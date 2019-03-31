@@ -5,18 +5,22 @@ def create_folder(path):
     try:
         os.makedirs(path)
     except OSError:
-        print("Creation of the directory %s failed" % path)
+        pass
+        # print("Creation of the directory %s failed" % path)
     else:
-        print("Successfully created the directory %s " % path)
+        pass
+        # print("Successfully created the directory %s " % path)
 
 
 def remove_folder(path):
     try:
         os.rmdir(path)
     except OSError:
-        print("Deletion  of the directory %s failed" % path)
+        pass
+        # print("Deletion  of the directory %s failed" % path)
     else:
-        print("Successfully deleted the directory %s " % path)
+        pass
+        # print("Successfully deleted the directory %s " % path)
 
 
 def get_files_in_dir(path, ext=""):

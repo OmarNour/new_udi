@@ -12,11 +12,17 @@ def get_file_name(file):
 def get_stg_tables(STG_tables, source_name):
     return STG_tables.loc[STG_tables['Source system name'] == source_name][['Table name', 'Fallback']].drop_duplicates()
 
-def get_stg_table_columns(STG_tables, source_name, Table_name):
-    return STG_tables.loc[(STG_tables['Source system name'] == source_name)
-                          & (STG_tables['Table name'] == Table_name)
-                          & (STG_tables['Key set name'].isnull())
-                          & (STG_tables['Code set name'].isnull())].reset_index()
+def get_stg_table_columns(STG_tables, source_name, Table_name, with_sk_columns=False):
+    STG_tables_df = STG_tables.loc[(STG_tables['Source system name'] == source_name)
+                                    & (STG_tables['Table name'] == Table_name)
+                                   ].reset_index()
+
+    if not with_sk_columns:
+        STG_tables_df = STG_tables_df.loc[(STG_tables_df['Key set name'].isnull())
+                                          & (STG_tables_df['Code set name'].isnull())
+                                          ].reset_index()
+
+    return STG_tables_df
 
 
 def single_quotes(string):

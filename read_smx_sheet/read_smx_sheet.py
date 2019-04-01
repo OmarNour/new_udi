@@ -68,6 +68,7 @@ for smx in md.get_files_in_dir(pm.smx_path,pm.smx_ext):
 
         parallel_templates.append(delayed(tmp.D400.d400)(source_output_path, source_name, STG_tables, Supplements))
         parallel_templates.append(delayed(tmp.D410.d410)(source_output_path, source_name, STG_tables, Supplements))
+        parallel_templates.append(delayed(tmp.D415.d415)(source_output_path, source_name, STG_tables, Supplements))
 
 
 with ProgressBar():

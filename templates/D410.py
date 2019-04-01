@@ -18,5 +18,4 @@ def d410(source_output_path, source_name, STG_tables, Supplements):
 
         f.write(script)
 
-
     f.close()

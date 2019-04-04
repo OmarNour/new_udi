@@ -1,4 +1,6 @@
 import os
+import shutil
+
 
 
 def create_folder(path):
@@ -14,7 +16,7 @@ def create_folder(path):
 
 def remove_folder(path):
     try:
-        os.rmdir(path)
+        shutil.rmtree(path)
     except OSError:
         pass
         # print("Deletion  of the directory %s failed" % path)

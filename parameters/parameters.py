@@ -23,3 +23,5 @@ SI_DB = "GDEV1T_SRCI"
 SI_VIEW = "GDEV1V_SRCI"
 
 GCFR_V = "GDEV1V_GCFR"
+
+separator = "||'_'||"

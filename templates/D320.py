@@ -9,7 +9,7 @@ def d320(source_output_path, source_name, STG_tables, BKEY):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
-    separator = "||'_'||"
+    separator = pm.separator
     stg_tables_df = STG_tables.loc[(STG_tables['Source system name'] == source_name)
                                     & ~(STG_tables['Key domain name'].isnull())
                                     & ~(STG_tables['Natural key'].isnull())]

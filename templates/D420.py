@@ -2,7 +2,7 @@ import parameters.parameters as pm
 import app_Lib.functions as funcs
 
 
-def d420(source_output_path, source_name, STG_tables, Supplements):
+def d420(source_output_path, source_name, STG_tables):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
@@ -28,7 +28,8 @@ def d420(source_output_path, source_name, STG_tables, Supplements):
         else:
             seq_pk_col = " "
 
-        stg_table_name = stg_table_name + '_' if funcs.is_Reserved_word(Supplements, 'TERADATA', stg_table_name) else stg_table_name
+        # stg_table_name = funcs.rename_reserved_word(Supplements, 'TERADATA', stg_table_name)
+        # stg_table_name = stg_table_name + '_' if funcs.is_Reserved_word(Supplements, 'TERADATA', stg_table_name) else stg_table_name
 
         create_view_script = "REPLACE VIEW " + pm.SI_VIEW + "." + stg_table_name + " AS\nSELECT \n"
         from_clause = "FROM " + pm.gdev1v_stg + "." + stg_table_name + " t"
@@ -36,6 +37,7 @@ def d420(source_output_path, source_name, STG_tables, Supplements):
 
         for STG_table_columns_index, STG_table_columns_row in STG_table_columns.iterrows():
             Column_name = STG_table_columns_row['Column name']
+            # Column_name = funcs.rename_reserved_word(Supplements, 'TERADATA', Column_name)
             # Column_name = Column_name + '_' if funcs.is_Reserved_word(Supplements, 'TERADATA', Column_name) else Column_name
 
             comma = ',' if STG_table_columns_index > 0 else seq_pk_col

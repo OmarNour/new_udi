@@ -4,14 +4,14 @@ import parameters.parameters as pm
 import app_Lib.functions as funcs
 
 
-def d400(source_output_path, source_name, STG_tables, Supplements):
+def d400(source_output_path, source_name, STG_tables):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
     stg_tables_df = funcs.get_stg_tables(STG_tables, source_name)
     for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
         Table_name = stg_tables_df_row['Table name']
-        Table_name = Table_name + '_' if funcs.is_Reserved_word(Supplements, 'TERADATA', Table_name) else Table_name
+        # Table_name = Table_name + '_' if funcs.is_Reserved_word(Supplements, 'TERADATA', Table_name) else Table_name
         Fallback = ', Fallback' if stg_tables_df_row['Fallback'].upper() == 'Y' else ''
 
         create_stg_table = "create multiset table " + pm.gdev1t_stg + "." + Table_name + Fallback + "\n" + "(\n"
@@ -22,7 +22,7 @@ def d400(source_output_path, source_name, STG_tables, Supplements):
         for STG_table_columns_index, STG_table_columns_row in STG_table_columns.iterrows():
             # print(STG_tables_index)
             Column_name = STG_table_columns_row['Column name']
-            Column_name = Column_name + '_' if funcs.is_Reserved_word(Supplements, 'TERADATA', Column_name) else Column_name
+            # Column_name = Column_name + '_' if funcs.is_Reserved_word(Supplements, 'TERADATA', Column_name) else Column_name
             comma = ',' if STG_table_columns_index > 0 else ' '
             comma_Column_name = comma + Column_name
 

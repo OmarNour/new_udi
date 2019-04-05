@@ -6,6 +6,9 @@ def is_Reserved_word(Supplements, Reserved_words_source, word):
     is_Reserved_word = True if Reserved_words[Reserved_words['Reserved words'] == word]['Reserved words'].any() == word else False
     return is_Reserved_word
 
+def rename_reserved_word(Supplements, Reserved_words_source, word):
+    return word + '_' if is_Reserved_word(Supplements, Reserved_words_source, word) else word
+
 def get_file_name(file):
     return os.path.splitext(os.path.basename(file))[0]
 

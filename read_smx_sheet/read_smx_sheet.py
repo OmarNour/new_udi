@@ -37,21 +37,24 @@ parallel_templates = []
 count_sources = 0
 
 for smx in md.get_files_in_dir(pm.smx_path,pm.smx_ext):
+    smx_file_path = pm.smx_path + smx
     smx_file_name = os.path.splitext(smx)[0]
 
-    System = pd.read_excel(pm.smx_path + smx, sheet_name='System')
+    System = pd.read_excel(smx_file_path, sheet_name='System')
     teradata_sources = System[System['Source type'] == 'TERADATA']
     count_sources = len(teradata_sources.index)
-    Table_mapping = delayed(pd.read_excel)(pm.smx_path + smx, sheet_name='Table mapping')
+    Table_mapping = delayed(pd.read_excel)(smx_file_path, sheet_name='Table mapping')
     # STG_tables = delayed(pd.read_excel)(pm.smx_path + smx, sheet_name='STG tables')
-    BKEY = delayed(pd.read_excel)(pm.smx_path + smx, sheet_name='BKEY')
+    BKEY = delayed(pd.read_excel)(smx_file_path, sheet_name='BKEY')
 
-    Supplements = pd.read_excel(pm.smx_path + smx, sheet_name='Supplements')
+    Supplements = pd.read_excel(smx_file_path, sheet_name='Supplements')
 
-    STG_tables = pd.read_excel(pm.smx_path + smx, sheet_name='STG tables')
-    STG_tables['Column name'] = STG_tables.apply(lambda row: funcs.rename_reserved_word(Supplements, 'TERADATA', row['Column name']), axis=1)
-    STG_tables['Table name'] = STG_tables.apply(lambda row: funcs.rename_reserved_word(Supplements, 'TERADATA', row['Table name']), axis=1)
-    STG_tables = delayed(STG_tables)
+    STG_tables = pd.read_excel(smx_file_path, sheet_name='STG tables')
+    STG_tables = funcs.rename_sheet_reserved_word(STG_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
+
+    # STG_tables['Column name'] = STG_tables.apply(lambda row: funcs.rename_reserved_word(Supplements, 'TERADATA', row['Column name']), axis=1)
+    # STG_tables['Table name'] = STG_tables.apply(lambda row: funcs.rename_reserved_word(Supplements, 'TERADATA', row['Table name']), axis=1)
+    # STG_tables = delayed(STG_tables)
 
     for system_index, system_row in teradata_sources.iterrows():
         # print(row['Source system name'])

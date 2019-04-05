@@ -6,6 +6,11 @@ def is_Reserved_word(Supplements, Reserved_words_source, word):
     is_Reserved_word = True if Reserved_words[Reserved_words['Reserved words'] == word]['Reserved words'].any() == word else False
     return is_Reserved_word
 
+def rename_sheet_reserved_word(sheet_df, Supplements_df, Reserved_words_source, columns):
+    for col in columns:
+        sheet_df[col] = sheet_df.apply(lambda row: rename_reserved_word(Supplements_df, Reserved_words_source, row[col]), axis=1)
+    return sheet_df
+
 def rename_reserved_word(Supplements, Reserved_words_source, word):
     return word + '_' if is_Reserved_word(Supplements, Reserved_words_source, word) else word
 

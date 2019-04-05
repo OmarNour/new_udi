@@ -12,7 +12,7 @@ def d200(source_output_path, source_name, STG_tables):
     stg_tables_df = funcs.get_stg_tables(STG_tables, source_name)
     for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
         Table_name = stg_tables_df_row['Table name']
-        # Table_name = Table_name + '_' if funcs.is_Reserved_word(Supplements, 'TERADATA', Table_name) else Table_name
+
         Fallback = ', Fallback' if stg_tables_df_row['Fallback'].upper() == 'Y' else ''
 
         create_stg_table = "create multiset table " + pm.gdev1t_stg + "." + Table_name + Fallback + "\n" + "(\n"
@@ -22,9 +22,8 @@ def d200(source_output_path, source_name, STG_tables):
 
         pi_columns = ""
         for STG_table_columns_index, STG_table_columns_row in STG_table_columns.iterrows():
-            # print(STG_tables_index)
             Column_name = STG_table_columns_row['Column name']
-            # Column_name = Column_name + '_' if funcs.is_Reserved_word(Supplements, 'TERADATA', Column_name) else Column_name
+
             comma = ',' if STG_table_columns_index > 0 else ' '
             comma_Column_name = comma + Column_name
 

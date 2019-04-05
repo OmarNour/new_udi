@@ -11,7 +11,6 @@ def d410(source_output_path, source_name, STG_tables):
     stg_tables_df = funcs.get_stg_tables(STG_tables, source_name)
     for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
         stg_table_name = stg_tables_df_row['Table name']
-        # stg_table_name = Table_name + '_' if funcs.is_Reserved_word(Supplements, 'TERADATA', Table_name) else Table_name
 
         script = "REPLACE VIEW " + pm.SI_VIEW + "." + stg_table_name + " AS\n"
         script = script + "SELECT * FROM " + pm.SI_DB + "." + stg_table_name + ";\n\n"

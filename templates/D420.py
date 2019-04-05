@@ -28,17 +28,12 @@ def d420(source_output_path, source_name, STG_tables):
         else:
             seq_pk_col = " "
 
-        # stg_table_name = funcs.rename_reserved_word(Supplements, 'TERADATA', stg_table_name)
-        # stg_table_name = stg_table_name + '_' if funcs.is_Reserved_word(Supplements, 'TERADATA', stg_table_name) else stg_table_name
-
         create_view_script = "REPLACE VIEW " + pm.SI_VIEW + "." + stg_table_name + " AS\nSELECT \n"
         from_clause = "FROM " + pm.gdev1v_stg + "." + stg_table_name + " t"
         STG_table_columns = funcs.get_stg_table_columns(STG_tables, source_name, stg_table_name, True)
 
         for STG_table_columns_index, STG_table_columns_row in STG_table_columns.iterrows():
             Column_name = STG_table_columns_row['Column name']
-            # Column_name = funcs.rename_reserved_word(Supplements, 'TERADATA', Column_name)
-            # Column_name = Column_name + '_' if funcs.is_Reserved_word(Supplements, 'TERADATA', Column_name) else Column_name
 
             comma = ',' if STG_table_columns_index > 0 else seq_pk_col
             comma_Column_name = comma + Column_name

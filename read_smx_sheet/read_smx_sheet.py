@@ -14,14 +14,16 @@ parallel_rmf = []
 parallel_crf = []
 parallel_templates = []
 count_sources = 0
+count_smx = 0
 
 for smx in md.get_files_in_dir(pm.smx_path,pm.smx_ext):
+    count_smx = count_smx + 1
     smx_file_path = pm.smx_path + smx
     smx_file_name = os.path.splitext(smx)[0]
 
     System = pd.read_excel(smx_file_path, sheet_name='System')
     teradata_sources = System[System['Source type'] == 'TERADATA']
-    count_sources = len(teradata_sources.index)
+    count_sources = count_sources + len(teradata_sources.index)
 
     Supplements = delayed(pd.read_excel)(smx_file_path, sheet_name='Supplements')
     Table_mapping = delayed(pd.read_excel)(smx_file_path, sheet_name='Table mapping')
@@ -54,11 +56,11 @@ for smx in md.get_files_in_dir(pm.smx_path,pm.smx_ext):
         parallel_templates.append(delayed(tmp.D400.d400)(source_output_path, source_name, STG_tables))
         parallel_templates.append(delayed(tmp.D410.d410)(source_output_path, source_name, STG_tables))
         parallel_templates.append(delayed(tmp.D415.d415)(source_output_path, source_name, STG_tables))
-        parallel_templates.append(delayed(tmp.D420.d420)(source_output_path, source_name, STG_tables))
+        parallel_templates.append(delayed(tmp.D420.d420)(source_output_path, source_name, STG_tables, BKEY))
 
 if len(parallel_templates) > 0:
     compute(*parallel_rmf)
     compute(*parallel_crf)
     with ProgressBar():
-        print("Start generating " + str(len(parallel_templates)) + " script for " + str(count_sources) + " sources")
+        print("Start generating " + str(len(parallel_templates)) + " script for " + str(count_sources) + " sources from " + str(count_smx) + " smx files")
         compute(*parallel_templates)

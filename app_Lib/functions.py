@@ -6,6 +6,7 @@ def is_Reserved_word(Supplements, Reserved_words_source, word):
     is_Reserved_word = True if Reserved_words[Reserved_words['Reserved words'] == word]['Reserved words'].any() == word else False
     return is_Reserved_word
 
+
 def rename_sheet_reserved_word(sheet_df, Supplements_df, Reserved_words_source, columns):
     for col in columns:
         sheet_df[col] = sheet_df.apply(lambda row: rename_reserved_word(Supplements_df, Reserved_words_source, row[col]), axis=1)
@@ -17,8 +18,18 @@ def rename_reserved_word(Supplements, Reserved_words_source, word):
 def get_file_name(file):
     return os.path.splitext(os.path.basename(file))[0]
 
+
 def get_stg_tables(STG_tables, source_name):
     return STG_tables.loc[STG_tables['Source system name'] == source_name][['Table name', 'Fallback']].drop_duplicates()
+
+
+def get_stg_table_nonNK_columns(STG_tables, source_name, Table_name, with_sk_columns=False):
+    STG_tables_df = STG_tables.loc[(STG_tables['Source system name'] == source_name)
+                                   & (STG_tables['Table name'] == Table_name)
+                                   & (STG_tables['Natural key'].isnull())
+                                   ].reset_index()
+    return STG_tables_df
+
 
 def get_stg_table_columns(STG_tables, source_name, Table_name, with_sk_columns=False):
     STG_tables_df = STG_tables.loc[(STG_tables['Source system name'] == source_name)

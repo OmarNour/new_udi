@@ -8,25 +8,6 @@ def d420(source_output_path, source_name, STG_tables, BKEY):
 
     separator = pm.separator
     stg_tables_df = funcs.get_stg_tables(STG_tables, source_name)
-    # stg_Natural_key_df = STG_tables.loc[(STG_tables['Source system name'] == source_name)
-    #                                     & ~(STG_tables['Natural key'].isnull())]
-
-    # trim_Trailing_Natural_key_list = []
-    # Natural_key_list = []
-    # for stg_Natural_key_df_index, stg_Natural_key_df_row in stg_Natural_key_df.iterrows():
-    #     Natural_key_list = stg_Natural_key_df_row['Natural key'].split(separator)
-    #     for i in Natural_key_list:
-    #         if "COALESCE" in i.strip().upper():
-    #             try:
-    #                 alias = i.strip().upper().replace("  ", " ").split("COALESCE(")
-    #                 alias.remove("")
-    #                 alias = alias[0].split(",")[0]
-    #             except:
-    #                 alias = i.strip()
-    #         else:
-    #             alias = i.strip()
-    #         trim_Trailing_Natural_key_list.append("TRIM(Trailing '.' from TRIM(" + i.strip() + ")) " + alias)
-
 
     for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
         stg_table_name = stg_tables_df_row['Table name']
@@ -34,12 +15,12 @@ def d420(source_output_path, source_name, STG_tables, BKEY):
         stg_Natural_key_df = STG_tables.loc[(STG_tables['Source system name'] == source_name)
                                             & (STG_tables['Table name'] == stg_table_name)
                                             & ~(STG_tables['Natural key'].isnull())]
-        Natural_key_list = []
+        bkey_Natural_key_list = []
         for stg_Natural_key_df_index, stg_Natural_key_df_row in stg_Natural_key_df.iterrows():
-            # Natural_key_list = stg_Natural_key_df_row['Natural key'].split(separator)
-            Natural_key_list.append(stg_Natural_key_df_row['Natural key'])
+            # bkey_Natural_key_list = stg_Natural_key_df_row['Natural key'].split(separator)
+            bkey_Natural_key_list.append(stg_Natural_key_df_row['Natural key'])
 
-        Natural_key_list_str = funcs.list_to_string(Natural_key_list, ',').upper()
+        bkey_Natural_key_list_str = funcs.list_to_string(bkey_Natural_key_list, ',').upper()
 
         stg_table_has_pk = True if len(STG_tables.loc[(STG_tables['Table name'] == stg_table_name)
                                                       & (STG_tables['PK'].str.upper() == 'Y')].index) > 0 else False
@@ -58,8 +39,8 @@ def d420(source_output_path, source_name, STG_tables, BKEY):
         for STG_table_columns_index, STG_table_columns_row in STG_table_columns.iterrows():
             Column_name = STG_table_columns_row['Column name'].upper()
             alias = Column_name
-            if Column_name in Natural_key_list_str:
-                if "COALESCE" in Natural_key_list_str:
+            if Column_name in bkey_Natural_key_list_str:
+                if "COALESCE" in bkey_Natural_key_list_str:
                     Column_name = "COALESCE( " + Column_name + ",'')"
                 Column_name = "TRIM(Trailing '.' from TRIM(" + Column_name + ")) " + alias
 

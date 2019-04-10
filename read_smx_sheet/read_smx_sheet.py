@@ -64,3 +64,5 @@ if len(parallel_templates) > 0:
     with ProgressBar():
         print("Start generating " + str(len(parallel_templates)) + " script for " + str(count_sources) + " sources from " + str(count_smx) + " smx files")
         compute(*parallel_templates)
+
+    os.startfile(pm.output_path)

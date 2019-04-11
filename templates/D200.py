@@ -15,8 +15,8 @@ def d200(source_output_path, source_name, STG_tables):
 
         Fallback = ', Fallback' if stg_tables_df_row['Fallback'].upper() == 'Y' else ''
 
-        create_stg_table = "create multiset table " + pm.gdev1t_stg + "." + Table_name + Fallback + "\n" + "(\n"
-        create_wrk_table = "create multiset table " + pm.gdev1t_WRK + "." + Table_name + Fallback + "\n" + "(\n"
+        create_stg_table = "create multiset table " + pm.T_STG + "." + Table_name + Fallback + "\n" + "(\n"
+        create_wrk_table = "create multiset table " + pm.t_WRK + "." + Table_name + Fallback + "\n" + "(\n"
 
         STG_table_columns = funcs.get_stg_table_columns(STG_tables, source_name, Table_name)
 

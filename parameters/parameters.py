@@ -1,27 +1,48 @@
-smx_ext = "xlsx"
-smx_path = 'C:/D/teradata_docs/smx/'
-output_path =  smx_path+'output/'
+# exec GPROD1M_GCFR.GCFR_Register_System(1, 'Economic', '', 'Economic')
+# call GPROD1P_UT.GCFR_UT_Register_Stream(1, 1, 'Economic stream', cast('2019-01-01' as date))
 
-automation_db = 'Automation'
+smx_ext = "xlsx"
+# smx_path = 'C:/Users/AA250090/Downloads/New folder/input/'
+# smx_path = "//10.10.10.250/TeraData/share/Salama/0Mpsn/Lastest SMX/"
+# project_path = "C:/Users/omar_nour/PycharmProjects/new_udi"
+smx_path = "C:/smx_sheets/"
+output_path =  smx_path + "udi_outputs/"
+
 etl_process_table = 'ETL_PROCESS'
 SOURCE_TABLES_LKP_table = 'SOURCE_TABLES_LKP'
 
-gdev1t_stg = 'GDEV1T_STG'
-gdev1t_WRK = 'GDEV1T_WRK'
-gdev1v_stg = 'GDEV1V_STG'
-INPUT_VIEW_DB = 'GDEV1V_INP'
+db_prefix = "GPROD1"
 
-MACRO_DB = "GDEV1M_GCFR"
-UT_DB = "GDEV1P_UT"
-G_BKEY_V = "GDEV1V_UTLFW"
-G_BKEY_T = "GDEV1T_UTLFW"
+gcfr_bkey_process_type = 21
+gcfr_ctl_Id = 1
+gcfr_stream_key = 1
 
-TMP_DB = "GDEV1T_TMP"
-APPLY_DB = "GDEV1P_PP"
+gcfr_system_name = "Economic"
+gcfr_stream_name = "Economic stream"
 
-SI_DB = "GDEV1T_SRCI"
-SI_VIEW = "GDEV1V_SRCI"
+T_STG = db_prefix + "T_STG"
+t_WRK = db_prefix + "T_WRK"
+v_stg = db_prefix + "V_STG"
+INPUT_VIEW_DB = db_prefix + "V_INP"
 
-GCFR_V = "GDEV1V_GCFR"
+MACRO_DB = db_prefix + "M_GCFR"
+UT_DB = db_prefix + "P_UT"
+G_BKEY_V = db_prefix + "V_UTLFW"
+G_BKEY_T = db_prefix + "T_UTLFW"
+
+TMP_DB = db_prefix + "T_TMP"
+APPLY_DB = db_prefix + "P_PP"
+
+SI_DB = db_prefix + "T_SRCI"
+SI_VIEW = db_prefix + "V_SRCI"
+
+GCFR_t = db_prefix + "t_GCFR"
+GCFR_V = db_prefix + "V_GCFR"
+
+M_GCFR = db_prefix + "M_GCFR"
+P_UT = db_prefix + "P_UT"
+
+core_table = db_prefix + "T_BASE"
+core_view = db_prefix + "V_BASE"
 
 separator = "||'_'||"

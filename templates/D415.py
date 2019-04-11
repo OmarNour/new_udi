@@ -13,7 +13,7 @@ def d415(source_output_path, source_name, STG_tables):
         stg_table_name = stg_tables_df_row['Table name']
 
         del_script = "DEL FROM " + pm.GCFR_V + ".GCFR_Transform_KeyCol "
-        del_script = del_script + " WHERE OUT_OBJECT_NAME = '" + stg_table_name + "';\n"
+        del_script = del_script + " WHERE OUT_DB_NAME = '" + pm.SI_VIEW + "' AND OUT_OBJECT_NAME = '" + stg_table_name + "';\n"
 
         STG_table_columns = funcs.get_stg_table_columns(STG_tables, source_name, stg_table_name, True)
 

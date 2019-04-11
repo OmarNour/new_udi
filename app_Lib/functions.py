@@ -1,5 +1,9 @@
 import os
+import numpy as np
 
+
+def replace_nan(df):
+    return df.replace(np.nan, '', regex=True)
 
 def is_Reserved_word(Supplements, Reserved_words_source, word):
     Reserved_words = Supplements[Supplements['Reserved words source'] == Reserved_words_source][['Reserved words']]
@@ -15,8 +19,20 @@ def rename_sheet_reserved_word(sheet_df, Supplements_df, Reserved_words_source, 
 def rename_reserved_word(Supplements, Reserved_words_source, word):
     return word + '_' if is_Reserved_word(Supplements, Reserved_words_source, word) else word
 
+
 def get_file_name(file):
     return os.path.splitext(os.path.basename(file))[0]
+
+
+def get_core_table_columns(Core_tables, Table_name ):
+    Core_tables_df = Core_tables.loc[(Core_tables['Layer'] == 'CORE')
+                                    & (Core_tables['Table name'] == Table_name)
+                                    ].reset_index()
+    return Core_tables_df
+
+
+def get_core_tables(Core_tables):
+    return Core_tables.loc[Core_tables['Layer'] == 'CORE'][['Table name', 'Fallback']].drop_duplicates()
 
 
 def get_stg_tables(STG_tables, source_name):
@@ -47,6 +63,12 @@ def get_stg_table_columns(STG_tables, source_name, Table_name, with_sk_columns=F
 def single_quotes(string):
     return "'%s'" % string
 
+def assertions(table_maping_row,Core_tables_list):
+    assert (table_maping_row['Main source'] != None), 'Missing Main Source  for Table Mapping:{}'.format(
+        str(table_maping_row['Mapping name']))
+    assert (table_maping_row[
+                'Target table name'] in Core_tables_list), 'TARGET TABLE NAME not found in Core Tables Sheet for Table Mapping:{}'.format(
+        str(table_maping_row['Mapping name']))
 
 def list_to_string(list, separator=None, between_single_quotes=0):
     if separator is None:

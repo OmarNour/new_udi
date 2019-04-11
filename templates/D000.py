@@ -16,8 +16,8 @@ def d000(source_output_path, source_name, Table_mapping, STG_tables, BKEY):
         target_table = str(table_maping_row['Target table name'])
         Historization_algorithm = str(table_maping_row['Historization algorithm'])
 
-        f.write("delete from " + pm.automation_db + "." + pm.etl_process_table + " where process_name = '" + process_name + "';\n")
-        f.write("insert into " + pm.automation_db + "." + pm.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID)\n")
+        f.write("delete from " + pm.GCFR_t + "." + pm.etl_process_table + " where process_name = '" + process_name + "';\n")
+        f.write("insert into " + pm.GCFR_t + "." + pm.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID)\n")
         f.write("VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL)" + ";\n")
         f.write("\n")
 
@@ -37,8 +37,8 @@ def d000(source_output_path, source_name, Table_mapping, STG_tables, BKEY):
             # print(Table_name, Column_name, Key_set_id,Key_domain_ID,Physical_table)
             process_name = "BK_" + str(Key_set_id) + "_" + Table_name + "_" + Column_name + "_" + str(Key_domain_ID)
 
-            f.write("delete from " + pm.automation_db + "." + pm.etl_process_table + " where process_name = '" + process_name + "';\n")
-            f.write("insert into " + pm.automation_db + "." + pm.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID)\n")
+            f.write("delete from " + pm.GCFR_t + "." + pm.etl_process_table + " where process_name = '" + process_name + "';\n")
+            f.write("insert into " + pm.GCFR_t + "." + pm.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID)\n")
             f.write("VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL)" + ";\n")
             f.write("\n")
 

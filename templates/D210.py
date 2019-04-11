@@ -13,7 +13,7 @@ def d210(source_output_path, source_name, STG_tables):
     for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
         Table_name = stg_tables_df_row['Table name']
 
-        create_stg_view = "REPLACE VIEW " + pm.gdev1v_stg + "." + Table_name + " AS LOCK ROW FOR ACCESS \n"
+        create_stg_view = "REPLACE VIEW " + pm.v_stg + "." + Table_name + " AS LOCK ROW FOR ACCESS \n"
         create_stg_view = create_stg_view + "SELECT\n"
 
         STG_table_columns = funcs.get_stg_table_columns(STG_tables, source_name, Table_name)
@@ -27,7 +27,7 @@ def d210(source_output_path, source_name, STG_tables):
             create_stg_view = create_stg_view + comma_Column_name + "\n"
 
         create_stg_view = create_stg_view + INS_DTTM
-        create_stg_view = create_stg_view + "from " + pm.gdev1t_stg + "." + Table_name + ";\n\n"
+        create_stg_view = create_stg_view + "from " + pm.T_STG + "." + Table_name + ";\n\n"
         f.write(create_stg_view)
 
     f.close()

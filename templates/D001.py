@@ -11,8 +11,8 @@ def d001(source_output_path, source_name, STG_tables):
         Table_name = STG_tables_row['Table name']
         # print(Table_name)
 
-        f.write("delete from " + pm.automation_db + "." + pm.SOURCE_TABLES_LKP_table + " where SOURCE_NAME = '" + source_name + "';\n")
-        f.write("insert into " + pm.automation_db + "." + pm.SOURCE_TABLES_LKP_table + "(SOURCE_NAME, TABLE_NAME)\n")
+        f.write("delete from " + pm.GCFR_t + "." + pm.SOURCE_TABLES_LKP_table + " where SOURCE_NAME = '" + source_name + "';\n")
+        f.write("insert into " + pm.GCFR_t + "." + pm.SOURCE_TABLES_LKP_table + "(SOURCE_NAME, TABLE_NAME)\n")
         f.write("VALUES ('" + source_name + "', '" + Table_name + "')" + ";\n")
         f.write("\n")
 

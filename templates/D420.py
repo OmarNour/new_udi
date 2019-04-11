@@ -31,7 +31,7 @@ def d420(source_output_path, source_name, STG_tables, BKEY):
             seq_pk_col = " "
 
         create_view_script = "REPLACE VIEW " + pm.SI_VIEW + "." + stg_table_name + " AS\nSELECT \n"
-        from_clause = "FROM " + pm.gdev1v_stg + "." + stg_table_name + " t"
+        from_clause = "FROM " + pm.v_stg + "." + stg_table_name + " t"
         STG_table_columns = funcs.get_stg_table_columns(STG_tables, source_name, stg_table_name, True)
 
         bkeys_left_join = ""

@@ -34,6 +34,7 @@ def generate_scripts():
 
             Supplements = delayed(pd.read_excel)(smx_file_path, sheet_name='Supplements')
             Table_mapping = delayed(pd.read_excel)(smx_file_path, sheet_name='Table mapping')
+            Table_mapping = delayed(funcs.replace_nan)(Table_mapping)
 
             Column_mapping = delayed(pd.read_excel)(pm.smx_path + smx, sheet_name='Column mapping')
             Column_mapping = delayed(funcs.replace_nan)(Column_mapping)

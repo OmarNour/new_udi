@@ -85,7 +85,7 @@ def generate_scripts():
                     parallel_templates.append(delayed(D600.d600)(source_output_path, source_name, Table_mapping, Core_tables))
                     parallel_templates.append(delayed(D607.d607)(source_output_path, Core_tables))
                     parallel_templates.append(delayed(D610.D610)(source_output_path, source_name, Table_mapping, Core_tables))
-                    parallel_templates.append(delayed(D615.d615)(source_output_path, source_name, Core_tables))
+                    parallel_templates.append(delayed(D615.d615)(source_output_path, Core_tables))
                     # parallel_templates.append(delayed(D620.d620)(source_output_path, source_name, Table_mapping, Column_mapping, Core_tables, Loading_Type))
                 except Exception as error:
                     # print(error)
@@ -106,7 +106,7 @@ def generate_scripts():
             compute(*parallel_templates)
 
         os.startfile(pm.output_path)
-        print("Output path:" + pm.output_path)
+        print("Output: " + pm.output_path)
     else:
         print("No SMX sheets found!")
 

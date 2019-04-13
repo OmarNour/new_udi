@@ -2,7 +2,7 @@ import parameters.parameters as pm
 import app_Lib.functions as funcs
 
 
-def d615(source_output_path, source_name, Core_tables):
+def d615(source_output_path, Core_tables):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 

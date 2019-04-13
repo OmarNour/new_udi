@@ -1,9 +1,35 @@
 import os
 import numpy as np
+import pandas as pd
 
 
-def replace_nan(df):
-    return df.replace(np.nan, '', regex=True)
+def read_excel(file_path, sheet_name, filter=None, filter_index=True, nan_to_empty=True):
+    df = pd.read_excel(file_path, sheet_name)
+
+    if filter:
+        df = df_filter(df, filter, filter_index)
+
+    if nan_to_empty:
+        df = replace_nan(df, '')
+
+    return df
+
+
+def df_filter(df, filter=None, filter_index=True):
+    if filter:
+        for i in filter:
+            if filter_index:
+                df = df[df.index.isin(i[1])]
+            else:
+                df = df[df[i[0]].isin(i[1])]
+
+    if not df.empty:
+        return df
+
+
+def replace_nan(df, replace_with):
+    return df.replace(np.nan, replace_with, regex=True)
+
 
 def is_Reserved_word(Supplements, Reserved_words_source, word):
     Reserved_words = Supplements[Supplements['Reserved words source'] == Reserved_words_source][['Reserved words']]
@@ -35,8 +61,12 @@ def get_core_tables(Core_tables):
     return Core_tables.loc[Core_tables['Layer'] == 'CORE'][['Table name', 'Fallback']].drop_duplicates()
 
 
-def get_stg_tables(STG_tables, source_name):
-    return STG_tables.loc[STG_tables['Source system name'] == source_name][['Table name', 'Fallback']].drop_duplicates()
+def get_stg_tables(STG_tables, source_name=None):
+    if source_name:
+        stg_table_names = STG_tables.loc[STG_tables['Source system name'] == source_name][['Table name', 'Fallback']].drop_duplicates()
+    else:
+        stg_table_names = STG_tables[['Table name', 'Fallback']].drop_duplicates()
+    return stg_table_names
 
 
 def get_stg_table_nonNK_columns(STG_tables, source_name, Table_name, with_sk_columns=False):
@@ -48,15 +78,19 @@ def get_stg_table_nonNK_columns(STG_tables, source_name, Table_name, with_sk_col
 
 
 def get_stg_table_columns(STG_tables, source_name, Table_name, with_sk_columns=False):
-    STG_tables_df = STG_tables.loc[(STG_tables['Source system name'] == source_name)
-                                    & (STG_tables['Table name'] == Table_name)
-                                   ].reset_index()
+    if source_name:
+        STG_tables_df = STG_tables.loc[(STG_tables['Source system name'] == source_name)
+                                        & (STG_tables['Table name'] == Table_name)
+                                       ].reset_index()
+    else:
+        STG_tables_df = STG_tables.loc[STG_tables['Table name'] == Table_name].reset_index()
 
     if not with_sk_columns:
-        STG_tables_df = STG_tables_df.loc[(STG_tables_df['Key set name'].isnull())
-                                          & (STG_tables_df['Code set name'].isnull())
+        STG_tables_df = STG_tables_df.loc[(STG_tables_df['Key set name'] == '')
+                                          & (STG_tables_df['Code set name'] == '')
                                           ].reset_index()
 
+    # print(STG_tables_df)
     return STG_tables_df
 
 

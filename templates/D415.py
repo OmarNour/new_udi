@@ -4,18 +4,18 @@ import parameters.parameters as pm
 import app_Lib.functions as funcs
 
 
-def d415(source_output_path, source_name, STG_tables):
+def d415(source_output_path, STG_tables):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
-    stg_tables_df = funcs.get_stg_tables(STG_tables, source_name)
+    stg_tables_df = funcs.get_stg_tables(STG_tables)
     for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
         stg_table_name = stg_tables_df_row['Table name']
 
         del_script = "DEL FROM " + pm.GCFR_V + ".GCFR_Transform_KeyCol "
         del_script = del_script + " WHERE OUT_DB_NAME = '" + pm.SI_VIEW + "' AND OUT_OBJECT_NAME = '" + stg_table_name + "';\n"
 
-        STG_table_columns = funcs.get_stg_table_columns(STG_tables, source_name, stg_table_name, True)
+        STG_table_columns = funcs.get_stg_table_columns(STG_tables, None, stg_table_name, True)
 
         exe_ = "EXEC " + pm.MACRO_DB + ".GCFR_Register_Tfm_KeyCol('" + pm.SI_VIEW + "'"
         _p = ",'" + stg_table_name + "'"

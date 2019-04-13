@@ -4,18 +4,18 @@ import parameters.parameters as pm
 import app_Lib.functions as funcs
 
 
-def d400(source_output_path, source_name, STG_tables):
+def d400(source_output_path, STG_tables):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
-    stg_tables_df = funcs.get_stg_tables(STG_tables, source_name)
+    stg_tables_df = funcs.get_stg_tables(STG_tables)
     for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
         Table_name = stg_tables_df_row['Table name']
         Fallback = ', Fallback' if stg_tables_df_row['Fallback'].upper() == 'Y' else ''
 
         create_stg_table = "create multiset table " + pm.T_STG + "." + Table_name + Fallback + "\n" + "(\n"
 
-        STG_table_columns = funcs.get_stg_table_columns(STG_tables, source_name, Table_name, True)
+        STG_table_columns = funcs.get_stg_table_columns(STG_tables, None, Table_name, True)
 
         pi_columns = ""
         for STG_table_columns_index, STG_table_columns_row in STG_table_columns.iterrows():
@@ -43,7 +43,7 @@ def d400(source_output_path, source_name, STG_tables):
                         + ",Process_Name\tVARCHAR(128)\n" \
                         + ",Process_Id\tINTEGER\n" \
                         + ",Update_Process_Name\tVARCHAR(128) \n" \
-                        + ",Update_Process_Id\tINTEGER\n  "
+                        + ",Update_Process_Id\tINTEGER\n"
 
         if pi_columns == "":
             pi_columns = "SEQ_NO"

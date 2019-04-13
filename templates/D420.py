@@ -2,19 +2,18 @@ import parameters.parameters as pm
 import app_Lib.functions as funcs
 
 
-def d420(source_output_path, source_name, STG_tables, BKEY):
+def d420(source_output_path, STG_tables, BKEY):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
     separator = pm.separator
-    stg_tables_df = funcs.get_stg_tables(STG_tables, source_name)
+    stg_tables_df = funcs.get_stg_tables(STG_tables)
 
     for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
         stg_table_name = stg_tables_df_row['Table name']
 
-        stg_Natural_key_df = STG_tables.loc[(STG_tables['Source system name'] == source_name)
-                                            & (STG_tables['Table name'] == stg_table_name)
-                                            & ~(STG_tables['Natural key'].isnull())]
+        stg_Natural_key_df = STG_tables.loc[(STG_tables['Table name'] == stg_table_name)
+                                            & (STG_tables['Natural key'] != "")]
         bkey_Natural_key_list = []
         for stg_Natural_key_df_index, stg_Natural_key_df_row in stg_Natural_key_df.iterrows():
             # bkey_Natural_key_list = stg_Natural_key_df_row['Natural key'].split(separator)
@@ -32,7 +31,7 @@ def d420(source_output_path, source_name, STG_tables, BKEY):
 
         create_view_script = "REPLACE VIEW " + pm.SI_VIEW + "." + stg_table_name + " AS\nSELECT \n"
         from_clause = "FROM " + pm.v_stg + "." + stg_table_name + " t"
-        STG_table_columns = funcs.get_stg_table_columns(STG_tables, source_name, stg_table_name, True)
+        STG_table_columns = funcs.get_stg_table_columns(STG_tables, None, stg_table_name, True)
 
         bkeys_left_join = ""
         bkeys_left_join_count = 0

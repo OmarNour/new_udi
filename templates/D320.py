@@ -1,18 +1,15 @@
-import pandas as pd
-import app_Lib.manage_directories as md
 import parameters.parameters as pm
 import app_Lib.functions as funcs
 import numpy as np
 
 
-def d320(source_output_path, source_name, STG_tables, BKEY):
+def d320(source_output_path, STG_tables, BKEY):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
     separator = pm.separator
-    stg_tables_df = STG_tables.loc[(STG_tables['Source system name'] == source_name)
-                                    & ~(STG_tables['Key domain name'].isnull())
-                                    & ~(STG_tables['Natural key'].isnull())]
+    stg_tables_df = STG_tables.loc[(STG_tables['Key domain name'] != "")
+                                    & (STG_tables['Natural key'] != "")]
 
     for stg_tables_df_index, stg_tables_df_row in stg_tables_df.replace(np.nan, "", regex=True).iterrows():
         key_domain_name = stg_tables_df_row['Key domain name']

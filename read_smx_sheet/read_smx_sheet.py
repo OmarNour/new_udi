@@ -4,12 +4,10 @@ sys.path.append(os.getcwd())
 import pandas as pd
 from app_Lib import manage_directories as md, functions as funcs
 from parameters import parameters as pm
-from templates import gcfr, D210, D300, D320, D420, D000, D001, D200, D330, D340, D400,D410,D415, D615, D600, D607, D610, D620
-
-
 from dask import compute, delayed
 from dask.diagnostics import ProgressBar
-
+import traceback
+from templates import gcfr, D210, D300, D320, D420, D000, D001, D200, D330, D340, D400,D410,D415, D615, D600, D607, D610, D620
 
 def generate_scripts():
     parallel_remove_output_home_path = []
@@ -33,16 +31,11 @@ def generate_scripts():
             count_sources = count_sources + len(teradata_sources.index)
 
             Supplements = delayed(pd.read_excel)(smx_file_path, sheet_name='Supplements')
-            Table_mapping = delayed(pd.read_excel)(smx_file_path, sheet_name='Table mapping')
-            Table_mapping = delayed(funcs.replace_nan)(Table_mapping)
 
             Column_mapping = delayed(pd.read_excel)(pm.smx_path + smx, sheet_name='Column mapping')
             Column_mapping = delayed(funcs.replace_nan)(Column_mapping)
 
             BKEY = delayed(pd.read_excel)(smx_file_path, sheet_name='BKEY')
-
-            STG_tables = delayed(pd.read_excel)(smx_file_path, sheet_name='STG tables')
-            STG_tables = delayed(funcs.rename_sheet_reserved_word)(STG_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
 
             Core_tables = delayed(pd.read_excel)(smx_file_path, sheet_name='Core tables')
             Core_tables = delayed(funcs.rename_sheet_reserved_word)(Core_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
@@ -58,8 +51,16 @@ def generate_scripts():
 
             for system_index, system_row in teradata_sources.iterrows():
                 try:
-                    source_name = system_row['Source system name']
                     Loading_Type = system_row['Loading type']
+                    source_name = system_row['Source system name']
+                    source_name_filter = [['Source', [source_name]]]
+                    stg_source_name_filter = [['Source system name', [source_name]]]
+
+                    Table_mapping = delayed(funcs.read_excel)(smx_file_path, 'Table mapping', source_name_filter, False)
+
+                    STG_tables = delayed(funcs.read_excel)(smx_file_path, 'STG tables', stg_source_name_filter, False)
+                    STG_tables = delayed(funcs.rename_sheet_reserved_word)(STG_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
+
                     source_output_path = home_output_path + Loading_Type + '/' + source_name
 
                     delayed_create_source_output_path = delayed(md.create_folder)(source_output_path)
@@ -68,27 +69,31 @@ def generate_scripts():
                     parallel_templates.append(delayed(D000.d000)(source_output_path, source_name, Table_mapping, STG_tables, BKEY))
                     parallel_templates.append(delayed(D001.d001)(source_output_path, source_name, STG_tables))
 
-                    parallel_templates.append(delayed(D200.d200)(source_output_path, source_name, STG_tables))
-                    parallel_templates.append(delayed(D210.d210)(source_output_path, source_name, STG_tables))
+                    parallel_templates.append(delayed(D200.d200)(source_output_path, STG_tables))
+                    parallel_templates.append(delayed(D210.d210)(source_output_path, STG_tables))
 
-                    parallel_templates.append(delayed(D300.d300)(source_output_path, source_name, STG_tables, BKEY))
-                    parallel_templates.append(delayed(D320.d320)(source_output_path, source_name, STG_tables, BKEY))
-                    parallel_templates.append(delayed(D330.d330)(source_output_path, source_name, STG_tables, BKEY))
-                    parallel_templates.append(delayed(D340.d340)(source_output_path, source_name, STG_tables, BKEY))
+                    parallel_templates.append(delayed(D300.d300)(source_output_path, STG_tables, BKEY))
+                    parallel_templates.append(delayed(D320.d320)(source_output_path, STG_tables, BKEY))
+                    parallel_templates.append(delayed(D330.d330)(source_output_path, STG_tables, BKEY))
+                    parallel_templates.append(delayed(D340.d340)(source_output_path, STG_tables, BKEY))
 
-                    parallel_templates.append(delayed(D400.d400)(source_output_path, source_name, STG_tables))
-                    parallel_templates.append(delayed(D410.d410)(source_output_path, source_name, STG_tables))
-                    parallel_templates.append(delayed(D415.d415)(source_output_path, source_name, STG_tables))
-                    parallel_templates.append(delayed(D420.d420)(source_output_path, source_name, STG_tables, BKEY))
+                    parallel_templates.append(delayed(D400.d400)(source_output_path, STG_tables))
+                    parallel_templates.append(delayed(D410.d410)(source_output_path, STG_tables))
+                    parallel_templates.append(delayed(D415.d415)(source_output_path, STG_tables))
+                    parallel_templates.append(delayed(D420.d420)(source_output_path, STG_tables, BKEY))
 
                     parallel_templates.append(delayed(D600.d600)(source_output_path, source_name, Table_mapping, Core_tables))
                     parallel_templates.append(delayed(D607.d607)(source_output_path, Core_tables))
                     parallel_templates.append(delayed(D610.D610)(source_output_path, source_name, Table_mapping, Core_tables))
                     parallel_templates.append(delayed(D615.d615)(source_output_path, source_name, Core_tables))
                     # parallel_templates.append(delayed(D620.d620)(source_output_path, source_name, Table_mapping, Column_mapping, Core_tables, Loading_Type))
-                except:
+                except Exception as error:
+                    # print(error)
+                    # traceback.print_exc()
                     count_sources = count_sources - 1
-    except:
+    except Exception as error:
+        # print(error)
+        # traceback.print_exc()
         count_smx = count_smx - 1
 
     if len(parallel_templates) > 0:
@@ -101,6 +106,7 @@ def generate_scripts():
             compute(*parallel_templates)
 
         os.startfile(pm.output_path)
+        print("Output path:" + pm.output_path)
     else:
         print("No SMX sheets found!")
 

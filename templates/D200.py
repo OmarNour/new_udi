@@ -4,12 +4,12 @@ import parameters.parameters as pm
 import app_Lib.functions as funcs
 
 
-def d200(source_output_path, source_name, STG_tables):
+def d200(source_output_path, STG_tables):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
     INS_DTTM = ",INS_DTTM  TIMESTAMP(6) NOT NULL \n"
-    stg_tables_df = funcs.get_stg_tables(STG_tables, source_name)
+    stg_tables_df = funcs.get_stg_tables(STG_tables, None)
     for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
         Table_name = stg_tables_df_row['Table name']
 
@@ -18,8 +18,7 @@ def d200(source_output_path, source_name, STG_tables):
         create_stg_table = "create multiset table " + pm.T_STG + "." + Table_name + Fallback + "\n" + "(\n"
         create_wrk_table = "create multiset table " + pm.t_WRK + "." + Table_name + Fallback + "\n" + "(\n"
 
-        STG_table_columns = funcs.get_stg_table_columns(STG_tables, source_name, Table_name)
-
+        STG_table_columns = funcs.get_stg_table_columns(STG_tables, None, Table_name, False)
         pi_columns = ""
         for STG_table_columns_index, STG_table_columns_row in STG_table_columns.iterrows():
             Column_name = STG_table_columns_row['Column name']

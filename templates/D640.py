@@ -9,7 +9,7 @@ import time;
 
 
 
-def t640(source_output_path, source_name, Table_mapping):
+def d640(source_output_path, source_name, Table_mapping):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+", encoding="utf-8")
     for table_maping_index, table_maping_row in Table_mapping[(Table_mapping['Source'] == source_name)].iterrows():

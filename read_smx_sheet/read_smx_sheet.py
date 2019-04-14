@@ -6,7 +6,7 @@ from parameters import parameters as pm
 from dask import compute, delayed
 from dask.diagnostics import ProgressBar
 import traceback
-from templates import gcfr, D210, D300, D320, D420, D000, D001, D200, D330, D340, D400,D410,D415, D615, D600, D607, D610, D620
+from templates import gcfr, D210, D300, D320, D420, D000, D001, D200, D330, D340, D400,D410,D415, D615, D600, D607, D610,D620, D630, D640
 
 def generate_scripts():
     parallel_remove_output_home_path = []
@@ -85,7 +85,9 @@ def generate_scripts():
                     parallel_templates.append(delayed(D607.d607)(source_output_path, Core_tables))
                     parallel_templates.append(delayed(D610.D610)(source_output_path, source_name, Table_mapping, Core_tables))
                     parallel_templates.append(delayed(D615.d615)(source_output_path, Core_tables))
-                    # parallel_templates.append(delayed(D620.d620)(source_output_path, source_name, Table_mapping, Column_mapping, Core_tables, Loading_Type))
+                    parallel_templates.append(delayed(D620.d620)(source_output_path, source_name, Table_mapping, Column_mapping, Core_tables, Loading_Type))
+                    parallel_templates.append(delayed(D630.d630)(source_output_path, source_name, Table_mapping))
+                    parallel_templates.append(delayed(D640.d640)(source_output_path, source_name, Table_mapping))
                 except Exception as error:
                     # print(error)
                     # traceback.print_exc()

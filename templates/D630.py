@@ -6,7 +6,7 @@ import app_Lib.functions as funcs
 import templates as tmp
 
 
-def t630(source_output_path, source_name, Table_mapping):
+def d630(source_output_path, source_name, Table_mapping):
 
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+", encoding="utf-8")
@@ -27,7 +27,7 @@ def t630(source_output_path, source_name, Table_mapping):
             else:
                 process_type_cd = '29'
         reg_exp+=process_type_cd+','+ctl_id+','+stream_key+",'"+pm.INPUT_VIEW_DB+"','"+process_name+"_IN',"
-        reg_exp+="'"+pm.gdev1v_base+"','"+tbl_name+"','"+pm.gdev1t_base+"','"+tbl_name+"','"+pm.TMP_DB+"',,,,1,0,1,0);\n"
+        reg_exp+="'"+pm.core_view+"','"+tbl_name+"','"+pm.core_table+"','"+tbl_name+"','"+pm.TMP_DB+"',,,,1,0,1,0);\n"
         f.write(reg_exp)
     f.close()
 

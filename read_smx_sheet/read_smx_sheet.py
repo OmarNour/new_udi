@@ -1,7 +1,6 @@
 import os
 import sys
 sys.path.append(os.getcwd())
-import pandas as pd
 from app_Lib import manage_directories as md, functions as funcs
 from parameters import parameters as pm
 from dask import compute, delayed
@@ -26,18 +25,18 @@ def generate_scripts():
             smx_file_name = os.path.splitext(smx)[0]
             print("\t"+smx_file_name)
 
-            System = pd.read_excel(smx_file_path, sheet_name='System')
+            System = funcs.read_excel(smx_file_path, sheet_name='System')
             teradata_sources = System[System['Source type'] == 'TERADATA']
             count_sources = count_sources + len(teradata_sources.index)
 
-            Supplements = delayed(pd.read_excel)(smx_file_path, sheet_name='Supplements')
+            Supplements = delayed(funcs.read_excel)(smx_file_path, sheet_name='Supplements')
 
-            Column_mapping = delayed(pd.read_excel)(pm.smx_path + smx, sheet_name='Column mapping')
-            Column_mapping = delayed(funcs.replace_nan)(Column_mapping)
+            Column_mapping = delayed(funcs.read_excel)(pm.smx_path + smx, sheet_name='Column mapping')
+            # Column_mapping = delayed(funcs.replace_nan)(Column_mapping)
 
-            BKEY = delayed(pd.read_excel)(smx_file_path, sheet_name='BKEY')
+            BKEY = delayed(funcs.read_excel)(smx_file_path, sheet_name='BKEY')
 
-            Core_tables = delayed(pd.read_excel)(smx_file_path, sheet_name='Core tables')
+            Core_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name='Core tables')
             Core_tables = delayed(funcs.rename_sheet_reserved_word)(Core_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
 
             home_output_path = pm.output_path + smx_file_name + '/'

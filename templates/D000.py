@@ -18,7 +18,7 @@ def d000(source_output_path, source_name, Table_mapping, STG_tables, BKEY):
         f.write("VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL)" + ";\n")
         f.write("\n")
 
-    for STG_tables_index, STG_tables_row in STG_tables.loc[STG_tables['Key set name'].notnull()].iterrows():
+    for STG_tables_index, STG_tables_row in STG_tables.loc[STG_tables['Key set name'] != ""].iterrows():
         Key_set_name = STG_tables_row['Key set name']
         Key_domain_name = STG_tables_row['Key domain name']
         Table_name = STG_tables_row['Table name']

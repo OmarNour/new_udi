@@ -14,31 +14,28 @@ def d330(source_output_path, STG_tables, BKEY):
         stg_table_name = stg_tables_df_row['Table name']
         stg_Column_name = stg_tables_df_row['Column name']
 
-        try:
-            bkey_df = BKEY.loc[(BKEY['Key domain name'] == key_domain_name)]
-            key_set_name = bkey_df['Key set name'].values[0]
-            Key_set_ID = str(int(bkey_df['Key set ID'].values[0]))
-            Key_domain_ID = str(int(bkey_df['Key domain ID'].values[0]))
-            Physical_table = bkey_df['Physical table'].values[0]
+        bkey_df = BKEY.loc[(BKEY['Key domain name'] == key_domain_name)]
+        key_set_name = bkey_df['Key set name'].values[0]
+        Key_set_ID = str(int(bkey_df['Key set ID'].values[0]))
+        Key_domain_ID = str(int(bkey_df['Key domain ID'].values[0]))
+        Physical_table = bkey_df['Physical table'].values[0]
 
-            script = "EXEC " + pm.MACRO_DB + ".GCFR_Register_Process("
-            script = script + "'BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "',"
-            script = script + "'define bkey for the table " + key_set_name + " and the domain " + key_domain_name + "',"
-            script = script + str(pm.gcfr_bkey_process_type) + ","
-            script = script + str(pm.gcfr_ctl_Id) + ","
-            script = script + str(pm.gcfr_stream_key) + ","
-            script = script + "'" + pm.INPUT_VIEW_DB + "',"
-            script = script + "'BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "_IN',"
-            script = script + "'" + pm.G_BKEY_V + "',"
-            script = script + "'" + Physical_table + "',"
-            script = script + "'" + pm.G_BKEY_T + "',"
-            script = script + "'" + Physical_table + "',"
-            script = script + "'" + pm.TMP_DB + "',"
-            script = script + "'" + Key_set_ID + "',"
-            script = script + "'" + Key_domain_ID + "',"
-            script = script + "'',0,0,0,0);"
+        script = "EXEC " + pm.MACRO_DB + ".GCFR_Register_Process("
+        script = script + "'BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "',"
+        script = script + "'define bkey for the table " + key_set_name + " and the domain " + key_domain_name + "',"
+        script = script + str(pm.gcfr_bkey_process_type) + ","
+        script = script + str(pm.gcfr_ctl_Id) + ","
+        script = script + str(pm.gcfr_stream_key) + ","
+        script = script + "'" + pm.INPUT_VIEW_DB + "',"
+        script = script + "'BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "_IN',"
+        script = script + "'" + pm.G_BKEY_V + "',"
+        script = script + "'" + Physical_table + "',"
+        script = script + "'" + pm.G_BKEY_T + "',"
+        script = script + "'" + Physical_table + "',"
+        script = script + "'" + pm.TMP_DB + "',"
+        script = script + "'" + Key_set_ID + "',"
+        script = script + "'" + Key_domain_ID + "',"
+        script = script + "'',0,0,0,0);"
 
-            f.write(script + '\n')
-        except:
-            pass
+        f.write(script + '\n')
     f.close()

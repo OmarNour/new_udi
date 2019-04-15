@@ -48,22 +48,19 @@ def d420(source_output_path, STG_tables, BKEY):
 
             create_view_script = create_view_script + comma_Column_name + "\n"
 
-            try:
-                Key_domain_name = STG_table_columns_row['Key domain name']
-                bkey_physical_table = BKEY.loc[(BKEY['Key domain name'].str.upper() == Key_domain_name)]['Physical table'].values[0]
-                bkeys_left_join_count = bkeys_left_join_count + 1
-                bk_alias = " bk" + str(bkeys_left_join_count)
-                bkeys_left_join = bkeys_left_join + "LEFT JOIN " + pm.G_BKEY_V + "." + bkey_physical_table + bk_alias + "\n"
+            Key_domain_name = STG_table_columns_row['Key domain name']
+            bkey_physical_table = BKEY.loc[(BKEY['Key domain name'].str.upper() == Key_domain_name)]['Physical table'].values[0]
+            bkeys_left_join_count = bkeys_left_join_count + 1
+            bk_alias = " bk" + str(bkeys_left_join_count)
+            bkeys_left_join = bkeys_left_join + "LEFT JOIN " + pm.G_BKEY_V + "." + bkey_physical_table + bk_alias + "\n"
 
-                Natural_key = STG_table_columns_row['Natural key']
-                split_Natural_key = Natural_key.replace(" ","").split(separator)
-                trim_Natural_key = []
-                for i in split_Natural_key:
-                    trim_Natural_key.append("TRIM(Trailing '.' from TRIM(" + i.strip() + "))")
-                Natural_key = funcs.list_to_string(trim_Natural_key, separator)
-                bkeys_left_join = bkeys_left_join + "\tON " + bk_alias + ".Source_Key = " + Natural_key + "\n"
-            except:
-                pass
+            Natural_key = STG_table_columns_row['Natural key']
+            split_Natural_key = Natural_key.replace(" ", "").split(separator)
+            trim_Natural_key = []
+            for i in split_Natural_key:
+                trim_Natural_key.append("TRIM(Trailing '.' from TRIM(" + i.strip() + "))")
+            Natural_key = funcs.list_to_string(trim_Natural_key, separator)
+            bkeys_left_join = bkeys_left_join + "\tON " + bk_alias + ".Source_Key = " + Natural_key + "\n"
 
         create_view_script = create_view_script + from_clause + "\n" + bkeys_left_join
         f.write(create_view_script+"\n")

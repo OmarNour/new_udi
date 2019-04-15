@@ -35,19 +35,17 @@ def d320(source_output_path, STG_tables, BKEY):
         Source_Key_cond = "WHERE " if "WHERE" not in Bkey_filter else " AND "
         Source_Key_cond = Source_Key_cond + "COALESCE(Source_Key,"+compare_string+") <> "+compare_string+" "
 
-        try:
-            bkey_df = BKEY.loc[(BKEY['Key domain name'] == key_domain_name)]
-            Key_set_ID = str(int(bkey_df['Key set ID'].values[0]))
-            Key_domain_ID = str(int(bkey_df['Key domain ID'].values[0]))
+        bkey_df = BKEY.loc[(BKEY['Key domain name'] == key_domain_name)]
+        Key_set_ID = str(int(bkey_df['Key set ID'].values[0]))
+        Key_domain_ID = str(int(bkey_df['Key domain ID'].values[0]))
 
-            script = "REPLACE VIEW " + pm.INPUT_VIEW_DB + ".BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "_IN AS LOCK ROW FOR ACCESS\n"
-            script = script + "SELECT " + Source_Key + " AS Source_Key\n"
-            script = script + "FROM " + pm.v_stg + "." + stg_table_name + "\n"
-            script = script + Bkey_filter + Source_Key_cond + "\n"
-            script = script + "GROUP BY 1;" + "\n"
+        script = "REPLACE VIEW " + pm.INPUT_VIEW_DB + ".BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "_IN AS LOCK ROW FOR ACCESS\n"
+        script = script + "SELECT " + Source_Key + " AS Source_Key\n"
+        script = script + "FROM " + pm.v_stg + "." + stg_table_name + "\n"
+        script = script + Bkey_filter + Source_Key_cond + "\n"
+        script = script + "GROUP BY 1;" + "\n"
 
-            f.write(script)
-            f.write('\n')
-        except:
-            pass
+        f.write(script)
+        f.write('\n')
+
     f.close()

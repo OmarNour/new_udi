@@ -14,20 +14,15 @@ def d340(source_output_path, STG_tables, BKEY):
         stg_table_name = stg_tables_df_row['Table name']
         stg_Column_name = stg_tables_df_row['Column name']
 
-        try:
-            bkey_df = BKEY.loc[(BKEY['Key domain name'] == key_domain_name)]
-            key_set_name = bkey_df['Key set name'].values[0]
-            Key_set_ID = str(int(bkey_df['Key set ID'].values[0]))
-            Key_domain_ID = str(int(bkey_df['Key domain ID'].values[0]))
-            Physical_table = bkey_df['Physical table'].values[0]
+        bkey_df = BKEY.loc[(BKEY['Key domain name'] == key_domain_name)]
+        Key_set_ID = str(int(bkey_df['Key set ID'].values[0]))
+        Key_domain_ID = str(int(bkey_df['Key domain ID'].values[0]))
 
-            script = "CALL " + pm.APPLY_DB + ".GCFR_PP_BKEY("
-            script = script + "'BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "'"
-            script = script + ",6, oRC, oRM);"
+        script = "CALL " + pm.APPLY_DB + ".GCFR_PP_BKEY("
+        script = script + "'BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "'"
+        script = script + ",6, oRC, oRM);"
 
-            f.write(script + '\n')
-        except:
-            pass
+        f.write(script + '\n')
     f.close()
 
 

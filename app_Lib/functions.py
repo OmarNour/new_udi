@@ -5,12 +5,16 @@ import pandas as pd
 
 def read_excel(file_path, sheet_name, filter=None, filter_index=True, nan_to_empty=True):
     df = pd.read_excel(file_path, sheet_name)
+    df_cols = list(df.columns.values)
 
     if filter:
         df = df_filter(df, filter, filter_index)
 
     if nan_to_empty:
-        df = replace_nan(df, '')
+        if isinstance(df, pd.DataFrame):
+            df = replace_nan(df, '')
+        else:
+            df = pd.DataFrame(columns=df_cols)
 
     return df
 
@@ -38,8 +42,9 @@ def is_Reserved_word(Supplements, Reserved_words_source, word):
 
 
 def rename_sheet_reserved_word(sheet_df, Supplements_df, Reserved_words_source, columns):
-    for col in columns:
-        sheet_df[col] = sheet_df.apply(lambda row: rename_reserved_word(Supplements_df, Reserved_words_source, row[col]), axis=1)
+    if not sheet_df.empty:
+        for col in columns:
+            sheet_df[col] = sheet_df.apply(lambda row: rename_reserved_word(Supplements_df, Reserved_words_source, row[col]), axis=1)
     return sheet_df
 
 def rename_reserved_word(Supplements, Reserved_words_source, word):

@@ -14,12 +14,18 @@ SOURCE_TABLES_LKP_table = 'SOURCE_TABLES_LKP'
 db_prefix = "GPROD1"
 
 gcfr_bkey_process_type = 21
+gcfr_snapshot_txf_process_type = 24
+gcfr_insert_txf_process_type = 25
+gcfr_others_txf_process_type = 29
 gcfr_ctl_Id = 1
 gcfr_stream_key = 1
 
 gcfr_system_name = "Economic"
 gcfr_stream_name = "Economic stream"
 
+separator = "||'_'||"
+
+############################
 T_STG = db_prefix + "T_STG"
 t_WRK = db_prefix + "T_WRK"
 v_stg = db_prefix + "V_STG"
@@ -45,4 +51,3 @@ P_UT = db_prefix + "P_UT"
 core_table = db_prefix + "T_BASE"
 core_view = db_prefix + "V_BASE"
 
-separator = "||'_'||"

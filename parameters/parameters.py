@@ -12,7 +12,7 @@ etl_process_table = 'ETL_PROCESS'
 SOURCE_TABLES_LKP_table = 'SOURCE_TABLES_LKP'
 
 db_prefix = "GPROD1"
-
+history_tbl = 'HISTORY'
 gcfr_bkey_process_type = 21
 gcfr_snapshot_txf_process_type = 24
 gcfr_insert_txf_process_type = 25

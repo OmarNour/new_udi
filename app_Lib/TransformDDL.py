@@ -4,7 +4,7 @@ import pandas as pd
 def get_trgt_pk(Core_tables,target_table ):
     trgt_pk = ''
     for core_tbl_indx, core_tbl_row in Core_tables[(Core_tables['Table name'] == target_table) & (Core_tables['PK'] == 'Y')].iterrows():
-        trgt_pk += core_tbl_row['Column name']+','
+        trgt_pk+= core_tbl_row['Column name']+','
     trgt_pk=trgt_pk[0:len(trgt_pk)-1]
     return trgt_pk
 
@@ -63,7 +63,7 @@ def get_bmap_values_for_codeset(Bmap_values, code_set_name):
 
 
 def get_select_clause(target_table,Core_tables,table_maping_name, Column_mapping):
-    sel_clause ='\n'
+    sel_clause='\n'
     for col_map_indx, col_map_row in Column_mapping[(Column_mapping['Mapping name'] == table_maping_name)].iterrows():
         sel_ready = ""
         src_tbl = col_map_row['Mapped to table']
@@ -79,14 +79,58 @@ def get_select_clause(target_table,Core_tables,table_maping_name, Column_mapping
             src = 'Cast (' + str(sql_const)+ ' AS ' + trgt_col_data_type + ')'
 
         trgt_col = ' AS '+col_map_row['Column name']
-        sel_ready = str(src)+str(trgt_col)+',\n'
+        sel_ready=str(src)+str(trgt_col)+',\n'
         sel_clause=sel_clause+sel_ready
     return  sel_clause
 
 def get_src_core_tbls (source_name, Core_tables, Table_mapping):
     src_mappings_df=Table_mapping[Table_mapping['Source']  == source_name]
-
     core_tables_list=src_mappings_df['Target table name']
  #   core_tables_list = [Table_mapping['Target table name'] for Table_mapping['Target table name'] in Table_mapping if Table_mapping['Source']  == source_name]
     core_tables_list = pd.unique(core_tables_list)
     return core_tables_list
+
+def get_src_tbl_mappings (source_name, Table_mapping):
+    src_mappings_df=Table_mapping[Table_mapping['Source']  == source_name]
+    return src_mappings_df
+
+def get_core_tbl_sart_date_column (Core_tables, tbl_name):
+
+    hist_key="S"
+    curr_rec = Core_tables[(Core_tables['Table name'].str.strip() == tbl_name.strip()) & (Core_tables['Historization key'].str.strip() == hist_key.strip())]
+    try:
+        start_date_col=curr_rec['Column name'].item()
+    except Exception as error:
+        start_date_col = "undefined"
+        # print(error)
+        # print ("start_date_col for tbl ", tbl_name, " is undefined")
+        return start_date_col
+    return  start_date_col
+
+def get_core_tbl_end_date_column (Core_tables, tbl_name):
+    hist_key="E"
+    curr_rec = Core_tables[(Core_tables['Table name'].str.strip() == tbl_name.strip()) & (Core_tables['Historization key'].str.strip() == hist_key.strip())]
+    try:
+        end_date_col=curr_rec['Column name'].item()
+    except Exception as error:
+        end_date_col = "undefined"
+        # print(error)
+        # print("end_date_col for tbl ", tbl_name, " is undefined")
+        return end_date_col
+
+    return end_date_col
+
+
+def get_core_tbl_hist_keys_list (Core_tables, tbl_name):
+    try:
+        hist_keys = Core_tables[ (Core_tables['Table name'] == tbl_name) & (Core_tables['Historization key'] == "Y")]
+        hist_keys_list=pd.unique(list(hist_keys['Column name']))
+        if (len(hist_keys_list)==0):
+            hist_keys_list={"undefined"}
+
+    except Exception as error:
+        hist_keys_list ={"undefined"}
+        # print(error)
+        # print("hist_keys for tbl ", tbl_name, " is undefined")
+        return hist_keys_list
+    return hist_keys_list

@@ -6,7 +6,7 @@ from parameters import parameters as pm
 from dask import compute, delayed
 from dask.diagnostics import ProgressBar
 import traceback
-from templates import gcfr, D210, D300, D320, D420, D000, D001, D200, D330, D340, D400,D410,D415, D615, D600, D607, D610,D620, D630, D640
+from templates import gcfr, D210, D300, D320, D420, D000, D001, D200, D330, D340, D400,D410,D415, D615, D600, D607, D608, D610,D620, D630, D640
 
 def generate_scripts():
     parallel_remove_output_home_path = []
@@ -34,6 +34,7 @@ def generate_scripts():
             Column_mapping = delayed(funcs.read_excel)(pm.smx_path + smx, sheet_name='Column mapping')
             # Column_mapping = delayed(funcs.replace_nan)(Column_mapping)
 
+            BMAP_values = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP values')
             BKEY = delayed(funcs.read_excel)(smx_file_path, sheet_name='BKEY')
 
             Core_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name='Core tables')
@@ -82,7 +83,8 @@ def generate_scripts():
                     parallel_templates.append(delayed(D420.d420)(source_output_path, STG_tables, BKEY))
 
                     parallel_templates.append(delayed(D600.d600)(source_output_path, source_name, Table_mapping, Core_tables))
-                    parallel_templates.append(delayed(D607.d607)(source_output_path, Core_tables))
+                    parallel_templates.append(delayed(D607.d607)(source_output_path, Core_tables, BMAP_values))
+                    parallel_templates.append(delayed(D608.d608)(source_output_path, Core_tables, BMAP_values))
                     parallel_templates.append(delayed(D610.D610)(source_output_path, source_name, Table_mapping, Core_tables))
                     parallel_templates.append(delayed(D615.d615)(source_output_path, Core_tables))
                     parallel_templates.append(delayed(D620.d620)(source_output_path, source_name, Table_mapping, Column_mapping, Core_tables, Loading_Type))

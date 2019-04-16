@@ -33,8 +33,8 @@ INPUT_VIEW_DB = db_prefix + "V_INP"
 
 MACRO_DB = db_prefix + "M_GCFR"
 UT_DB = db_prefix + "P_UT"
-G_BKEY_V = db_prefix + "V_UTLFW"
-G_BKEY_T = db_prefix + "T_UTLFW"
+UTLFW_v = db_prefix + "V_UTLFW"
+UTLFW_t = db_prefix + "T_UTLFW"
 
 TMP_DB = db_prefix + "T_TMP"
 APPLY_DB = db_prefix + "P_PP"

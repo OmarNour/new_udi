@@ -35,6 +35,7 @@ def generate_scripts():
             # Column_mapping = delayed(funcs.replace_nan)(Column_mapping)
 
             BMAP_values = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP values')
+            BMAP = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP')
             BKEY = delayed(funcs.read_excel)(smx_file_path, sheet_name='BKEY')
 
             Core_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name='Core tables')
@@ -80,7 +81,7 @@ def generate_scripts():
                     parallel_templates.append(delayed(D400.d400)(source_output_path, STG_tables))
                     parallel_templates.append(delayed(D410.d410)(source_output_path, STG_tables))
                     parallel_templates.append(delayed(D415.d415)(source_output_path, STG_tables))
-                    parallel_templates.append(delayed(D420.d420)(source_output_path, STG_tables, BKEY))
+                    parallel_templates.append(delayed(D420.d420)(source_output_path, STG_tables, BKEY, BMAP))
 
                     parallel_templates.append(delayed(D600.d600)(source_output_path, source_name, Table_mapping, Core_tables))
                     parallel_templates.append(delayed(D607.d607)(source_output_path, Core_tables, BMAP_values))

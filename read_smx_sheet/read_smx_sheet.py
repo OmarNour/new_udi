@@ -52,7 +52,7 @@ def generate_scripts():
 
             for system_index, system_row in teradata_sources.iterrows():
                 try:
-                    Loading_Type = system_row['Loading type']
+                    Loading_Type = system_row['Loading type'].upper()
                     source_name = system_row['Source system name']
                     source_name_filter = [['Source', [source_name]]]
                     stg_source_name_filter = [['Source system name', [source_name]]]

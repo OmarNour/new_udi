@@ -18,10 +18,11 @@ def d420(source_output_path, STG_tables, BKEY, BMAP):
                                             & (STG_tables['Natural key'] != "")]
         Natural_key_list = []
         for stg_Natural_key_df_index, stg_Natural_key_df_row in stg_Natural_key_df.iterrows():
-            # Natural_key_list = stg_Natural_key_df_row['Natural key'].split(separator)
-            Natural_key_list.append(stg_Natural_key_df_row['Natural key'])
+            Natural_key_split = stg_Natural_key_df_row['Natural key'].split(separator)
+            for i in Natural_key_split:
+                Natural_key_list.append(i.upper())
 
-        Natural_key_list_str = funcs.list_to_string(Natural_key_list, ',').upper()
+        # Natural_key_list_str = funcs.list_to_string(Natural_key_list, ',').upper()
 
         stg_table_has_pk = True if len(STG_tables.loc[(STG_tables['Table name'] == stg_table_name)
                                                       & (STG_tables['PK'].str.upper() == 'Y')].index) > 0 else False
@@ -43,17 +44,20 @@ def d420(source_output_path, STG_tables, BKEY, BMAP):
         bkey_columns = ""
         bmap_columns = ""
         for STG_table_columns_index, STG_table_columns_row in STG_table_columns.iterrows():
+            comma = ',' if STG_table_columns_index > 0 else seq_pk_col
+
             Column_name = STG_table_columns_row['Column name'].upper()
-            Natural_key = STG_table_columns_row['Natural key']
+            Natural_key = STG_table_columns_row['Natural key'].upper()
 
             alias = Column_name
             Column_name = "t." + Column_name
-            if alias in Natural_key_list_str:
-                if "COALESCE" in Natural_key_list_str:
-                    Column_name = "COALESCE( " + Column_name + ",'')"
-                Column_name = "TRIM(Trailing '.' from TRIM(" + Column_name + ")) " + alias
 
-            comma = ',' if STG_table_columns_index > 0 else seq_pk_col
+            for i in Natural_key_list:
+                i = i.replace(" ", "")
+                if alias == i or "COALESCE(" + alias + ",'')" == i:
+                    if "COALESCE" in i:
+                        Column_name = "COALESCE(" + Column_name + ",'')"
+                    Column_name = "TRIM(Trailing '.' from TRIM(" + Column_name + ")) " + alias
 
             if Natural_key == "":
                 comma_Column_name = comma + Column_name
@@ -63,7 +67,7 @@ def d420(source_output_path, STG_tables, BKEY, BMAP):
                 trim_Natural_key = []
                 split_Natural_key = Natural_key.replace(" ", "").split(separator)
                 for i in split_Natural_key:
-                    trim_Natural_key.append("TRIM(Trailing '.' from TRIM(t." + i.strip() + "))")
+                    trim_Natural_key.append("TRIM(Trailing '.' from TRIM(" + i.strip() + "))")
                 trimed_Natural_key = funcs.list_to_string(trim_Natural_key, separator)
 
                 Key_domain_name = STG_table_columns_row['Key domain name']

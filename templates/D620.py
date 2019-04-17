@@ -55,7 +55,7 @@ def d620(source_output_path, source_name, Table_mapping,Column_mapping,Core_tabl
         if (Loading_Type == 'ONLINE'):
             modification_type=main_src+'.MODIFICATION_TYPE'
         else:
-            modification_type = "'I' AS MODIFICATION_TYPE"
+            modification_type = "'U' AS MODIFICATION_TYPE"
 
         inp_view_select_clause=inp_view_select_clause+'\n'+ map_grp+'\n'+start_date+ '\n'+end_date+ '\n'+modification_type+'\n'
 

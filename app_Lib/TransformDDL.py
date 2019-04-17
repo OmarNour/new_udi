@@ -1,4 +1,53 @@
 import pandas as pd
+import parameters.parameters as pm
+
+
+def get_sub_query(subquery,src_layer,main_src):
+    if src_layer == "SEM":
+        join_ = 'JOIN '
+        from_ = 'FROM '
+    else:
+        join_ = 'JOIN ' + pm.SI_VIEW + '.'
+        from_ = 'FROM ' + pm.SI_VIEW + '.'
+    if subquery.find("UNION") != -1:
+        subquery = "("+subquery + ")" + main_src
+    out = subquery.replace("FROM ", from_)
+    out_2 = out.replace(from_ + " (", "FROM (")
+    out_3 = out_2.replace("JOIN ", join_)
+    out_4 = out_3.replace(join_+"(","JOIN (")
+    out_5 = out_4.replace(join_+" (","JOIN (")
+    out_5 = out_5.replace(join_ + "\n (", "JOIN (")
+    out_6 = out_5.replace(join_+"CORE.", "JOIN "+ pm.core_view+".")
+    out_6 = out_6.replace(join_+" CORE.", "JOIN "+ pm.core_view+".")
+    return out_6
+
+
+def get_unique_code_set_name_id(BMAP):
+    bmap_unique = BMAP[["Code set name", "Code set ID", "Physical table"]].drop_duplicates()
+    # print(" bmaps: ", bmap_unique)
+    return bmap_unique
+
+
+def get_bmap_physical_tbl_name (BMAP, code_set_name):
+    bmap_unique = get_unique_code_set_name_id(BMAP)
+    curr_rec = bmap_unique[bmap_unique["Code set name"] == code_set_name.strip()]
+    try:
+        tbl_name=curr_rec["Physical table"].item()
+    except Exception as error:
+        tbl_name = "undefined"
+    return str(tbl_name)
+
+def get_bmap_code_set_id(BMAP, code_set_name):
+    bmap_unique = get_unique_code_set_name_id(BMAP)
+    # print("bmap_unique: ",bmap_unique )
+    curr_rec = bmap_unique[bmap_unique["Code set name"] == code_set_name.strip()]
+    try:
+        code_set_id = curr_rec["Code set ID"].item()
+        # print("code_set_id ", code_set_id)
+    except Exception as error:
+        code_set_id = "undefined"
+        # print("code_set_id ", code_set_id)
+    return str(code_set_id)
 
 
 def get_trgt_pk(Core_tables,target_table ):

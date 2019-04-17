@@ -10,21 +10,24 @@ def d620(source_output_path, source_name, Table_mapping,Column_mapping,Core_tabl
     f = open(source_output_path + "/" + file_name + ".sql", "w+", encoding="utf-8")
     notes= list()
     for table_maping_index, table_maping_row in Table_mapping[(Table_mapping['Source'] == source_name)].iterrows(): #& (source_name=='CRA')& (Table_mapping['Mapping name'] == 'L1_PRTY_RLTD_L0_CRA_COMPANY_PERSON')].iterrows():
+    # for table_maping_index, table_maping_row in Table_mapping[(Table_mapping['Source'] == source_name) & (source_name=='TADAMON')& (Table_mapping['Mapping name'] == 'L1_PRTY_DEMOG_L0_TADAMON_CARD_SPONSOR_MOTHER')].iterrows():
         inp_view_select_clause = ''
         inp_view_from_clause = ''
         inp_view_left_join_clause = ''
         inp_view_where_clause =''
+        sub_query_flag=0
 
         prcess_type = 'TXF'
         layer = str(table_maping_row['Layer'])
         table_maping_name=str(table_maping_row['Mapping name'])
+        src_layer=str(table_maping_row['Source layer'])
         process_name = prcess_type + "_" + layer + "_" + table_maping_name
 
         inp_view_header = 'REPLACE VIEW ' + pm.INPUT_VIEW_DB + '.' + process_name + '_IN AS'
         target_table = str(table_maping_row['Target table name'])
         main_src=table_maping_row['Main source']
-        core_tables_list= pd.unique(list(Core_tables['Table name']))
-
+        # core_tables_list= pd.unique(list(Core_tables['Table name']))
+        core_tables_list=TransformDDL.get_core_tables_list(Core_tables)
         msg = ''
 
 
@@ -59,18 +62,27 @@ def d620(source_output_path, source_name, Table_mapping,Column_mapping,Core_tabl
 
         inp_view_select_clause=inp_view_select_clause+'\n'+ map_grp+'\n'+start_date+ '\n'+end_date+ '\n'+modification_type+'\n'
 
-
-
-        inp_view_from_clause='FROM '+pm.SI_VIEW+'.'+table_maping_row['Main source']+' ' +table_maping_row['Main source']
-
-        if table_maping_row['Join'] != "":
-            inp_view_from_clause=inp_view_from_clause+'\n'+table_maping_row['Join']
-            join='JOIN '+pm.SI_VIEW+'.'
-            inp_view_from_clause = inp_view_from_clause.replace('JOIN',join)
+        if table_maping_row['Join'] == "":
+            inp_view_from_clause = 'FROM ' + pm.SI_VIEW + '.' + table_maping_row['Main source'] + ' ' + table_maping_row['Main source']
+        elif table_maping_row['Join'] != "":
+                 if (table_maping_row['Join'].find("FROM".strip()) == -1): #no subquery in join clause
+                    inp_view_from_clause = 'FROM ' + pm.SI_VIEW + '.' + table_maping_row['Main source'] + ' ' +table_maping_row['Main source']
+                    inp_view_from_clause = inp_view_from_clause+'\n'+table_maping_row['Join']
+                    join = 'JOIN '+pm.SI_VIEW+'.'
+                    inp_view_from_clause = inp_view_from_clause.replace('JOIN',join)
+                 else:
+                     sub_query_flag=1
+                     join_clause=table_maping_row['Join']
+                     subquery_clause=TransformDDL.get_sub_query(join_clause,src_layer,main_src)
+                     inp_view_from_clause = ' FROM \n'+ subquery_clause
 
         inp_view_where_clause=';'
         if table_maping_row['Filter criterion']!="":
-            inp_view_where_clause='Where '+table_maping_row['Filter criterion']+';'
+            # if (sub_query_flag == 0):
+            inp_view_where_clause = 'Where '+table_maping_row['Filter criterion']+';'
+            # else:
+            #     inp_view_where_clause = 'Where '+table_maping_row['Filter criterion']+');'
+
 
         f.write(inp_view_header)
         f.write("\n")

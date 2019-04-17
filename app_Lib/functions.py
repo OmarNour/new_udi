@@ -6,6 +6,7 @@ import pandas as pd
 def read_excel(file_path, sheet_name, filter=None, filter_index=True, nan_to_empty=True):
     df = pd.read_excel(file_path, sheet_name)
     df_cols = list(df.columns.values)
+    df = df.applymap(lambda x: x.strip() if type(x) is str else x)
 
     if filter:
         df = df_filter(df, filter, filter_index)
@@ -101,6 +102,7 @@ def get_stg_table_columns(STG_tables, source_name, Table_name, with_sk_columns=F
 
 def single_quotes(string):
     return "'%s'" % string
+
 
 def assertions(table_maping_row,Core_tables_list):
     assert (table_maping_row['Main source'] != None), 'Missing Main Source  for Table Mapping:{}'.format(

@@ -4,9 +4,8 @@
 smx_ext = "xlsx"
 # smx_path = 'C:/Users/AA250090/Downloads/New folder/input/'
 # smx_path = "//10.10.10.250/TeraData/share/Salama/0Mpsn/Lastest SMX/"
-# project_path = "C:/Users/omar_nour/PycharmProjects/new_udi"
 smx_path = "C:/smx_sheets/"
-output_path =  smx_path + "udi_outputs/"
+output_path = smx_path + "udi_outputs/"
 
 etl_process_table = 'ETL_PROCESS'
 SOURCE_TABLES_LKP_table = 'SOURCE_TABLES_LKP'

@@ -18,7 +18,7 @@ def d630(source_output_path, source_name, Table_mapping):
         ctl_id = funcs.single_quotes(pm.gcfr_ctl_Id)
         stream_key = funcs.single_quotes(pm.gcfr_stream_key)
         process_name = "TXF_" + layer + "_" + table_maping_name
-        reg_exp = "EXEC " + pm.MACRO_DB+".GCFR_Register_Process'"+process_name+"','',"
+        reg_exp = "EXEC " + pm.MACRO_DB+".GCFR_Register_Process('"+process_name+"','',"
         if process_type == "SNAPSHOT":
             process_type_cd = pm.gcfr_snapshot_txf_process_type
         else:

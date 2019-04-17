@@ -10,6 +10,7 @@ output_path =  smx_path + "udi_outputs/"
 
 etl_process_table = 'ETL_PROCESS'
 SOURCE_TABLES_LKP_table = 'SOURCE_TABLES_LKP'
+SOURCE_NAME_LKP_table = 'SOURCE_NAME_LKP'
 
 db_prefix = "GPROD1"
 history_tbl = 'HISTORY'

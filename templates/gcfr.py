@@ -4,7 +4,7 @@ import app_Lib.functions as funcs
 
 def gcfr(output_path):
     file_name = funcs.get_file_name(__file__)
-    f = open(output_path + "000_run_first_" + file_name.upper() + ".sql", "w+")
+    f = open(output_path + "/" + "000_run_first_" + file_name.upper() + ".sql", "w+")
     system_name = funcs.single_quotes(pm.gcfr_system_name)
     stream_name = funcs.single_quotes(pm.gcfr_stream_name)
     register_system = "exec " + pm.M_GCFR + ".GCFR_Register_System(" + str(pm.gcfr_ctl_Id) + ", " + system_name + ", '',  " + system_name + ");"

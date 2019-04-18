@@ -6,11 +6,13 @@ from parameters import parameters as pm
 from dask import compute, delayed
 from dask.diagnostics import ProgressBar
 import traceback
+import datetime as dt
 from templates import gcfr, D003, D002, D210, D300, D320, D420, D000, D001, D200, D330, D340, D400,D410,D415, D615, D600, D607, D608, D610,D620, D630, D640
 
 def generate_scripts():
     parallel_remove_output_home_path = []
     parallel_create_output_home_path = []
+    # parallel_remove_output_source_path = []
     parallel_create_output_source_path = []
     parallel_templates = []
     count_sources = 0
@@ -21,8 +23,12 @@ def generate_scripts():
     try:
         for smx in md.get_files_in_dir(pm.smx_path,pm.smx_ext):
             count_smx = count_smx + 1
-            smx_file_path = pm.smx_path + smx
+            smx_file_path = pm.smx_path + "/" + smx
             smx_file_name = os.path.splitext(smx)[0]
+            dt_now = dt.datetime.now()
+            dt_folder = dt_now.strftime("%Y") + "_" + dt_now.strftime("%b").upper() + "_" + dt_now.strftime("%d") + "_" + dt_now.strftime("%H") + "_" + dt_now.strftime("%M")
+            home_output_path = pm.output_path + "/" + dt_folder + "/" + smx_file_name + "/"
+
             print("\t"+smx_file_name)
 
             System = funcs.read_excel(smx_file_path, sheet_name='System')
@@ -31,8 +37,7 @@ def generate_scripts():
 
             Supplements = delayed(funcs.read_excel)(smx_file_path, sheet_name='Supplements')
 
-            Column_mapping = delayed(funcs.read_excel)(pm.smx_path + smx, sheet_name='Column mapping')
-            # Column_mapping = delayed(funcs.replace_nan)(Column_mapping)
+            Column_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name='Column mapping')
 
             BMAP_values = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP values')
             BMAP = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP')
@@ -41,11 +46,10 @@ def generate_scripts():
             Core_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name='Core tables')
             Core_tables = delayed(funcs.rename_sheet_reserved_word)(Core_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
 
-            home_output_path = pm.output_path + smx_file_name + '/'
             delayed_remove_home_output_path = delayed(md.remove_folder)(home_output_path)
-            delayed_create_home_output_path = delayed(md.create_folder)(home_output_path)
-
             parallel_remove_output_home_path.append(delayed_remove_home_output_path)
+
+            delayed_create_home_output_path = delayed(md.create_folder)(home_output_path)
             parallel_create_output_home_path.append(delayed_create_home_output_path)
 
             parallel_templates.append(delayed(gcfr.gcfr)(home_output_path))
@@ -62,7 +66,10 @@ def generate_scripts():
                     STG_tables = delayed(funcs.read_excel)(smx_file_path, 'STG tables', stg_source_name_filter, False)
                     STG_tables = delayed(funcs.rename_sheet_reserved_word)(STG_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
 
-                    source_output_path = home_output_path + Loading_Type + '/' + source_name
+                    source_output_path = home_output_path + "/" + Loading_Type + "/" + source_name
+
+                    # delayed_remove_output_source_path = delayed(md.remove_folder)(source_output_path)
+                    # parallel_remove_output_source_path.append(delayed_remove_output_source_path)
 
                     delayed_create_source_output_path = delayed(md.create_folder)(source_output_path)
                     parallel_create_output_source_path.append(delayed_create_source_output_path)
@@ -105,6 +112,7 @@ def generate_scripts():
     if len(parallel_templates) > 0:
         compute(*parallel_remove_output_home_path)
         compute(*parallel_create_output_home_path)
+        # compute(*parallel_remove_output_source_path)
         compute(*parallel_create_output_source_path)
         with ProgressBar():
             smx_files = " smx files" if count_smx > 1 else " smx file"

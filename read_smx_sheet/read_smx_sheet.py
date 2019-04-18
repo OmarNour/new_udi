@@ -21,13 +21,16 @@ def generate_scripts():
     print("Reading from: ", pm.smx_path)
     print(pm.smx_ext + " files:")
     try:
+        dt_now = dt.datetime.now()
+        dt_folder = dt_now.strftime("%Y") + "_" + dt_now.strftime("%b").upper() + "_" + dt_now.strftime("%d") + "_" + dt_now.strftime("%H") + "_" + dt_now.strftime("%M")
+        output_path = pm.output_path + "/" + dt_folder
         for smx in md.get_files_in_dir(pm.smx_path,pm.smx_ext):
             count_smx = count_smx + 1
             smx_file_path = pm.smx_path + "/" + smx
             smx_file_name = os.path.splitext(smx)[0]
-            dt_now = dt.datetime.now()
-            dt_folder = dt_now.strftime("%Y") + "_" + dt_now.strftime("%b").upper() + "_" + dt_now.strftime("%d") + "_" + dt_now.strftime("%H") + "_" + dt_now.strftime("%M")
-            home_output_path = pm.output_path + "/" + dt_folder + "/" + smx_file_name + "/"
+
+
+            home_output_path = output_path + "/" + smx_file_name + "/"
 
             print("\t"+smx_file_name)
 
@@ -119,8 +122,8 @@ def generate_scripts():
             print("Start generating " + str(len(parallel_templates)) + " script for " + str(count_sources) + " sources from " + str(count_smx) + smx_files)
             compute(*parallel_templates)
 
-        os.startfile(pm.output_path)
-        print("Output: " + pm.output_path)
+        os.startfile(output_path)
+        print("Output: " + output_path)
     else:
         print("No SMX sheets found!")
 

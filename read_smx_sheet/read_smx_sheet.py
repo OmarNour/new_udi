@@ -120,7 +120,7 @@ def generate_scripts():
             print("Start generating " + str(len(parallel_templates)) + " script for " + str(count_sources) + " sources from " + str(count_smx) + smx_files)
             compute(*parallel_templates)
 
-        os.startfile(output_path)
+        os.startfile(pm.output_path)
     else:
         print("No SMX sheets found!")
 

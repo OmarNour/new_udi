@@ -5,11 +5,11 @@ import pandas as pd
 
 
 
-def d620(source_output_path, source_name, Table_mapping,Column_mapping,Core_tables, Loading_Type):
+def d620(source_output_path, Table_mapping,Column_mapping,Core_tables, Loading_Type):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+", encoding="utf-8")
     notes= list()
-    for table_maping_index, table_maping_row in Table_mapping[(Table_mapping['Source'] == source_name)].iterrows(): #& (source_name=='CRA')& (Table_mapping['Mapping name'] == 'L1_PRTY_RLTD_L0_CRA_COMPANY_PERSON')].iterrows():
+    for table_maping_index, table_maping_row in Table_mapping.iterrows(): #& (source_name=='CRA')& (Table_mapping['Mapping name'] == 'L1_PRTY_RLTD_L0_CRA_COMPANY_PERSON')].iterrows():
     # for table_maping_index, table_maping_row in Table_mapping[(Table_mapping['Source'] == source_name) & (source_name=='TADAMON')& (Table_mapping['Mapping name'] == 'L1_PRTY_DEMOG_L0_TADAMON_CARD_SPONSOR_MOTHER')].iterrows():
         inp_view_select_clause = ''
         inp_view_from_clause = ''

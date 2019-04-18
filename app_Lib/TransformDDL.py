@@ -130,11 +130,12 @@ def get_select_clause(target_table,Core_tables,table_maping_name, Column_mapping
         trgt_col = ' AS '+col_map_row['Column name']
         sel_ready=str(src)+str(trgt_col)+',\n'
         sel_clause=sel_clause+sel_ready
-    return  sel_clause
+    return sel_clause
 
-def get_src_core_tbls (source_name, Core_tables, Table_mapping):
-    src_mappings_df=Table_mapping[Table_mapping['Source']  == source_name]
-    core_tables_list=src_mappings_df['Target table name']
+
+def get_src_core_tbls(Table_mapping):
+    # src_mappings_df=Table_mapping[Table_mapping['Source']  == source_name]
+    core_tables_list=Table_mapping['Target table name']
  #   core_tables_list = [Table_mapping['Target table name'] for Table_mapping['Target table name'] in Table_mapping if Table_mapping['Source']  == source_name]
     core_tables_list = pd.unique(core_tables_list)
     return core_tables_list

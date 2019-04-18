@@ -17,22 +17,20 @@ def generate_scripts():
     parallel_templates = []
     count_sources = 0
     count_smx = 0
+    dt_now = dt.datetime.now()
+    dt_folder = dt_now.strftime("%Y") + "_" + dt_now.strftime("%b").upper() + "_" + dt_now.strftime("%d") + "_" + dt_now.strftime("%H") + "_" + dt_now.strftime("%M")
+    output_path = pm.output_path + "/" + dt_folder
 
     print("Reading from: ", pm.smx_path)
+    print("Output folder: ", output_path)
     print(pm.smx_ext + " files:")
     try:
-        dt_now = dt.datetime.now()
-        dt_folder = dt_now.strftime("%Y") + "_" + dt_now.strftime("%b").upper() + "_" + dt_now.strftime("%d") + "_" + dt_now.strftime("%H") + "_" + dt_now.strftime("%M")
-        output_path = pm.output_path + "/" + dt_folder
         for smx in md.get_files_in_dir(pm.smx_path,pm.smx_ext):
             count_smx = count_smx + 1
             smx_file_path = pm.smx_path + "/" + smx
             smx_file_name = os.path.splitext(smx)[0]
-
-
+            print("\t" + smx_file_name)
             home_output_path = output_path + "/" + smx_file_name + "/"
-
-            print("\t"+smx_file_name)
 
             System = funcs.read_excel(smx_file_path, sheet_name='System')
             teradata_sources = System[System['Source type'] == 'TERADATA']
@@ -95,13 +93,13 @@ def generate_scripts():
                     parallel_templates.append(delayed(D415.d415)(source_output_path, STG_tables))
                     parallel_templates.append(delayed(D420.d420)(source_output_path, STG_tables, BKEY, BMAP))
 
-                    parallel_templates.append(delayed(D600.d600)(source_output_path, source_name, Table_mapping, Core_tables))
+                    parallel_templates.append(delayed(D600.d600)(source_output_path, Table_mapping, Core_tables))
                     parallel_templates.append(delayed(D607.d607)(source_output_path, Core_tables, BMAP_values))
                     parallel_templates.append(delayed(D608.d608)(source_output_path, Core_tables, BMAP_values))
-                    parallel_templates.append(delayed(D610.D610)(source_output_path, source_name, Table_mapping, Core_tables))
+                    parallel_templates.append(delayed(D610.D610)(source_output_path, Table_mapping))
                     parallel_templates.append(delayed(D615.d615)(source_output_path, Core_tables))
-                    parallel_templates.append(delayed(D620.d620)(source_output_path, source_name, Table_mapping, Column_mapping, Core_tables, Loading_Type))
-                    parallel_templates.append(delayed(D630.d630)(source_output_path, source_name, Table_mapping))
+                    parallel_templates.append(delayed(D620.d620)(source_output_path, Table_mapping, Column_mapping, Core_tables, Loading_Type))
+                    parallel_templates.append(delayed(D630.d630)(source_output_path, Table_mapping))
                     parallel_templates.append(delayed(D640.d640)(source_output_path, source_name, Table_mapping))
                 except Exception as error:
                     # print(error)
@@ -123,7 +121,6 @@ def generate_scripts():
             compute(*parallel_templates)
 
         os.startfile(output_path)
-        print("Output: " + output_path)
     else:
         print("No SMX sheets found!")
 

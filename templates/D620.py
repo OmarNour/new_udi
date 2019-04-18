@@ -51,8 +51,8 @@ def d620(source_output_path, Table_mapping,Column_mapping,Core_tables, Loading_T
 
         sub="/* Target table:	"+target_table+"*/"+'\n'+"/* Table mapping:	"+table_maping_name +"*/"+'\n'+"/* Mapping group:	"+table_maping_row['Mapping group'] +"*/"
         inp_view_select_clause='SELECT '+'\n'+sub+TransformDDL.get_select_clause(target_table, Core_tables, table_maping_name, Column_mapping)
-        map_grp=' CAST(' +funcs.single_quotes(table_maping_row['Mapping group'])+' AS VARCHAR(100)) AS  MAP_GROUP ,'
-        start_date='(SELECT Business_Date FROM GDEV1V_GCFR.GCFR_Process_Id'+'\n'+'   WHERE Process_Name = '+ "'"+process_name+ "'"+'\n'+') AS Start_Date,'
+        map_grp = ' CAST(' +funcs.single_quotes(table_maping_row['Mapping group'])+' AS VARCHAR(100)) AS  MAP_GROUP ,'
+        start_date = '(SELECT Business_Date FROM ' + pm.GCFR_V + '.GCFR_Process_Id'+'\n'+'   WHERE Process_Name = ' + "'" + process_name + "'"+'\n'+') AS Start_Date,'
         end_date='DATE '+"'9999-12-31'"+' AS End_Date,'
         modification_type=''
         if (Loading_Type == 'ONLINE'):

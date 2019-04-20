@@ -30,8 +30,7 @@ class ReadSmx():
         print("Reading from: ", pm.smx_path)
         print("Output folder: ", self.output_path)
         print(pm.smx_ext + " files:")
-
-        for smx in md.get_files_in_dir(pm.smx_path,pm.smx_ext):
+        for smx in md.get_files_in_dir(pm.smx_path, pm.smx_ext):
             self.count_smx = self.count_smx + 1
             smx_file_path = pm.smx_path + "/" + smx
             smx_file_name = os.path.splitext(smx)[0]
@@ -47,11 +46,16 @@ class ReadSmx():
             delayed_read_smx_sheet = delayed(self.read_smx_sheet)(home_output_path, smx_file_path)
             self.parallel_read_smx_sheet.append(delayed_read_smx_sheet)
 
+
         if len(self.parallel_templates) > 0:
             compute(*self.parallel_remove_output_home_path)
             compute(*self.parallel_create_output_home_path)
-            compute(*self.parallel_read_smx_sheet)
-            compute(*self.parallel_read_smx_source)
+            with ProgressBar():
+                print("\nReading smx sheets...")
+                compute(*self.parallel_read_smx_sheet)
+            with ProgressBar():
+                print("Reading Sources ...")
+                compute(*self.parallel_read_smx_source)
             compute(*self.parallel_create_output_source_path)
             with ProgressBar():
                 smx_files = " smx files" if self.count_smx > 1 else " smx file"
@@ -60,20 +64,23 @@ class ReadSmx():
             os.startfile(pm.output_path)
 
     def read_smx_sheet(self, home_output_path, smx_file_path):
-        System = funcs.read_excel(smx_file_path, sheet_name='System')
-        teradata_sources = System[System['Source type'] == 'TERADATA']
-        self.count_sources = self.count_sources + len(teradata_sources.index)
+        try:
+            System = funcs.read_excel(smx_file_path, sheet_name='System')
+            teradata_sources = System[System['Source type'] == 'TERADATA']
+            self.count_sources = self.count_sources + len(teradata_sources.index)
 
-        Supplements = delayed(funcs.read_excel)(smx_file_path, sheet_name='Supplements')
-        Column_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name='Column mapping')
-        BMAP_values = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP values')
-        BMAP = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP')
-        BKEY = delayed(funcs.read_excel)(smx_file_path, sheet_name='BKEY')
-        Core_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name='Core tables')
-        Core_tables = delayed(funcs.rename_sheet_reserved_word)(Core_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
+            Supplements = delayed(funcs.read_excel)(smx_file_path, sheet_name='Supplements')
+            Column_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name='Column mapping')
+            BMAP_values = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP values')
+            BMAP = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP')
+            BKEY = delayed(funcs.read_excel)(smx_file_path, sheet_name='BKEY')
+            Core_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name='Core tables')
+            Core_tables = delayed(funcs.rename_sheet_reserved_word)(Core_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
 
-        delayed_read_smx_source = delayed(self.read_smx_source)(home_output_path, smx_file_path, teradata_sources, Supplements, Column_mapping, BMAP_values, BMAP, BKEY, Core_tables)
-        self.parallel_read_smx_source.append(delayed_read_smx_source)
+            delayed_read_smx_source = delayed(self.read_smx_source)(home_output_path, smx_file_path, teradata_sources, Supplements, Column_mapping, BMAP_values, BMAP, BKEY, Core_tables)
+            self.parallel_read_smx_source.append(delayed_read_smx_source)
+        except:
+            self.count_smx = self.count_smx - 1
 
     def read_smx_source(self, home_output_path, smx_file_path, teradata_sources, Supplements, Column_mapping, BMAP_values, BMAP, BKEY, Core_tables):
         for system_index, system_row in teradata_sources.iterrows():

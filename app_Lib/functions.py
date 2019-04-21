@@ -119,3 +119,9 @@ def list_to_string(list, separator=None, between_single_quotes=0):
     to_string = prefix.join((single_quotes(str(x)) if between_single_quotes == 1 else str(x)) if x is not None else "" for x in list)
 
     return to_string
+
+
+def string_to_dict(sting_dict):
+    if sting_dict:
+        # ex: Firstname="Sita" Lastname="Sharma" Age=22 Phone=1234567890
+        return eval("dict(%s)" % ','.join(sting_dict.split()))

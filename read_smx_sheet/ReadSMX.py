@@ -113,7 +113,10 @@ if __name__ == '__main__':
     start_time = dt.datetime.now()
 
     read_smx = ReadSmx()
-    read_smx.read_smx_folder()
+    inputs = funcs.string_to_dict(sys.argv[1])
+    home_output_path = inputs['home_output_path']
+    smx_file_path = inputs['smx_file_path']
+    read_smx.read_smx_sheet(home_output_path, smx_file_path)
 
     end_time = dt.datetime.now()
     print("\nTotal Elapsed time: ", end_time - start_time)

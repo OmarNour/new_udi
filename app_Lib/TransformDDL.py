@@ -89,7 +89,6 @@ def get_column_data_type(Core_tables, column_name, table_name):
     return trgt_col_data_type
 
 
-
 def get_code_set_names(Bmap_values):
     code_set_names = pd.unique(list(Bmap_values['Code set name']))
     return code_set_names

@@ -40,7 +40,7 @@ def d608(source_output_path, Core_tables, BMAP_values):
         insert_st = ""
         tbl_pk = TransformDDL.get_trgt_pk(Core_tables, code_set)
         # Bmap_Vals=TransformDDL.get_bmap_values_for_codeset(BMAP_values,code_set)
-        for bmap_values_indx, bmap_values_row in BMAP_values[(BMAP_values['Code set name'] == code_set)].iterrows():
+        for bmap_values_indx, bmap_values_row in BMAP_values[(BMAP_values['Code set name'] == code_set) & (BMAP_values['Layer'] == 'CORE')][['EDW code','Description']].drop_duplicates().iterrows():
             del_st = "DELETE FROM " + pm.core_table + "." + code_set + " WHERE " + tbl_pk + " = '" + str(bmap_values_row['EDW code']) + "';\n"
             insert_into_st = "INSERT INTO " + pm.core_table + "." + code_set + "(" + TransformDDL.get_lkp_tbl_Cols(Core_tables, code_set) + ")\nVALUES "
             insert_values = "(" + str(bmap_values_row["EDW code"]) + ", '" + str(bmap_values_row["Description"]) + "');\n\n"

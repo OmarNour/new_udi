@@ -125,3 +125,19 @@ def string_to_dict(sting_dict):
     if sting_dict:
         # ex: Firstname="Sita" Lastname="Sharma" Age=22 Phone=1234567890
         return eval("dict(%s)" % ','.join(sting_dict.split()))
+
+
+def wait_for_processes_to_finish(process_list, process_dict):
+    count_finished_processes = 0
+    no_of_subprocess = len(process_list)
+    while process_list:
+        for p_no in range(no_of_subprocess):
+            if process_dict[str(p_no)].poll() is not None:
+                try:
+                    process_list.remove(p_no)
+                    count_finished_processes += 1
+                    # print('-----------------------------------------------------------')
+                    print('\nProcess no.', p_no, 'finished, total finished', count_finished_processes, 'out of', no_of_subprocess)
+
+                except:
+                    pass

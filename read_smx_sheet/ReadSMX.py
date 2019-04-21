@@ -2,11 +2,11 @@ import os
 import sys
 sys.path.append(os.getcwd())
 from app_Lib import manage_directories as md, functions as funcs
-from parameters import parameters as pm
 from dask import compute, delayed
-from dask.diagnostics import ProgressBar
-import traceback
+# from dask.diagnostics import ProgressBar
+# import traceback
 import datetime as dt
+import multiprocessing
 from templates import gcfr, D003, D002, D210, D300, D320, D420, D000, D001, D200, D330, D340, D400,D410,D415, D615, D600, D607, D608, D610,D620, D630, D640
 
 
@@ -20,6 +20,8 @@ class ReadSmx:
         # self.count_sources = 0
 
     def read_smx_sheet(self, home_output_path, smx_file_path):
+        start_time = dt.datetime.now()
+        # print("\nStart processing: ", smx_file_path)
         count_sources = 0
         try:
             System = funcs.read_excel(smx_file_path, sheet_name='System')
@@ -38,16 +40,17 @@ class ReadSmx:
             self.parallel_read_smx_source.append(delayed_read_smx_source)
 
             if len(self.parallel_read_smx_source) > 0:
-                compute(*self.parallel_read_smx_source)
-                compute(*self.parallel_create_output_source_path)
-                compute(*self.parallel_build_scripts)
-                with ProgressBar():
-                    print("\nStart generating " + str(len(self.parallel_templates)) + " script for " + str(count_sources) + " sources ")
-                    compute(*self.parallel_templates)
+                cpu_count = multiprocessing.cpu_count()
+                compute(*self.parallel_read_smx_source, num_workers=cpu_count)
+                compute(*self.parallel_create_output_source_path, num_workers=cpu_count)
+                compute(*self.parallel_build_scripts, num_workers=cpu_count)
+                compute(*self.parallel_templates, num_workers=cpu_count)
 
         except:
             pass
             # self.count_smx = self.count_smx - 1
+        end_time = dt.datetime.now()
+        # print("\nProcessing: ", smx_file_path, " completed, elapsed time ", end_time-start_time)
 
     def read_smx_source(self, home_output_path, smx_file_path, teradata_sources, Supplements, Column_mapping, BMAP_values, BMAP, BKEY, Core_tables):
         for system_index, system_row in teradata_sources.iterrows():
@@ -98,25 +101,19 @@ class ReadSmx:
         self.parallel_templates.append(delayed(D600.d600)(source_output_path, Table_mapping, Core_tables))
         self.parallel_templates.append(delayed(D607.d607)(source_output_path, Core_tables, BMAP_values))
         self.parallel_templates.append(delayed(D608.d608)(source_output_path, Core_tables, BMAP_values))
-        self.parallel_templates.append(delayed(D610.D610)(source_output_path, Table_mapping))
+        self.parallel_templates.append(delayed(D610.d610)(source_output_path, Table_mapping))
         self.parallel_templates.append(delayed(D615.d615)(source_output_path, Core_tables))
         self.parallel_templates.append(delayed(D620.d620)(source_output_path, Table_mapping, Column_mapping, Core_tables, Loading_Type))
         self.parallel_templates.append(delayed(D630.d630)(source_output_path, Table_mapping))
         self.parallel_templates.append(delayed(D640.d640)(source_output_path, source_name, Table_mapping))
-
 
     def validate_smx_sheet(self):
         pass
 
 
 if __name__ == '__main__':
-    start_time = dt.datetime.now()
-
     read_smx = ReadSmx()
     inputs = funcs.string_to_dict(sys.argv[1])
     home_output_path = inputs['home_output_path']
     smx_file_path = inputs['smx_file_path']
     read_smx.read_smx_sheet(home_output_path, smx_file_path)
-
-    end_time = dt.datetime.now()
-    print("\nTotal Elapsed time: ", end_time - start_time)

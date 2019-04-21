@@ -94,7 +94,7 @@ def generate_scripts():
                     parallel_templates.append(delayed(D600.d600)(source_output_path, Table_mapping, Core_tables))
                     parallel_templates.append(delayed(D607.d607)(source_output_path, Core_tables, BMAP_values))
                     parallel_templates.append(delayed(D608.d608)(source_output_path, Core_tables, BMAP_values))
-                    parallel_templates.append(delayed(D610.D610)(source_output_path, Table_mapping))
+                    parallel_templates.append(delayed(D610.d610)(source_output_path, Table_mapping))
                     parallel_templates.append(delayed(D615.d615)(source_output_path, Core_tables))
                     parallel_templates.append(delayed(D620.d620)(source_output_path, Table_mapping, Column_mapping, Core_tables, Loading_Type))
                     parallel_templates.append(delayed(D630.d630)(source_output_path, Table_mapping))

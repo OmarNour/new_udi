@@ -3,7 +3,7 @@ import app_Lib.functions as funcs
 import app_Lib.TransformDDL as TransformDDL
 
 
-def D610(source_output_path, Table_mapping):
+def d610(source_output_path, Table_mapping):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+", encoding="utf-8")
     core_tables_list = TransformDDL.get_src_core_tbls(Table_mapping)

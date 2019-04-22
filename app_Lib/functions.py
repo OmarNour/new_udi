@@ -134,7 +134,7 @@ def wait_for_processes_to_finish(processes_numbers, processes_run_status, proces
     print('\nGenerating scripts...\n---------------------------------------------------------------------------')
     while processes_numbers:
         for p_no in range(no_of_subprocess):
-            if processes_run_status[str(p_no)].poll() is not None:
+            if processes_run_status[p_no].poll() is not None:
                 try:
                     processes_numbers.remove(p_no)
                     count_finished_processes += 1

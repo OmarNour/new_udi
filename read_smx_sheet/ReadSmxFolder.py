@@ -41,7 +41,7 @@ class ReadSmxFolder:
             processes_numbers.append(process_no)
             main_inputs = " home_output_path=" + funcs.single_quotes(home_output_path) + " smx_file_path=" + funcs.single_quotes(smx_file_path) + " "
             to_run = module_path + '/ReadSMX.py'
-            processes_run_status[str(process_no)] = subprocess.Popen(['python',
+            processes_run_status[process_no] = subprocess.Popen(['python',
                                                               to_run,
                                                               main_inputs])
         funcs.wait_for_processes_to_finish(processes_numbers, processes_run_status, processes_names)

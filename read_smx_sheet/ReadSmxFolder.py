@@ -22,8 +22,9 @@ class ReadSmxFolder:
         print("Output folder: \t", output_path)
         print(pm.smx_ext + " files:")
 
-        process_dict = {}
-        process_list = []
+        processes_names = {}
+        processes_run_status = {}
+        processes_numbers = []
         module_path = os.path.dirname(sys.modules['__main__'].__file__)
         for process_no, smx in enumerate(md.get_files_in_dir(pm.smx_path, pm.smx_ext)):
             self.count_smx = self.count_smx + 1
@@ -36,13 +37,14 @@ class ReadSmxFolder:
             md.create_folder(home_output_path)
             gcfr.gcfr(home_output_path)
             #################################################################################
-            process_list.append(process_no)
+            processes_names[process_no] = smx_file_name
+            processes_numbers.append(process_no)
             main_inputs = " home_output_path=" + funcs.single_quotes(home_output_path) + " smx_file_path=" + funcs.single_quotes(smx_file_path) + " "
             to_run = module_path + '/ReadSMX.py'
-            process_dict[str(process_no)] = subprocess.Popen(['python',
+            processes_run_status[str(process_no)] = subprocess.Popen(['python',
                                                               to_run,
                                                               main_inputs])
-        funcs.wait_for_processes_to_finish(process_list, process_dict)
+        funcs.wait_for_processes_to_finish(processes_numbers, processes_run_status, processes_names)
         #################################################################################
 
         os.startfile(pm.output_path)

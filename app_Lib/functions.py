@@ -111,6 +111,7 @@ def assertions(table_maping_row,Core_tables_list):
                 'Target table name'] in Core_tables_list), 'TARGET TABLE NAME not found in Core Tables Sheet for Table Mapping:{}'.format(
         str(table_maping_row['Mapping name']))
 
+
 def list_to_string(list, separator=None, between_single_quotes=0):
     if separator is None:
         prefix = ""
@@ -127,17 +128,18 @@ def string_to_dict(sting_dict):
         return eval("dict(%s)" % ','.join(sting_dict.split()))
 
 
-def wait_for_processes_to_finish(process_list, process_dict):
+def wait_for_processes_to_finish(processes_numbers, processes_run_status, processes_names):
     count_finished_processes = 0
-    no_of_subprocess = len(process_list)
-    while process_list:
+    no_of_subprocess = len(processes_numbers)
+    print('\nGenerating scripts...\n---------------------------------------------------------------------------')
+    while processes_numbers:
         for p_no in range(no_of_subprocess):
-            if process_dict[str(p_no)].poll() is not None:
+            if processes_run_status[str(p_no)].poll() is not None:
                 try:
-                    process_list.remove(p_no)
+                    processes_numbers.remove(p_no)
                     count_finished_processes += 1
                     # print('-----------------------------------------------------------')
-                    print('\nProcess no.', p_no, 'finished, total finished', count_finished_processes, 'out of', no_of_subprocess)
-
+                    # print('\nProcess no.', p_no, 'finished, total finished', count_finished_processes, 'out of', no_of_subprocess)
+                    print(count_finished_processes, 'out of', no_of_subprocess, 'finished.\t', processes_names[p_no])
                 except:
                     pass

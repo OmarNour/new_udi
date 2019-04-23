@@ -71,11 +71,9 @@ class ReadSmx:
         end_time = dt.datetime.now()
         # print("\nProcessing: ", smx_file_path, " completed, elapsed time ", end_time-start_time)
 
-
     # def read_smx_source(self, home_output_path, smx_file_path, teradata_sources, Supplements, Column_mapping, BMAP_values, BMAP, BKEY, Core_tables):
     def read_smx_source(self, home_output_path, smx_file_path):
         teradata_sources = funcs.get_sheet_data(smx_file_path, "System")
-        Supplements = funcs.get_sheet_data(smx_file_path, "Supplements")
         Column_mapping = funcs.get_sheet_data(smx_file_path, "Column mapping")
         BMAP_values = funcs.get_sheet_data(smx_file_path, "BMAP values")
         BMAP = funcs.get_sheet_data(smx_file_path, "BMAP")
@@ -94,12 +92,8 @@ class ReadSmx:
                 source_name_filter = [['Source', [source_name]]]
                 stg_source_name_filter = [['Source system name', [source_name]]]
 
-                # Table_mapping = delayed(funcs.read_excel)(smx_file_path, 'Table mapping', source_name_filter)
                 Table_mapping = delayed(funcs.get_sheet_data)(smx_file_path, "Table mapping", source_name_filter)
-                # STG_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
-                # STG_tables = delayed(funcs.read_excel)(smx_file_path, 'STG tables', stg_source_name_filter, STG_tables_reserved_words)
                 STG_tables = delayed(funcs.get_sheet_data)(smx_file_path, "STG tables", stg_source_name_filter)
-                # STG_tables = delayed(funcs.rename_sheet_reserved_word)(STG_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
 
                 delayed_build_scripts = delayed(self.build_scripts)(source_output_path, source_name, Loading_Type, Table_mapping, STG_tables, BKEY, Core_tables, BMAP, BMAP_values, Column_mapping)
                 self.parallel_build_scripts.append(delayed_build_scripts)

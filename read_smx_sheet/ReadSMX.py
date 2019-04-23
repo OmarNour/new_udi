@@ -7,103 +7,97 @@ from parameters import parameters as pm
 # from dask.diagnostics import ProgressBar
 # import traceback
 import datetime as dt
-import multiprocessing
 from templates import gcfr, D003, D002, D210, D300, D320, D420, D000, D001, D200, D330, D340, D400,D410,D415, D615, D600, D607, D608, D610,D620, D630, D640
+import multiprocessing
 import warnings
 warnings.filterwarnings("ignore")
 
 
 class ReadSmx:
     def __init__(self):
-        self.parallel_read_smx_source = []
-        self.parallel_create_output_source_path = []
-        self.parallel_build_scripts = []
+
         self.parallel_templates = []
         # self.count_smx = 0
         # self.count_sources = 0
 
-    def read_smx_sheet(self, home_output_path, smx_file_path):
-        # start_time = dt.datetime.now()
-        # print("\nStart processing: ", smx_file_path)
-        # parquet_path = home_output_path + "/" + pm.parquet_db_name
-        # count_sources = 0
-        parallel_save_sheet_data = []
-        try:
-            teradata_sources_filter = [['Source type', ['TERADATA']]]
-            teradata_sources = delayed(funcs.read_excel)(smx_file_path, sheet_name='System', filter=teradata_sources_filter)
+    # def read_smx_sheet(self, home_output_path, smx_file_path):
+    #     # start_time = dt.datetime.now()
+    #     # print("\nStart processing: ", smx_file_path)
+    #     # parquet_path = home_output_path + "/" + pm.parquet_db_name
+    #     # count_sources = 0
+    #     parallel_save_sheet_data = []
+    #     try:
+    #         teradata_sources_filter = [['Source type', ['TERADATA']]]
+    #         teradata_sources = delayed(funcs.read_excel)(smx_file_path, sheet_name='System', filter=teradata_sources_filter)
+    #
+    #         Supplements = delayed(funcs.read_excel)(smx_file_path, sheet_name='Supplements')
+    #         Column_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name='Column mapping')
+    #         BMAP_values = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP values')
+    #         BMAP = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP')
+    #         BKEY = delayed(funcs.read_excel)(smx_file_path, sheet_name='BKEY')
+    #         Core_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
+    #         Core_tables = delayed(funcs.read_excel)(smx_file_path, 'Core tables', None, Core_tables_reserved_words)
+    #         STG_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
+    #         STG_tables = delayed(funcs.read_excel)(smx_file_path, 'STG tables', None, STG_tables_reserved_words)
+    #         Table_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name='Table mapping')
+    #
+    #         parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(teradata_sources, smx_file_path, 'System'))
+    #         parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Supplements, smx_file_path, 'Supplements'))
+    #         parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Column_mapping, smx_file_path, 'Column mapping'))
+    #         parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(BMAP_values, smx_file_path, 'BMAP values'))
+    #         parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(BMAP, smx_file_path, 'BMAP'))
+    #         parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(BKEY, smx_file_path, 'BKEY'))
+    #         parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Core_tables, smx_file_path, 'Core tables'))
+    #         parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(STG_tables, smx_file_path, 'STG tables'))
+    #         parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Table_mapping, smx_file_path, 'Table mapping'))
+    #
+    #         delayed_read_smx_source = delayed(self.read_smx_source)(home_output_path, smx_file_path)
+    #         self.parallel_read_smx_source.append(delayed_read_smx_source)
+    #
+    #         if len(self.parallel_read_smx_source) > 0:
+    #             cpu_count = multiprocessing.cpu_count()
+    #             compute(*parallel_save_sheet_data, num_workers=cpu_count)
+    #             compute(*self.parallel_read_smx_source, num_workers=cpu_count)
+    #             compute(*self.parallel_create_output_source_path, num_workers=cpu_count)
+    #             compute(*self.parallel_build_scripts, num_workers=cpu_count)
+    #             compute(*self.parallel_templates, num_workers=cpu_count)
+    #
+    #     except Exception as error:
+    #         print("0", error)
+    #         pass
 
-            Supplements = delayed(funcs.read_excel)(smx_file_path, sheet_name='Supplements')
-            Column_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name='Column mapping')
-            BMAP_values = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP values')
-            BMAP = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP')
-            BKEY = delayed(funcs.read_excel)(smx_file_path, sheet_name='BKEY')
-            Core_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
-            Core_tables = delayed(funcs.read_excel)(smx_file_path, 'Core tables', None, Core_tables_reserved_words)
-            STG_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
-            STG_tables = delayed(funcs.read_excel)(smx_file_path, 'STG tables', None, STG_tables_reserved_words)
-            Table_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name='Table mapping')
+    # def read_smx_source(self, home_output_path, smx_file_path):
+    #     teradata_sources = funcs.get_sheet_data(smx_file_path, "System")
+    #     for system_index, system_row in teradata_sources.iterrows():
+    #         try:
+    #             Loading_Type = system_row['Loading type'].upper()
+    #             source_name = system_row['Source system name']
+    #
+    #             source_output_path = home_output_path + "/" + Loading_Type + "/" + source_name
+    #             delayed_create_source_output_path = delayed(md.create_folder)(source_output_path)
+    #             self.parallel_create_output_source_path.append(delayed_create_source_output_path)
+    #
+    #             delayed_build_scripts = delayed(self.build_source_scripts)(smx_file_path, source_output_path, source_name, Loading_Type)
+    #             self.parallel_build_scripts.append(delayed_build_scripts)
+    #
+    #         except Exception as error:
+    #             print("1", error)
+    #             pass
+    #             # traceback.print_exc()
+    #             self.count_sources = self.count_sources - 1
 
-            parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(teradata_sources, smx_file_path, 'System'))
-            parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Supplements, smx_file_path, 'Supplements'))
-            parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Column_mapping, smx_file_path, 'Column mapping'))
-            parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(BMAP_values, smx_file_path, 'BMAP values'))
-            parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(BMAP, smx_file_path, 'BMAP'))
-            parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(BKEY, smx_file_path, 'BKEY'))
-            parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Core_tables, smx_file_path, 'Core tables'))
-            parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(STG_tables, smx_file_path, 'STG tables'))
-            parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Table_mapping, smx_file_path, 'Table mapping'))
-
-            delayed_read_smx_source = delayed(self.read_smx_source)(home_output_path, smx_file_path)
-            self.parallel_read_smx_source.append(delayed_read_smx_source)
-
-            if len(self.parallel_read_smx_source) > 0:
-                cpu_count = multiprocessing.cpu_count()
-                compute(*parallel_save_sheet_data, num_workers=cpu_count)
-                compute(*self.parallel_read_smx_source, num_workers=cpu_count)
-                compute(*self.parallel_create_output_source_path, num_workers=cpu_count)
-                compute(*self.parallel_build_scripts, num_workers=cpu_count)
-                compute(*self.parallel_templates, num_workers=cpu_count)
-
-        except Exception as error:
-            print("0", error)
-            pass
-            # self.count_smx = self.count_smx - 1
-        end_time = dt.datetime.now()
-        # print("\nProcessing: ", smx_file_path, " completed, elapsed time ", end_time-start_time)
-
-    # def read_smx_source(self, home_output_path, smx_file_path, teradata_sources, Supplements, Column_mapping, BMAP_values, BMAP, BKEY, Core_tables):
-    def read_smx_source(self, home_output_path, smx_file_path):
-        teradata_sources = funcs.get_sheet_data(smx_file_path, "System")
-        for system_index, system_row in teradata_sources.iterrows():
-            try:
-                Loading_Type = system_row['Loading type'].upper()
-                source_name = system_row['Source system name']
-
-                source_output_path = home_output_path + "/" + Loading_Type + "/" + source_name
-                delayed_create_source_output_path = delayed(md.create_folder)(source_output_path)
-                self.parallel_create_output_source_path.append(delayed_create_source_output_path)
-
-                delayed_build_scripts = delayed(self.build_source_scripts)(smx_file_path, source_output_path, source_name, Loading_Type)
-                self.parallel_build_scripts.append(delayed_build_scripts)
-
-            except Exception as error:
-                print("1", error)
-                pass
-                # traceback.print_exc()
-                self.count_sources = self.count_sources - 1
-
-    def build_source_scripts(self, smx_file_path, source_output_path, source_name, Loading_Type):
-        Column_mapping = delayed(funcs.get_sheet_data)(smx_file_path, "Column mapping")
-        BMAP_values = delayed(funcs.get_sheet_data)(smx_file_path, "BMAP values")
-        BMAP = delayed(funcs.get_sheet_data)(smx_file_path, "BMAP")
-        BKEY = delayed(funcs.get_sheet_data)(smx_file_path, "BKEY")
-        Core_tables = delayed(funcs.get_sheet_data)(smx_file_path, "Core tables")
+    def build_source_scripts(self, smx_file_path, output_path, source_output_path, source_name, Loading_Type):
+        Column_mapping = delayed(funcs.get_sheet_data)(smx_file_path, output_path, "Column mapping")
+        BMAP_values = delayed(funcs.get_sheet_data)(smx_file_path, output_path, "BMAP values")
+        BMAP = delayed(funcs.get_sheet_data)(smx_file_path, output_path, "BMAP")
+        BKEY = delayed(funcs.get_sheet_data)(smx_file_path, output_path, "BKEY")
+        Core_tables = delayed(funcs.get_sheet_data)(smx_file_path, output_path, "Core tables")
 
         source_name_filter = [['Source', [source_name]]]
         stg_source_name_filter = [['Source system name', [source_name]]]
 
-        Table_mapping = delayed(funcs.get_sheet_data)(smx_file_path, "Table mapping", source_name_filter)
-        STG_tables = delayed(funcs.get_sheet_data)(smx_file_path, "STG tables", stg_source_name_filter)
+        Table_mapping = delayed(funcs.get_sheet_data)(smx_file_path, output_path, "Table mapping", source_name_filter)
+        STG_tables = delayed(funcs.get_sheet_data)(smx_file_path, output_path, "STG tables", stg_source_name_filter)
 
         self.parallel_templates.append(delayed(D000.d000)(source_output_path, source_name, Table_mapping, STG_tables, BKEY))
         self.parallel_templates.append(delayed(D001.d001)(source_output_path, source_name, STG_tables))
@@ -132,6 +126,10 @@ class ReadSmx:
         self.parallel_templates.append(delayed(D630.d630)(source_output_path, Table_mapping))
         self.parallel_templates.append(delayed(D640.d640)(source_output_path, source_name, Table_mapping))
 
+        if len(self.parallel_templates) > 0:
+            cpu_count = multiprocessing.cpu_count()
+            compute(*self.parallel_templates, num_workers=cpu_count)
+
     def validate_smx_sheet(self):
         pass
 
@@ -139,6 +137,11 @@ class ReadSmx:
 if __name__ == '__main__':
     read_smx = ReadSmx()
     inputs = funcs.string_to_dict(sys.argv[1])
-    home_output_path = inputs['home_output_path']
-    smx_file_path = inputs['smx_file_path']
-    read_smx.read_smx_sheet(home_output_path, smx_file_path)
+
+    i_smx_file_path = inputs['smx_file_path']
+    i_output_path = inputs['output_path']
+    i_source_output_path = inputs['source_output_path']
+    i_source_name = inputs['source_name']
+    i_Loading_Type = inputs['Loading_Type']
+
+    read_smx.build_source_scripts(i_smx_file_path, i_output_path, i_source_output_path, i_source_name, i_Loading_Type)

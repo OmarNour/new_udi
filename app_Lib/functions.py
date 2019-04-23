@@ -143,7 +143,7 @@ def string_to_dict(sting_dict):
 def wait_for_processes_to_finish(processes_numbers, processes_run_status, processes_names):
     count_finished_processes = 0
     no_of_subprocess = len(processes_numbers)
-    print('\nGenerating scripts...\n---------------------------------------------------------------------------')
+    # print('\nGenerating scripts...\n---------------------------------------------------------------------------')
     while processes_numbers:
         for p_no in range(no_of_subprocess):
             if processes_run_status[p_no].poll() is not None:
@@ -206,18 +206,18 @@ def read_all_from_parquet_delayed(dataset, columns=None, filter=None):
     return df
 
 
-def get_sheet_path(smx_file_path, sheet_name):
+def get_sheet_path(smx_file_path, output_path, sheet_name):
     file_name = get_file_name(smx_file_path)
-    parquet_path = pm.output_path + "/" + file_name + "/" + pm.parquet_db_name + "/" + sheet_name
+    parquet_path = output_path + "/" + file_name + "/" + pm.parquet_db_name + "/" + sheet_name
     return parquet_path
 
 
-def save_sheet_data(df, smx_file_path, sheet_name):
-    parquet_path = get_sheet_path(smx_file_path, sheet_name)
+def save_sheet_data(df, smx_file_path, output_path, sheet_name):
+    parquet_path = get_sheet_path(smx_file_path, output_path, sheet_name)
     save_to_parquet(df, parquet_path, partition_cols=None, string_columns=None)
 
 
-def get_sheet_data(smx_file_path, sheet_name, df_filter=None):
-    parquet_path = get_sheet_path(smx_file_path, sheet_name)
+def get_sheet_data(smx_file_path, output_path, sheet_name, df_filter=None):
+    parquet_path = get_sheet_path(smx_file_path, output_path, sheet_name)
     df_sheet = read_all_from_parquet(parquet_path, None, True, filter=df_filter)
     return df_sheet

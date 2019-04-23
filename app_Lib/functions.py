@@ -1,21 +1,32 @@
 import os
 import numpy as np
 import pandas as pd
+import pyarrow.parquet as pq
+import pyarrow as pa
+from parameters import parameters as pm
+import dask.dataframe as dd
 
 
-def read_excel(file_path, sheet_name, filter=None, filter_index=True, nan_to_empty=True):
-    df = pd.read_excel(file_path, sheet_name)
+def read_excel(file_path, sheet_name, filter=None, reserved_words_validation=None, nan_to_empty=True):
+    df = pd.read_excel(file_path, sheet_name, skipna=True)
     df_cols = list(df.columns.values)
     df = df.applymap(lambda x: x.strip() if type(x) is str else x)
 
     if filter:
-        df = df_filter(df, filter, filter_index)
+        df = df_filter(df, filter, False)
 
     if nan_to_empty:
         if isinstance(df, pd.DataFrame):
             df = replace_nan(df, '')
+            df = df.applymap(lambda x: int(x) if type(x) is float else x)
         else:
             df = pd.DataFrame(columns=df_cols)
+
+
+    if reserved_words_validation is not None:
+        df = rename_sheet_reserved_word(df, reserved_words_validation[0], reserved_words_validation[1], reserved_words_validation[2])
+
+    # save_sheet_data(df, file_path, sheet_name)
 
     return df
 
@@ -47,6 +58,7 @@ def rename_sheet_reserved_word(sheet_df, Supplements_df, Reserved_words_source, 
         for col in columns:
             sheet_df[col] = sheet_df.apply(lambda row: rename_reserved_word(Supplements_df, Reserved_words_source, row[col]), axis=1)
     return sheet_df
+
 
 def rename_reserved_word(Supplements, Reserved_words_source, word):
     return word + '_' if is_Reserved_word(Supplements, Reserved_words_source, word) else word
@@ -143,3 +155,69 @@ def wait_for_processes_to_finish(processes_numbers, processes_run_status, proces
                     print(count_finished_processes, 'out of', no_of_subprocess, 'finished.\t', processes_names[p_no])
                 except:
                     pass
+
+
+def xstr(s):
+    if s is None:
+        return ''
+    return str(s)
+
+
+def save_to_parquet(pq_df, dataset_root_path, partition_cols=None, string_columns=None):
+    if not pq_df.empty:
+
+        # all_object_columns = df.select_dtypes(include='object').columns
+        # print(all_object_columns)
+
+        if string_columns is None:
+            # string_columns = df.columns
+            string_columns = pq_df.select_dtypes(include='object').columns
+
+
+        for i in string_columns:
+            pq_df[i] = pq_df[i].apply(xstr)
+
+        partial_results_table = pa.Table.from_pandas(df=pq_df, nthreads=None)
+
+        pq.write_to_dataset(partial_results_table, root_path=dataset_root_path, partition_cols=partition_cols,
+                            use_dictionary=False
+                            )
+        # flavor = 'spark'
+        # print("{:,}".format(len(df.index)), 'records inserted into', dataset_root_path, 'in', datetime.datetime.now() - start_time)
+
+
+def read_all_from_parquet(dataset, columns, use_threads, filter=None):
+    df = pq.read_table(dataset,
+                       columns=columns,
+                       use_threads=use_threads,
+                       use_pandas_metadata=True).to_pandas()
+
+    if filter:
+        df = df_filter(df, filter, False)
+
+    return df
+
+
+def read_all_from_parquet_delayed(dataset, columns=None, filter=None):
+    df = dd.read_parquet(path=dataset, columns=columns, engine='pyarrow')
+    if filter:
+        for i in filter:
+            df = df[df[i[0]].isin(i[1])]
+    return df
+
+
+def get_sheet_path(smx_file_path, sheet_name):
+    file_name = get_file_name(smx_file_path)
+    parquet_path = pm.output_path + "/" + file_name + "/" + pm.parquet_db_name + "/" + sheet_name
+    return parquet_path
+
+
+def save_sheet_data(df, smx_file_path, sheet_name):
+    parquet_path = get_sheet_path(smx_file_path, sheet_name)
+    save_to_parquet(df, parquet_path, partition_cols=None, string_columns=None)
+
+
+def get_sheet_data(smx_file_path, sheet_name, df_filter=None):
+    parquet_path = get_sheet_path(smx_file_path, sheet_name)
+    df_sheet = read_all_from_parquet(parquet_path, None, True, filter=df_filter)
+    return df_sheet

@@ -15,9 +15,8 @@ class ReadSmxFolder:
 
 
     def read_smx_folder(self):
-        dt_now = dt.datetime.now()
-        dt_folder = dt_now.strftime("%Y") + "_" + dt_now.strftime("%b").upper() + "_" + dt_now.strftime("%d") + "_" + dt_now.strftime("%H") + "_" + dt_now.strftime("%M")
-        output_path = pm.output_path + "/" + dt_folder
+
+        output_path = pm.output_path
         print("Reading from: \t", pm.smx_path)
         print("Output folder: \t", output_path)
         print(pm.smx_ext + " files:")

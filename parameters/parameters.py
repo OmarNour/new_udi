@@ -1,3 +1,7 @@
+import datetime as dt
+
+dt_now = dt.datetime.now()
+dt_folder = dt_now.strftime("%Y") + "_" + dt_now.strftime("%b").upper() + "_" + dt_now.strftime("%d") + "_" + dt_now.strftime("%H") + "_" + dt_now.strftime("%M")
 # exec GPROD1M_GCFR.GCFR_Register_System(1, 'Economic', '', 'Economic')
 # call GPROD1P_UT.GCFR_UT_Register_Stream(1, 1, 'Economic stream', cast('2019-01-01' as date))
 
@@ -5,7 +9,7 @@ smx_ext = "xlsx"
 # smx_path = 'C:/Users/AA250090/Downloads/New folder/input'
 # smx_path = "//10.10.10.250/TeraData/share/Salama/0Mpsn/Lastest SMX"
 smx_path = "C:/smx_sheets"
-output_path = smx_path + "/" + "udi_outputs"
+output_path = smx_path + "/" + "udi_outputs" + "/" + dt_folder
 
 etl_process_table = 'ETL_PROCESS'
 SOURCE_TABLES_LKP_table = 'SOURCE_TABLES_LKP'
@@ -50,4 +54,8 @@ P_UT = db_prefix + "P_UT"
 
 core_table = db_prefix + "T_BASE"
 core_view = db_prefix + "V_BASE"
+################################
+
+parquet_db_name = "smx_data"
+
 

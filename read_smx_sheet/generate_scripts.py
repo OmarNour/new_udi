@@ -60,9 +60,9 @@ def generate_scripts():
                     source_name_filter = [['Source', [source_name]]]
                     stg_source_name_filter = [['Source system name', [source_name]]]
 
-                    Table_mapping = delayed(funcs.read_excel)(smx_file_path, 'Table mapping', source_name_filter, False)
+                    Table_mapping = delayed(funcs.read_excel)(smx_file_path, 'Table mapping', source_name_filter)
 
-                    STG_tables = delayed(funcs.read_excel)(smx_file_path, 'STG tables', stg_source_name_filter, False)
+                    STG_tables = delayed(funcs.read_excel)(smx_file_path, 'STG tables', stg_source_name_filter)
                     STG_tables = delayed(funcs.rename_sheet_reserved_word)(STG_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
 
                     source_output_path = home_output_path + "/" + Loading_Type + "/" + source_name

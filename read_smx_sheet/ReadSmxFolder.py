@@ -28,11 +28,6 @@ class ReadSmxFolder:
         self.parallel_save_sheet_data = []
 
     def read_smx_sheets(self, smx_file_path):
-        # start_time = dt.datetime.now()
-        # print("\nStart processing: ", smx_file_path)
-        # parquet_path = home_output_path + "/" + pm.parquet_db_name
-        # count_sources = 0
-
         try:
             teradata_sources_filter = [['Source type', ['TERADATA']]]
             teradata_sources = delayed(funcs.read_excel)(smx_file_path, sheet_name='System', filter=teradata_sources_filter)
@@ -122,20 +117,20 @@ class ReadSmxFolder:
             self.parallel_read_smx_sheets.append(delayed(self.read_smx_sheets)(smx_file_path))
 
         if len(self.parallel_read_smx_sheets) > 0:
+            cpu_count = multiprocessing.cpu_count()
+            compute(*self.parallel_read_smx_sheets, num_workers=cpu_count)
             with ProgressBar():
-                cpu_count = multiprocessing.cpu_count()
                 print("\nReading SMX Sheets...")
-                compute(*self.parallel_read_smx_sheets, num_workers=cpu_count)
-                print("\nSaving SMX Sheets...")
                 compute(*self.parallel_save_sheet_data, num_workers=cpu_count)
 
-        smx_files = " smx files" if self.count_smx > 1 else " smx file"
-        print("\nStart generating scripts for " + str(self.count_sources) + " sources from " + str(self.count_smx) + smx_files)
+
         for i in read_smx_source_inputs:
             i_home_output_path = i[0]
             i_smx_file_path = i[1]
             self.read_smx_source(i_home_output_path, i_smx_file_path)
 
+        smx_files = " smx files" if self.count_smx > 1 else " smx file"
+        print("\nStart generating scripts for " + str(self.count_sources) + " sources from " + str(self.count_smx) + smx_files)
         funcs.wait_for_processes_to_finish(self.processes_numbers, self.processes_run_status, self.processes_names)
         os.startfile(self.output_path)
 

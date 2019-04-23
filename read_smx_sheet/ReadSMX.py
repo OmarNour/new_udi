@@ -74,12 +74,6 @@ class ReadSmx:
     # def read_smx_source(self, home_output_path, smx_file_path, teradata_sources, Supplements, Column_mapping, BMAP_values, BMAP, BKEY, Core_tables):
     def read_smx_source(self, home_output_path, smx_file_path):
         teradata_sources = funcs.get_sheet_data(smx_file_path, "System")
-        Column_mapping = funcs.get_sheet_data(smx_file_path, "Column mapping")
-        BMAP_values = funcs.get_sheet_data(smx_file_path, "BMAP values")
-        BMAP = funcs.get_sheet_data(smx_file_path, "BMAP")
-        BKEY = funcs.get_sheet_data(smx_file_path, "BKEY")
-        Core_tables = funcs.get_sheet_data(smx_file_path, "Core tables")
-
         for system_index, system_row in teradata_sources.iterrows():
             try:
                 Loading_Type = system_row['Loading type'].upper()
@@ -89,13 +83,7 @@ class ReadSmx:
                 delayed_create_source_output_path = delayed(md.create_folder)(source_output_path)
                 self.parallel_create_output_source_path.append(delayed_create_source_output_path)
 
-                source_name_filter = [['Source', [source_name]]]
-                stg_source_name_filter = [['Source system name', [source_name]]]
-
-                Table_mapping = delayed(funcs.get_sheet_data)(smx_file_path, "Table mapping", source_name_filter)
-                STG_tables = delayed(funcs.get_sheet_data)(smx_file_path, "STG tables", stg_source_name_filter)
-
-                delayed_build_scripts = delayed(self.build_scripts)(source_output_path, source_name, Loading_Type, Table_mapping, STG_tables, BKEY, Core_tables, BMAP, BMAP_values, Column_mapping)
+                delayed_build_scripts = delayed(self.build_source_scripts)(smx_file_path, source_output_path, source_name, Loading_Type)
                 self.parallel_build_scripts.append(delayed_build_scripts)
 
             except Exception as error:
@@ -104,7 +92,18 @@ class ReadSmx:
                 # traceback.print_exc()
                 self.count_sources = self.count_sources - 1
 
-    def build_scripts(self, source_output_path, source_name, Loading_Type, Table_mapping, STG_tables, BKEY, Core_tables, BMAP, BMAP_values, Column_mapping):
+    def build_source_scripts(self, smx_file_path, source_output_path, source_name, Loading_Type):
+        Column_mapping = delayed(funcs.get_sheet_data)(smx_file_path, "Column mapping")
+        BMAP_values = delayed(funcs.get_sheet_data)(smx_file_path, "BMAP values")
+        BMAP = delayed(funcs.get_sheet_data)(smx_file_path, "BMAP")
+        BKEY = delayed(funcs.get_sheet_data)(smx_file_path, "BKEY")
+        Core_tables = delayed(funcs.get_sheet_data)(smx_file_path, "Core tables")
+
+        source_name_filter = [['Source', [source_name]]]
+        stg_source_name_filter = [['Source system name', [source_name]]]
+
+        Table_mapping = delayed(funcs.get_sheet_data)(smx_file_path, "Table mapping", source_name_filter)
+        STG_tables = delayed(funcs.get_sheet_data)(smx_file_path, "STG tables", stg_source_name_filter)
 
         self.parallel_templates.append(delayed(D000.d000)(source_output_path, source_name, Table_mapping, STG_tables, BKEY))
         self.parallel_templates.append(delayed(D001.d001)(source_output_path, source_name, STG_tables))

@@ -56,7 +56,7 @@ class ReadSmxFolder:
             # self.parallel_read_smx_source.append(delayed(self.read_smx_source)(home_output_path, smx_file_path))
 
         except Exception as error:
-            print("0", error)
+            # print("0", error)
             pass
 
     def read_smx_source(self, home_output_path, smx_file_path):
@@ -89,12 +89,10 @@ class ReadSmxFolder:
                 #################################################################################
 
             except Exception as error:
-                print("1", error)
+                # print("1", error)
                 pass
                 # traceback.print_exc()
                 self.count_sources = self.count_sources - 1
-
-
 
     def read_smx_folder(self):
         print("Reading from: \t", pm.smx_path)
@@ -123,14 +121,13 @@ class ReadSmxFolder:
                 print("\nReading SMX Sheets...")
                 compute(*self.parallel_save_sheet_data, num_workers=cpu_count)
 
-
         for i in read_smx_source_inputs:
             i_home_output_path = i[0]
             i_smx_file_path = i[1]
             self.read_smx_source(i_home_output_path, i_smx_file_path)
 
-        smx_files = " smx files" if self.count_smx > 1 else " smx file"
-        print("\nStart generating scripts for " + str(self.count_sources) + " sources from " + str(self.count_smx) + smx_files)
+        # smx_files = " smx files" if self.count_smx > 1 else " smx file"
+        # print("\nStart generating scripts for " + str(self.count_sources) + " sources from " + str(self.count_smx) + smx_files)
         funcs.wait_for_processes_to_finish(self.processes_numbers, self.processes_run_status, self.processes_names)
         os.startfile(self.output_path)
 

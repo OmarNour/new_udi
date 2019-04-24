@@ -8,26 +8,28 @@ import dask.dataframe as dd
 
 
 def read_excel(file_path, sheet_name, filter=None, reserved_words_validation=None, nan_to_empty=True):
-    df = pd.read_excel(file_path, sheet_name, skipna=True)
-    df_cols = list(df.columns.values)
-    df = df.applymap(lambda x: x.strip() if type(x) is str else x)
+    try:
+        df = pd.read_excel(file_path, sheet_name)
+        df_cols = list(df.columns.values)
+        df = df.applymap(lambda x: x.strip() if type(x) is str else x)
 
-    if filter:
-        df = df_filter(df, filter, False)
+        if filter:
+            df = df_filter(df, filter, False)
 
-    if nan_to_empty:
-        if isinstance(df, pd.DataFrame):
-            df = replace_nan(df, '')
-            df = df.applymap(lambda x: int(x) if type(x) is float else x)
-        else:
-            df = pd.DataFrame(columns=df_cols)
+        if nan_to_empty:
+            if isinstance(df, pd.DataFrame):
+                df = replace_nan(df, '')
+                df = df.applymap(lambda x: int(x) if type(x) is float else x)
+            else:
+                df = pd.DataFrame(columns=df_cols)
 
 
-    if reserved_words_validation is not None:
-        df = rename_sheet_reserved_word(df, reserved_words_validation[0], reserved_words_validation[1], reserved_words_validation[2])
+        if reserved_words_validation is not None:
+            df = rename_sheet_reserved_word(df, reserved_words_validation[0], reserved_words_validation[1], reserved_words_validation[2])
 
-    # save_sheet_data(df, file_path, sheet_name)
-
+        # save_sheet_data(df, file_path, sheet_name)
+    except:
+        df = pd.DataFrame()
     return df
 
 
@@ -143,7 +145,7 @@ def string_to_dict(sting_dict):
 def wait_for_processes_to_finish(processes_numbers, processes_run_status, processes_names):
     count_finished_processes = 0
     no_of_subprocess = len(processes_numbers)
-    # print('\nGenerating scripts...\n---------------------------------------------------------------------------')
+    print('\nStart Generating scripts...\n---------------------------------------------------------------------------')
     while processes_numbers:
         for p_no in range(no_of_subprocess):
             if processes_run_status[p_no].poll() is not None:
@@ -187,13 +189,16 @@ def save_to_parquet(pq_df, dataset_root_path, partition_cols=None, string_column
 
 
 def read_all_from_parquet(dataset, columns, use_threads, filter=None):
-    df = pq.read_table(dataset,
-                       columns=columns,
-                       use_threads=use_threads,
-                       use_pandas_metadata=True).to_pandas()
+    try:
+        df = pq.read_table(dataset,
+                           columns=columns,
+                           use_threads=use_threads,
+                           use_pandas_metadata=True).to_pandas()
 
-    if filter:
-        df = df_filter(df, filter, False)
+        if filter:
+            df = df_filter(df, filter, False)
+    except:
+        df = pd.DataFrame()
 
     return df
 

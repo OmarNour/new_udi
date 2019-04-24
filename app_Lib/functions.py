@@ -145,7 +145,7 @@ def string_to_dict(sting_dict):
 def wait_for_processes_to_finish(processes_numbers, processes_run_status, processes_names):
     count_finished_processes = 0
     no_of_subprocess = len(processes_numbers)
-    print('\nStart Generating scripts...\n---------------------------------------------------------------------------')
+
     while processes_numbers:
         for p_no in range(no_of_subprocess):
             if processes_run_status[p_no].poll() is not None:

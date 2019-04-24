@@ -15,17 +15,21 @@ from dask.diagnostics import ProgressBar
 
 class ReadSmxFolder:
     def __init__(self):
+        self.module_path = os.path.dirname(sys.modules['__main__'].__file__)
         self.output_path = pm.output_path
-        self.process_no = 0
-        self.processes_names = {}
-        self.processes_run_status = {}
-        self.processes_numbers = []
+
+        self.smx_process_no = 0
+        self.smx_processes_names = {}
+        self.smx_processes_run_status = {}
+        self.smx_processes_numbers = []
+
+        self.build_scripts_process_no = 0
+        self.build_scripts_processes_names = {}
+        self.build_scripts_processes_run_status = {}
+        self.build_scripts_processes_numbers = []
 
         self.count_smx = 0
         self.count_sources = 0
-        self.parallel_read_smx_sheets = []
-        self.parallel_build_source_scripts = []
-        self.parallel_save_sheet_data = []
 
     def read_smx_folder(self):
         print("Reading from: \t", pm.smx_path)
@@ -37,7 +41,7 @@ class ReadSmxFolder:
             self.count_smx = self.count_smx + 1
             smx_file_name = os.path.splitext(smx)[0]
             print("\t" + smx_file_name)
-            home_output_path = self.output_path + "/" + smx_file_name + "/"
+            home_output_path = self.output_path + "/" + smx_file_name
             smx_file_path = pm.smx_path + "/" + smx
             read_smx_source_inputs.append([home_output_path,smx_file_path])
 
@@ -45,58 +49,40 @@ class ReadSmxFolder:
             md.create_folder(home_output_path)
             gcfr.gcfr(home_output_path)
 
-            self.parallel_read_smx_sheets.append(delayed(self.read_smx_sheets)(smx_file_path))
+            self.read_smx_sheets(smx_file_path)
 
-        if len(self.parallel_read_smx_sheets) > 0:
-            cpu_count = multiprocessing.cpu_count()
-            compute(*self.parallel_read_smx_sheets, num_workers=cpu_count)
-            with ProgressBar():
-                print("\nReading SMX Sheets...")
-                compute(*self.parallel_save_sheet_data, num_workers=cpu_count)
+        print("\nStart reading " + str(len(self.smx_processes_numbers)) + " SMX sheets...")
+        print("---------------------------------------------------------------------------")
+        funcs.wait_for_processes_to_finish(self.smx_processes_numbers, self.smx_processes_run_status, self.smx_processes_names)
 
         for i in read_smx_source_inputs:
             i_home_output_path = i[0]
             i_smx_file_path = i[1]
             self.build_smx_source_scripts(i_home_output_path, i_smx_file_path)
 
-        funcs.wait_for_processes_to_finish(self.processes_numbers, self.processes_run_status, self.processes_names)
+        print("\nStart building scripts for " + str(len(self.build_scripts_processes_numbers)) + " sources...")
+        print("---------------------------------------------------------------------------")
+        funcs.wait_for_processes_to_finish(self.build_scripts_processes_numbers, self.build_scripts_processes_run_status, self.build_scripts_processes_names)
         os.startfile(self.output_path)
 
     def read_smx_sheets(self, smx_file_path):
-        try:
-            teradata_sources_filter = [['Source type', ['TERADATA']]]
-            teradata_sources = delayed(funcs.read_excel)(smx_file_path, sheet_name='System', filter=teradata_sources_filter)
+        #################################################################################
+        smx_file_name = funcs.get_file_name(smx_file_path)
+        self.smx_processes_names[self.smx_process_no] = smx_file_name
+        self.smx_processes_numbers.append(self.smx_process_no)
+        main_inputs = " smx_file_path=" + funcs.single_quotes(smx_file_path)
+        main_inputs = main_inputs + " output_path=" + funcs.single_quotes(self.output_path)
+        main_inputs = main_inputs + " task=" + funcs.single_quotes(1)
 
-            Supplements = delayed(funcs.read_excel)(smx_file_path, sheet_name='Supplements')
-            Column_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name='Column mapping')
-            BMAP_values = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP values')
-            BMAP = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP')
-            BKEY = delayed(funcs.read_excel)(smx_file_path, sheet_name='BKEY')
-            Core_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
-            Core_tables = delayed(funcs.read_excel)(smx_file_path, 'Core tables', None, Core_tables_reserved_words)
-            STG_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
-            STG_tables = delayed(funcs.read_excel)(smx_file_path, 'STG tables', None, STG_tables_reserved_words)
-            Table_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name='Table mapping')
-
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(teradata_sources, smx_file_path, self.output_path, 'System'))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Supplements, smx_file_path, self.output_path, 'Supplements'))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Column_mapping, smx_file_path, self.output_path, 'Column mapping'))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(BMAP_values, smx_file_path, self.output_path, 'BMAP values'))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(BMAP, smx_file_path, self.output_path, 'BMAP'))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(BKEY, smx_file_path, self.output_path, 'BKEY'))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Core_tables, smx_file_path, self.output_path, 'Core tables'))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(STG_tables, smx_file_path, self.output_path, 'STG tables'))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Table_mapping, smx_file_path, self.output_path, 'Table mapping'))
-
-        except Exception as error:
-            # print("0", error)
-            pass
+        to_run = self.module_path + '/ReadSMX.py'
+        self.smx_processes_run_status[self.smx_process_no] = subprocess.Popen(['python',
+                                                                               to_run,
+                                                                               main_inputs])
+        self.smx_process_no += 1
+        #################################################################################
 
     def build_smx_source_scripts(self, home_output_path, smx_file_path):
-
-        module_path = os.path.dirname(sys.modules['__main__'].__file__)
         teradata_sources = funcs.get_sheet_data(smx_file_path, self.output_path, "System")
-
         for system_index, system_row in teradata_sources.iterrows():
             try:
                 Loading_Type = system_row['Loading type'].upper()
@@ -107,18 +93,20 @@ class ReadSmxFolder:
                 self.count_sources = self.count_sources + 1
                 #################################################################################
                 smx_file_name = funcs.get_file_name(smx_file_path)
-                self.processes_names[self.process_no] = smx_file_name + "_" + source_name
-                self.processes_numbers.append(self.process_no)
+                self.build_scripts_processes_names[self.build_scripts_process_no] = smx_file_name + "_" + source_name
+                self.build_scripts_processes_numbers.append(self.build_scripts_process_no)
                 main_inputs = " smx_file_path=" + funcs.single_quotes(smx_file_path)
                 main_inputs = main_inputs + " source_output_path=" + funcs.single_quotes(source_output_path)
                 main_inputs = main_inputs + " output_path=" + funcs.single_quotes(self.output_path)
                 main_inputs = main_inputs + " source_name=" + funcs.single_quotes(source_name)
                 main_inputs = main_inputs + " Loading_Type=" + funcs.single_quotes(Loading_Type)
-                to_run = module_path + '/ReadSMX.py'
-                self.processes_run_status[self.process_no] = subprocess.Popen(['python',
-                                                                          to_run,
-                                                                          main_inputs])
-                self.process_no += 1
+                main_inputs = main_inputs + " task=" + funcs.single_quotes(2)
+
+                to_run = self.module_path+ '/ReadSMX.py'
+                self.build_scripts_processes_run_status[self.build_scripts_process_no] = subprocess.Popen(['python',
+                                                                                                           to_run,
+                                                                                                           main_inputs])
+                self.build_scripts_process_no += 1
                 #################################################################################
 
             except Exception as error:

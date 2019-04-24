@@ -93,7 +93,7 @@ class ReadSmxFolder:
                 self.count_sources = self.count_sources + 1
                 #################################################################################
                 smx_file_name = funcs.get_file_name(smx_file_path)
-                self.build_scripts_processes_names[self.build_scripts_process_no] = smx_file_name + "\t" + source_name
+                self.build_scripts_processes_names[self.build_scripts_process_no] = smx_file_name + "\t" + Loading_Type + "\t" + source_name
                 self.build_scripts_processes_numbers.append(self.build_scripts_process_no)
                 main_inputs = " smx_file_path=" + funcs.single_quotes(smx_file_path)
                 main_inputs = main_inputs + " source_output_path=" + funcs.single_quotes(source_output_path)

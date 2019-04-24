@@ -9,7 +9,7 @@ smx_ext = "xlsx"
 # smx_path = 'C:/Users/AA250090/Downloads/New folder/input'
 # smx_path = "//10.10.10.250/TeraData/share/Salama/0Mpsn/Lastest SMX"
 smx_path = "C:/smx_sheets"
-output_path = smx_path + "/" + "udi_outputs" + "/" + dt_folder
+home_output_folder = "C:/smx_scripts"
 
 etl_process_table = 'ETL_PROCESS'
 SOURCE_TABLES_LKP_table = 'SOURCE_TABLES_LKP'
@@ -30,6 +30,8 @@ gcfr_stream_name = "Economic stream"
 separator = "||'_'||"
 
 ############################
+output_path = home_output_folder + "/" + dt_folder
+
 T_STG = db_prefix + "T_STG"
 t_WRK = db_prefix + "T_WRK"
 v_stg = db_prefix + "V_STG"

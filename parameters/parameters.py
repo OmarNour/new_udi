@@ -1,36 +1,30 @@
 import datetime as dt
 
-dt_now = dt.datetime.now()
-dt_folder = dt_now.strftime("%Y") + "_" + dt_now.strftime("%b").upper() + "_" + dt_now.strftime("%d") + "_" + dt_now.strftime("%H") + "_" + dt_now.strftime("%M")
-# exec GPROD1M_GCFR.GCFR_Register_System(1, 'Economic', '', 'Economic')
-# call GPROD1P_UT.GCFR_UT_Register_Stream(1, 1, 'Economic stream', cast('2019-01-01' as date))
-
-smx_ext = "xlsx"
 smx_path = "C:/smx_sheets"
 home_output_folder = "C:/smx_scripts"
 
 etl_process_table = 'ETL_PROCESS'
 SOURCE_TABLES_LKP_table = 'SOURCE_TABLES_LKP'
 SOURCE_NAME_LKP_table = 'SOURCE_NAME_LKP'
+history_tbl = 'HISTORY'
 
 db_prefix = "GPROD1"
-history_tbl = 'HISTORY'
+
+gcfr_ctl_Id = 1
+gcfr_stream_key = 1
+gcfr_system_name = "Economic"
+gcfr_stream_name = "Economic stream"
+
 gcfr_bkey_process_type = 21
 gcfr_snapshot_txf_process_type = 24
 gcfr_insert_txf_process_type = 25
 gcfr_others_txf_process_type = 29
-gcfr_ctl_Id = 1
-gcfr_stream_key = 1
-
-
-gcfr_system_name = "Economic"
-gcfr_stream_name = "Economic stream"
-
-separator = "||'_'||"
 
 ############################
+dt_now = dt.datetime.now()
+dt_folder = dt_now.strftime("%Y") + "_" + dt_now.strftime("%b").upper() + "_" + dt_now.strftime("%d") + "_" + dt_now.strftime("%H") + "_" + dt_now.strftime("%M")
 output_path = home_output_folder + "/" + dt_folder
-
+smx_ext = "xlsx"
 System_sht = "System"
 Supplements_sht = "Supplements"
 Column_mapping_sht = "Column mapping"
@@ -70,6 +64,7 @@ core_view = db_prefix + "V_BASE"
 
 parquet_db_name = "smx_data"
 sys_argv_separator = "|#|"
+stg_cols_separator = "||'_'||"
 read_sheets_parallel = False
 
 

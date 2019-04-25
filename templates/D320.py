@@ -8,7 +8,7 @@ def d320(source_output_path, STG_tables, BKEY):
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
     try:
-        separator = pm.separator
+        separator = pm.stg_cols_separator
         stg_tables_df = STG_tables.loc[(STG_tables['Key domain name'] != "")
                                         & (STG_tables['Natural key'] != "")]
 

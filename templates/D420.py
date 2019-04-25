@@ -7,7 +7,7 @@ def d420(source_output_path, STG_tables, BKEY, BMAP):
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
     try:
-        separator = pm.separator
+        separator = pm.stg_cols_separator
         stg_tables_df = funcs.get_stg_tables(STG_tables)
 
         bmap_physical_table = "BMAP_STANDARD_MAP"

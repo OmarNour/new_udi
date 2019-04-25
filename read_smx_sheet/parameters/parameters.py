@@ -68,6 +68,6 @@ core_view = db_prefix + "V_BASE"
 parquet_db_name = "smx_data"
 sys_argv_separator = "|#|"
 stg_cols_separator = "||'_'||"
-read_sheets_parallel = False
+read_sheets_parallel = True
 
 

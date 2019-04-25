@@ -6,8 +6,6 @@ dt_folder = dt_now.strftime("%Y") + "_" + dt_now.strftime("%b").upper() + "_" + 
 # call GPROD1P_UT.GCFR_UT_Register_Stream(1, 1, 'Economic stream', cast('2019-01-01' as date))
 
 smx_ext = "xlsx"
-# smx_path = 'C:/Users/AA250090/Downloads/New folder/input'
-# smx_path = "//10.10.10.250/TeraData/share/Salama/0Mpsn/Lastest SMX"
 smx_path = "C:/smx_sheets"
 home_output_folder = "C:/smx_scripts"
 

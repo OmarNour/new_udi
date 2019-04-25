@@ -32,6 +32,17 @@ separator = "||'_'||"
 ############################
 output_path = home_output_folder + "/" + dt_folder
 
+System_sht = "System"
+Supplements_sht = "Supplements"
+Column_mapping_sht = "Column mapping"
+BMAP_values_sht = "BMAP values"
+BMAP_sht = "BMAP"
+BKEY_sht = "BKEY"
+STG_tables_sht = "STG tables"
+Table_mapping_sht = "Table mapping"
+Core_tables_sht = "Core tables"
+sheets = [System_sht, Supplements_sht, Column_mapping_sht, BMAP_values_sht, BMAP_sht, BKEY_sht, STG_tables_sht, Table_mapping_sht, Core_tables_sht]
+
 T_STG = db_prefix + "T_STG"
 t_WRK = db_prefix + "T_WRK"
 v_stg = db_prefix + "V_STG"
@@ -59,5 +70,7 @@ core_view = db_prefix + "V_BASE"
 ################################
 
 parquet_db_name = "smx_data"
+sys_argv_separator = "|#|"
+read_sheets_parallel = False
 
 

@@ -6,11 +6,9 @@ from app_Lib import manage_directories as md, functions as funcs
 import datetime as dt
 from templates import gcfr
 import subprocess
-from dask import compute, delayed
-import multiprocessing
+import pandas as pd
 import warnings
 warnings.filterwarnings("ignore")
-from dask.diagnostics import ProgressBar
 
 
 class ReadSmxFolder:
@@ -31,54 +29,108 @@ class ReadSmxFolder:
         self.count_smx = 0
         self.count_sources = 0
 
+    def is_smx_file(self, file):
+        file_sheets = pd.ExcelFile(file).sheet_names
+        required_sheets = list(pm.sheets)
+        for required_sheet in pm.sheets:
+            for file_sheet in file_sheets:
+                if file_sheet == required_sheet:
+                    # print(file_sheet, "found!")
+                    required_sheets.remove(required_sheet)
+                    # print(required_sheets)
+
+        return True if len(required_sheets) == 0 else False
+
+    def get_smx_files(self):
+        smx_files = []
+        all_files = md.get_files_in_dir(pm.smx_path, pm.smx_ext)
+        for i in all_files:
+            file = pm.smx_path + "/" + i
+            smx_files.append(i) if self.is_smx_file(file) else None
+        return smx_files
+
     def read_smx_folder(self):
         print("\nReading from: \t", pm.smx_path)
-        print("Output folder: \t", self.output_path)
-        print(pm.smx_ext + " files:")
+        smx_files = self.get_smx_files()
+        if len(smx_files) > 0:
+            print("Output folder: \t", self.output_path)
+            print("SMX files:")
 
-        read_smx_source_inputs = []
-        for smx in md.get_files_in_dir(pm.smx_path, pm.smx_ext):
-            self.count_smx = self.count_smx + 1
-            smx_file_name = os.path.splitext(smx)[0]
-            print("\t" + smx_file_name)
-            home_output_path = self.output_path + "/" + smx_file_name
-            smx_file_path = pm.smx_path + "/" + smx
-            read_smx_source_inputs.append([home_output_path,smx_file_path])
+            read_smx_source_inputs = []
+            reading_sheets_start_time = dt.datetime.now()
+            for smx in smx_files:
+                self.count_smx = self.count_smx + 1
+                smx_file_name = os.path.splitext(smx)[0]
+                print("\t" + smx_file_name)
+                home_output_path = self.output_path + "/" + smx_file_name
+                smx_file_path = pm.smx_path + "/" + smx
+                read_smx_source_inputs.append([home_output_path,smx_file_path])
 
-            md.remove_folder(home_output_path)
-            md.create_folder(home_output_path)
-            gcfr.gcfr(home_output_path)
+                md.remove_folder(home_output_path)
+                md.create_folder(home_output_path)
+                gcfr.gcfr(home_output_path)
 
-            self.read_smx_sheets(smx_file_path)
+                if pm.read_sheets_parallel:
+                    self.read_smx_sheets(smx_file_path)
+                else:
+                    self.read_smx_files(smx_file_path)
 
-        print("\nStart reading " + str(len(self.smx_processes_numbers)) + " SMX sheets...")
-        print("---------------------------------------------------------------------------")
-        funcs.wait_for_processes_to_finish(self.smx_processes_numbers, self.smx_processes_run_status, self.smx_processes_names)
+            if pm.read_sheets_parallel:
+                print("\nStart reading " + str(len(self.smx_processes_numbers)) + " sheets in " + str(int(len(self.smx_processes_numbers) / len(pm.sheets))) + " SMX files...")
+            else:
+                print("\nStart reading " + str(len(self.smx_processes_numbers)) + " SMX files...")
+            print("---------------------------------------------------------------------------")
+            funcs.wait_for_processes_to_finish(self.smx_processes_numbers, self.smx_processes_run_status, self.smx_processes_names)
+            reading_sheets_end_time = dt.datetime.now()
+            print("\nReading elapsed time: ", reading_sheets_end_time - reading_sheets_start_time)
 
-        for i in read_smx_source_inputs:
-            i_home_output_path = i[0]
-            i_smx_file_path = i[1]
-            self.build_smx_source_scripts(i_home_output_path, i_smx_file_path)
+            building_start_time = dt.datetime.now()
+            for i in read_smx_source_inputs:
+                i_home_output_path = i[0]
+                i_smx_file_path = i[1]
+                self.build_smx_source_scripts(i_home_output_path, i_smx_file_path)
 
-        print("\nStart building scripts for " + str(len(self.build_scripts_processes_numbers)) + " sources...")
-        print("---------------------------------------------------------------------------")
-        funcs.wait_for_processes_to_finish(self.build_scripts_processes_numbers, self.build_scripts_processes_run_status, self.build_scripts_processes_names)
-        os.startfile(self.output_path)
+            print("\nStart building scripts for " + str(len(self.build_scripts_processes_numbers)) + " sources...")
+            print("---------------------------------------------------------------------------")
+            funcs.wait_for_processes_to_finish(self.build_scripts_processes_numbers, self.build_scripts_processes_run_status, self.build_scripts_processes_names)
+            building_end_time = dt.datetime.now()
+            print("\nBuilding scripts elapsed time: ", building_end_time - building_start_time)
+            os.startfile(self.output_path)
+        else:
+            print("No SMX files found!")
 
-    def read_smx_sheets(self, smx_file_path):
+    def read_smx_files(self, smx_file_path):
         #################################################################################
         smx_file_name = funcs.get_file_name(smx_file_path)
-        self.smx_processes_names[self.smx_process_no] = smx_file_name
+        self.smx_processes_names[self.smx_process_no] = smx_file_name + "\t"
         self.smx_processes_numbers.append(self.smx_process_no)
-        main_inputs = " smx_file_path=" + funcs.single_quotes(smx_file_path)
-        main_inputs = main_inputs + " output_path=" + funcs.single_quotes(self.output_path)
-        main_inputs = main_inputs + " task=" + funcs.single_quotes(1)
+        main_inputs = "smx_file_path=" + funcs.single_quotes(smx_file_path)
+        main_inputs = main_inputs + pm.sys_argv_separator + "output_path=" + funcs.single_quotes(self.output_path)
+        main_inputs = main_inputs + pm.sys_argv_separator + "task=" + funcs.single_quotes(0)
 
         to_run = self.module_path + '/ReadSMX.py'
         self.smx_processes_run_status[self.smx_process_no] = subprocess.Popen(['python',
                                                                                to_run,
                                                                                main_inputs])
         self.smx_process_no += 1
+        #################################################################################
+
+    def read_smx_sheets(self, smx_file_path):
+        #################################################################################
+        smx_file_name = funcs.get_file_name(smx_file_path)
+        for sheet_name in pm.sheets:
+            self.smx_processes_names[self.smx_process_no] = smx_file_name + "\t" + sheet_name
+            self.smx_processes_numbers.append(self.smx_process_no)
+            main_inputs = "smx_file_path=" + funcs.single_quotes(smx_file_path)
+            main_inputs = main_inputs + pm.sys_argv_separator + "output_path=" + funcs.single_quotes(self.output_path)
+            main_inputs = main_inputs + pm.sys_argv_separator + "sheet_name=" + funcs.single_quotes(sheet_name)
+            main_inputs = main_inputs + pm.sys_argv_separator + "task=" + funcs.single_quotes(1)
+
+            to_run = self.module_path + '/ReadSMX.py'
+            self.smx_processes_run_status[self.smx_process_no] = subprocess.Popen(['python',
+                                                                                   to_run,
+                                                                                   main_inputs])
+            self.smx_process_no += 1
         #################################################################################
 
     def build_smx_source_scripts(self, home_output_path, smx_file_path):
@@ -95,12 +147,12 @@ class ReadSmxFolder:
                 smx_file_name = funcs.get_file_name(smx_file_path)
                 self.build_scripts_processes_names[self.build_scripts_process_no] = smx_file_name + "\t" + Loading_Type + "\t" + source_name
                 self.build_scripts_processes_numbers.append(self.build_scripts_process_no)
-                main_inputs = " smx_file_path=" + funcs.single_quotes(smx_file_path)
-                main_inputs = main_inputs + " source_output_path=" + funcs.single_quotes(source_output_path)
-                main_inputs = main_inputs + " output_path=" + funcs.single_quotes(self.output_path)
-                main_inputs = main_inputs + " source_name=" + funcs.single_quotes(source_name)
-                main_inputs = main_inputs + " Loading_Type=" + funcs.single_quotes(Loading_Type)
-                main_inputs = main_inputs + " task=" + funcs.single_quotes(2)
+                main_inputs = "smx_file_path=" + funcs.single_quotes(smx_file_path)
+                main_inputs = main_inputs + pm.sys_argv_separator + "source_output_path=" + funcs.single_quotes(source_output_path)
+                main_inputs = main_inputs + pm.sys_argv_separator + "output_path=" + funcs.single_quotes(self.output_path)
+                main_inputs = main_inputs + pm.sys_argv_separator + "source_name=" + funcs.single_quotes(source_name)
+                main_inputs = main_inputs + pm.sys_argv_separator + "Loading_Type=" + funcs.single_quotes(Loading_Type)
+                main_inputs = main_inputs + pm.sys_argv_separator + "task=" + funcs.single_quotes(2)
 
                 to_run = self.module_path+ '/ReadSMX.py'
                 self.build_scripts_processes_run_status[self.build_scripts_process_no] = subprocess.Popen(['python',

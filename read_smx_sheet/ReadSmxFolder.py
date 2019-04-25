@@ -6,11 +6,9 @@ from app_Lib import manage_directories as md, functions as funcs
 import datetime as dt
 from templates import gcfr
 import subprocess
-from dask import compute, delayed
-import multiprocessing
+import pandas as pd
 import warnings
 warnings.filterwarnings("ignore")
-from dask.diagnostics import ProgressBar
 
 
 class ReadSmxFolder:
@@ -68,17 +66,19 @@ class ReadSmxFolder:
     def read_smx_sheets(self, smx_file_path):
         #################################################################################
         smx_file_name = funcs.get_file_name(smx_file_path)
-        self.smx_processes_names[self.smx_process_no] = smx_file_name
-        self.smx_processes_numbers.append(self.smx_process_no)
-        main_inputs = " smx_file_path=" + funcs.single_quotes(smx_file_path)
-        main_inputs = main_inputs + " output_path=" + funcs.single_quotes(self.output_path)
-        main_inputs = main_inputs + " task=" + funcs.single_quotes(1)
+        for sheet_name in pm.sheets:
+            self.smx_processes_names[self.smx_process_no] = smx_file_name + "\t" + sheet_name
+            self.smx_processes_numbers.append(self.smx_process_no)
+            main_inputs = "smx_file_path=" + funcs.single_quotes(smx_file_path)
+            main_inputs = main_inputs + pm.sys_argv_separator + "output_path=" + funcs.single_quotes(self.output_path)
+            main_inputs = main_inputs + pm.sys_argv_separator + "sheet_name=" + funcs.single_quotes(sheet_name)
+            main_inputs = main_inputs + pm.sys_argv_separator + "task=" + funcs.single_quotes(1)
 
-        to_run = self.module_path + '/ReadSMX.py'
-        self.smx_processes_run_status[self.smx_process_no] = subprocess.Popen(['python',
-                                                                               to_run,
-                                                                               main_inputs])
-        self.smx_process_no += 1
+            to_run = self.module_path + '/ReadSMX.py'
+            self.smx_processes_run_status[self.smx_process_no] = subprocess.Popen(['python',
+                                                                                   to_run,
+                                                                                   main_inputs])
+            self.smx_process_no += 1
         #################################################################################
 
     def build_smx_source_scripts(self, home_output_path, smx_file_path):
@@ -95,12 +95,12 @@ class ReadSmxFolder:
                 smx_file_name = funcs.get_file_name(smx_file_path)
                 self.build_scripts_processes_names[self.build_scripts_process_no] = smx_file_name + "\t" + Loading_Type + "\t" + source_name
                 self.build_scripts_processes_numbers.append(self.build_scripts_process_no)
-                main_inputs = " smx_file_path=" + funcs.single_quotes(smx_file_path)
-                main_inputs = main_inputs + " source_output_path=" + funcs.single_quotes(source_output_path)
-                main_inputs = main_inputs + " output_path=" + funcs.single_quotes(self.output_path)
-                main_inputs = main_inputs + " source_name=" + funcs.single_quotes(source_name)
-                main_inputs = main_inputs + " Loading_Type=" + funcs.single_quotes(Loading_Type)
-                main_inputs = main_inputs + " task=" + funcs.single_quotes(2)
+                main_inputs = "smx_file_path=" + funcs.single_quotes(smx_file_path)
+                main_inputs = main_inputs + pm.sys_argv_separator + "source_output_path=" + funcs.single_quotes(source_output_path)
+                main_inputs = main_inputs + pm.sys_argv_separator + "output_path=" + funcs.single_quotes(self.output_path)
+                main_inputs = main_inputs + pm.sys_argv_separator + "source_name=" + funcs.single_quotes(source_name)
+                main_inputs = main_inputs + pm.sys_argv_separator + "Loading_Type=" + funcs.single_quotes(Loading_Type)
+                main_inputs = main_inputs + pm.sys_argv_separator + "task=" + funcs.single_quotes(2)
 
                 to_run = self.module_path+ '/ReadSMX.py'
                 self.build_scripts_processes_run_status[self.build_scripts_process_no] = subprocess.Popen(['python',

@@ -136,10 +136,10 @@ def list_to_string(list, separator=None, between_single_quotes=0):
     return to_string
 
 
-def string_to_dict(sting_dict):
+def string_to_dict(sting_dict, separator=' '):
     if sting_dict:
         # ex: Firstname="Sita" Lastname="Sharma" Age=22 Phone=1234567890
-        return eval("dict(%s)" % ','.join(sting_dict.split()))
+        return eval("dict(%s)" % ','.join(sting_dict.split(separator)))
 
 
 def wait_for_processes_to_finish(processes_numbers, processes_run_status, processes_names):

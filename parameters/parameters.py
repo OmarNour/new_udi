@@ -4,7 +4,7 @@ smx_path = "C:/smx_sheets"
 home_output_folder = "C:/smx_scripts"
 
 # source_names = []
-source_names = ["TADAMON", "TAMWEEN", "TAX"]
+source_names = ["TAMWEEN", "TAX", "EDU", "CUSTOMS"]
 
 etl_process_table = 'ETL_PROCESS'
 SOURCE_TABLES_LKP_table = 'SOURCE_TABLES_LKP'

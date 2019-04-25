@@ -3,6 +3,9 @@ import datetime as dt
 smx_path = "C:/smx_sheets"
 home_output_folder = "C:/smx_scripts"
 
+# source_names = []
+source_names = ["TADAMON", "TAMWEEN", "TAX"]
+
 etl_process_table = 'ETL_PROCESS'
 SOURCE_TABLES_LKP_table = 'SOURCE_TABLES_LKP'
 SOURCE_NAME_LKP_table = 'SOURCE_NAME_LKP'
@@ -65,6 +68,6 @@ core_view = db_prefix + "V_BASE"
 parquet_db_name = "smx_data"
 sys_argv_separator = "|#|"
 stg_cols_separator = "||'_'||"
-read_sheets_parallel = False
+read_sheets_parallel = True
 
 

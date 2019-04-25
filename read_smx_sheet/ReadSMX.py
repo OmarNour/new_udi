@@ -149,10 +149,8 @@ if __name__ == '__main__':
         i_sheet_name = inputs['sheet_name']
         read_smx.read_smx_sheets(i_output_path, i_smx_file_path, i_sheet_name)
 
-
     if i_task == '2':
         i_source_output_path = inputs['source_output_path']
         i_source_name = inputs['source_name']
         i_Loading_Type = inputs['Loading_Type']
-
         read_smx.build_source_scripts(i_smx_file_path, i_output_path, i_source_output_path, i_source_name, i_Loading_Type)

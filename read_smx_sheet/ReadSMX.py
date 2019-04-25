@@ -19,28 +19,28 @@ class ReadSmx:
     def read_smx_file(self, output_path, smx_file_path):
         try:
             teradata_sources_filter = [['Source type', ['TERADATA']]]
-            teradata_sources = delayed(funcs.read_excel)(smx_file_path, sheet_name='System', filter=teradata_sources_filter)
+            teradata_sources = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.System_sht, filter=teradata_sources_filter)
 
-            Supplements = delayed(funcs.read_excel)(smx_file_path, sheet_name='Supplements')
-            Column_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name='Column mapping')
-            BMAP_values = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP values')
-            BMAP = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP')
-            BKEY = delayed(funcs.read_excel)(smx_file_path, sheet_name='BKEY')
+            Supplements = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.Supplements_sht)
+            Column_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.Column_mapping_sht)
+            BMAP_values = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.BMAP_values_sht)
+            BMAP = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.BMAP_sht)
+            BKEY = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.BKEY_sht)
             Core_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
-            Core_tables = delayed(funcs.read_excel)(smx_file_path, 'Core tables', None, Core_tables_reserved_words)
+            Core_tables = delayed(funcs.read_excel)(smx_file_path, pm.Core_tables_sht, None, Core_tables_reserved_words)
             STG_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
-            STG_tables = delayed(funcs.read_excel)(smx_file_path, 'STG tables', None, STG_tables_reserved_words)
-            Table_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name='Table mapping')
+            STG_tables = delayed(funcs.read_excel)(smx_file_path, pm.STG_tables_sht, None, STG_tables_reserved_words)
+            Table_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.Table_mapping_sht)
 
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(teradata_sources, smx_file_path, output_path, 'System'))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Supplements, smx_file_path, output_path, 'Supplements'))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Column_mapping, smx_file_path, output_path, 'Column mapping'))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(BMAP_values, smx_file_path, output_path, 'BMAP values'))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(BMAP, smx_file_path, output_path, 'BMAP'))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(BKEY, smx_file_path, output_path, 'BKEY'))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Core_tables, smx_file_path, output_path, 'Core tables'))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(STG_tables, smx_file_path, output_path, 'STG tables'))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Table_mapping, smx_file_path, output_path, 'Table mapping'))
+            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(teradata_sources, smx_file_path, output_path, pm.System_sht))
+            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Supplements, smx_file_path, output_path, pm.Supplements_sht))
+            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Column_mapping, smx_file_path, output_path, pm.Column_mapping_sht))
+            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(BMAP_values, smx_file_path, output_path, pm.BMAP_values_sht))
+            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(BMAP, smx_file_path, output_path, pm.BMAP_sht))
+            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(BKEY, smx_file_path, output_path, pm.BKEY_sht))
+            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Core_tables, smx_file_path, output_path, pm.Core_tables_sht))
+            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(STG_tables, smx_file_path, output_path, pm.STG_tables_sht))
+            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(Table_mapping, smx_file_path, output_path, pm.Table_mapping_sht))
 
         except Exception as error:
             # print("0", error)
@@ -130,9 +130,6 @@ class ReadSmx:
 
         if len(self.parallel_templates) > 0:
             compute(*self.parallel_templates, num_workers=self.cpu_count)
-
-    def validate_smx_sheet(self):
-        pass
 
 
 if __name__ == '__main__':

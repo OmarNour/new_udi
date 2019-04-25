@@ -1,13 +1,13 @@
 import os
 import sys
 sys.path.append(os.getcwd())
-from app_Lib import manage_directories as md, functions as funcs
-from parameters import parameters as pm
+from read_smx_sheet.app_Lib import manage_directories as md, functions as funcs
+from read_smx_sheet.parameters import parameters as pm
 from dask import compute, delayed
 from dask.diagnostics import ProgressBar
-import traceback
 import datetime as dt
-from templates import gcfr, D003, D002, D210, D300, D320, D420, D000, D001, D200, D330, D340, D400,D410,D415, D615, D600, D607, D608, D610,D620, D630, D640
+from read_smx_sheet.templates import D300, D320, D200, D330, D400, D610, D640
+from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
 
 
 def generate_scripts():

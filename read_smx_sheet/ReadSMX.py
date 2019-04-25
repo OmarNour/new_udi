@@ -1,14 +1,10 @@
 import os
 import sys
 sys.path.append(os.getcwd())
-from app_Lib import manage_directories as md, functions as funcs
 from dask import compute, delayed
-from parameters import parameters as pm
-from templates import gcfr, D003, D002, D210, D300, D320, D420, D000, D001, D200, D330, D340, D400,D410,D415, D615, D600, D607, D608, D610,D620, D630, D640
 import multiprocessing
 import warnings
 warnings.filterwarnings("ignore")
-
 
 class ReadSmx:
     def __init__(self):
@@ -133,10 +129,13 @@ class ReadSmx:
 
 
 if __name__ == '__main__':
-    read_smx = ReadSmx()
+    from read_smx_sheet.app_Lib import functions as funcs
+    from read_smx_sheet.parameters import parameters as pm
+    from read_smx_sheet.templates import D300, D320, D200, D330, D400, D610, D640
+    from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, D620, D001, D600, D607, D002, D340
 
+    read_smx = ReadSmx()
     inputs = funcs.string_to_dict(sys.argv[1], pm.sys_argv_separator)
-    # print(inputs)
 
     i_task = inputs['task']
     i_smx_file_path = inputs['smx_file_path']

@@ -1,10 +1,7 @@
 import os
 import sys
 sys.path.append(os.getcwd())
-from parameters import parameters as pm
-from app_Lib import manage_directories as md, functions as funcs
 import datetime as dt
-from templates import gcfr
 import subprocess
 import pandas as pd
 import warnings
@@ -172,6 +169,9 @@ class ReadSmxFolder:
 
 
 if __name__ == '__main__':
+    from read_smx_sheet.parameters import parameters as pm
+    from read_smx_sheet.app_Lib import functions as funcs, manage_directories as md
+    from read_smx_sheet.templates import gcfr
     start_time = dt.datetime.now()
 
     read_smx = ReadSmxFolder()

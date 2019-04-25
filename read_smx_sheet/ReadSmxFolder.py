@@ -35,9 +35,7 @@ class ReadSmxFolder:
         for required_sheet in pm.sheets:
             for file_sheet in file_sheets:
                 if file_sheet == required_sheet:
-                    # print(file_sheet, "found!")
                     required_sheets.remove(required_sheet)
-                    # print(required_sheets)
 
         return True if len(required_sheets) == 0 else False
 
@@ -73,7 +71,7 @@ class ReadSmxFolder:
                 if pm.read_sheets_parallel:
                     self.read_smx_sheets(smx_file_path)
                 else:
-                    self.read_smx_files(smx_file_path)
+                    self.read_smx_file(smx_file_path)
 
             if pm.read_sheets_parallel:
                 print("\nStart reading " + str(len(self.smx_processes_numbers)) + " sheets in " + str(int(len(self.smx_processes_numbers) / len(pm.sheets))) + " SMX files...")
@@ -99,7 +97,7 @@ class ReadSmxFolder:
         else:
             print("No SMX files found!")
 
-    def read_smx_files(self, smx_file_path):
+    def read_smx_file(self, smx_file_path):
         #################################################################################
         smx_file_name = funcs.get_file_name(smx_file_path)
         self.smx_processes_names[self.smx_process_no] = smx_file_name + "\t"

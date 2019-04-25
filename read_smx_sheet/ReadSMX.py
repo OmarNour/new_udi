@@ -89,17 +89,17 @@ class ReadSmx:
             pass
 
     def build_source_scripts(self, smx_file_path, output_path, source_output_path, source_name, Loading_Type):
-        Column_mapping = delayed(funcs.get_sheet_data)(smx_file_path, output_path, "Column mapping")
-        BMAP_values = delayed(funcs.get_sheet_data)(smx_file_path, output_path, "BMAP values")
-        BMAP = delayed(funcs.get_sheet_data)(smx_file_path, output_path, "BMAP")
-        BKEY = delayed(funcs.get_sheet_data)(smx_file_path, output_path, "BKEY")
-        Core_tables = delayed(funcs.get_sheet_data)(smx_file_path, output_path, "Core tables")
+        Column_mapping = delayed(funcs.get_sheet_data)(smx_file_path, output_path, pm.Column_mapping_sht)
+        BMAP_values = delayed(funcs.get_sheet_data)(smx_file_path, output_path, pm.BMAP_values_sht)
+        BMAP = delayed(funcs.get_sheet_data)(smx_file_path, output_path, pm.BMAP_sht)
+        BKEY = delayed(funcs.get_sheet_data)(smx_file_path, output_path, pm.BKEY_sht)
+        Core_tables = delayed(funcs.get_sheet_data)(smx_file_path, output_path, pm.Core_tables_sht)
 
         source_name_filter = [['Source', [source_name]]]
         stg_source_name_filter = [['Source system name', [source_name]]]
 
-        Table_mapping = delayed(funcs.get_sheet_data)(smx_file_path, output_path, "Table mapping", source_name_filter)
-        STG_tables = delayed(funcs.get_sheet_data)(smx_file_path, output_path, "STG tables", stg_source_name_filter)
+        Table_mapping = delayed(funcs.get_sheet_data)(smx_file_path, output_path, pm.Table_mapping_sht, source_name_filter)
+        STG_tables = delayed(funcs.get_sheet_data)(smx_file_path, output_path, pm.STG_tables_sht, stg_source_name_filter)
 
         self.parallel_templates.append(delayed(D000.d000)(source_output_path, source_name, Table_mapping, STG_tables, BKEY))
         self.parallel_templates.append(delayed(D001.d001)(source_output_path, source_name, STG_tables))

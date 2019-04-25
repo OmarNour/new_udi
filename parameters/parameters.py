@@ -22,6 +22,7 @@ gcfr_others_txf_process_type = 29
 gcfr_ctl_Id = 1
 gcfr_stream_key = 1
 
+
 gcfr_system_name = "Economic"
 gcfr_stream_name = "Economic stream"
 

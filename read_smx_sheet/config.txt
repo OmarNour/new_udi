@@ -1,0 +1,27 @@
+smx_path="C:/smx_sheets"
+home_output_folder="C:/smx_scripts"
+
+# Source Filter:
+## for all sources: source_names=""
+## for for certain sources: sources: source_names="TAMWEEN,TAX,EDU,CUSTOMS"
+source_names="TAX"
+
+etl_process_table="ETL_PROCESS"
+SOURCE_TABLES_LKP_table="SOURCE_TABLES_LKP"
+SOURCE_NAME_LKP_table="SOURCE_NAME_LKP"
+history_tbl="HISTORY"
+
+db_prefix="GPROD1"
+
+gcfr_ctl_Id=1
+gcfr_stream_key=1
+gcfr_system_name="Economic"
+gcfr_stream_name="Economic stream"
+
+gcfr_bkey_process_type=21
+gcfr_snapshot_txf_process_type=24
+gcfr_insert_txf_process_type=25
+gcfr_others_txf_process_type=29
+
+# values: 1 or 0
+read_sheets_parallel=0

@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 import pyarrow as pa
-from read_smx_sheet.parameters import parameters as pm
 import dask.dataframe as dd
 
 
@@ -23,11 +22,9 @@ def read_excel(file_path, sheet_name, filter=None, reserved_words_validation=Non
             else:
                 df = pd.DataFrame(columns=df_cols)
 
-
         if reserved_words_validation is not None:
             df = rename_sheet_reserved_word(df, reserved_words_validation[0], reserved_words_validation[1], reserved_words_validation[2])
 
-        # save_sheet_data(df, file_path, sheet_name)
     except:
         df = pd.DataFrame()
     return df
@@ -110,7 +107,6 @@ def get_stg_table_columns(STG_tables, source_name, Table_name, with_sk_columns=F
                                           & (STG_tables_df['Code set name'] == '')
                                           ].reset_index()
 
-    # print(STG_tables_df)
     return STG_tables_df
 
 
@@ -211,18 +207,20 @@ def read_all_from_parquet_delayed(dataset, columns=None, filter=None):
     return df
 
 
-def get_sheet_path(smx_file_path, output_path, sheet_name):
+def get_sheet_path(parquet_db_name, smx_file_path, output_path, sheet_name):
     file_name = get_file_name(smx_file_path)
-    parquet_path = output_path + "/" + file_name + "/" + pm.parquet_db_name + "/" + sheet_name
+    parquet_path = output_path + "/" + file_name + "/" + parquet_db_name + "/" + sheet_name
     return parquet_path
 
 
-def save_sheet_data(df, smx_file_path, output_path, sheet_name):
-    parquet_path = get_sheet_path(smx_file_path, output_path, sheet_name)
+def save_sheet_data(parquet_db_name, df, smx_file_path, output_path, sheet_name):
+    parquet_path = get_sheet_path(parquet_db_name, smx_file_path, output_path, sheet_name)
     save_to_parquet(df, parquet_path, partition_cols=None, string_columns=None)
 
 
-def get_sheet_data(smx_file_path, output_path, sheet_name, df_filter=None):
-    parquet_path = get_sheet_path(smx_file_path, output_path, sheet_name)
+def get_sheet_data(parquet_db_name, smx_file_path, output_path, sheet_name, df_filter=None):
+    parquet_path = get_sheet_path(parquet_db_name, smx_file_path, output_path, sheet_name)
     df_sheet = read_all_from_parquet(parquet_path, None, True, filter=df_filter)
+    if not isinstance(df_sheet, pd.DataFrame):
+        df_sheet = pd.DataFrame()
     return df_sheet

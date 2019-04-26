@@ -129,12 +129,13 @@ class ReadSmxFolder:
         #################################################################################
 
     def build_smx_source_scripts(self, home_output_path, smx_file_path):
+        print("pm.source_names", pm.source_names)
         if pm.source_names:
             System_sht_filter = [['Source system name', pm.source_names]]
         else:
             System_sht_filter = None
 
-        teradata_sources = funcs.get_sheet_data(smx_file_path, self.output_path, pm.System_sht, System_sht_filter)
+        teradata_sources = funcs.get_sheet_data(pm.parquet_db_name, smx_file_path, self.output_path, pm.System_sht, System_sht_filter)
         for system_index, system_row in teradata_sources.iterrows():
             try:
                 Loading_Type = system_row['Loading type'].upper()

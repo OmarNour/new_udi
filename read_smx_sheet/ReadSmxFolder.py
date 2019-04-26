@@ -129,7 +129,6 @@ class ReadSmxFolder:
         #################################################################################
 
     def build_smx_source_scripts(self, home_output_path, smx_file_path):
-        print("pm.source_names", pm.source_names)
         if pm.source_names:
             System_sht_filter = [['Source system name', pm.source_names]]
         else:

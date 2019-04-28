@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 import pyarrow as pa
+from pyarrow.formatting import *
 import dask.dataframe as dd
 
 

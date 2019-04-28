@@ -130,3 +130,4 @@ if __name__ == '__main__':
 
     end_time = dt.datetime.now()
     print("\nTotal Elapsed time: ", end_time - start_time)
+    k = input("press any key to exit!")

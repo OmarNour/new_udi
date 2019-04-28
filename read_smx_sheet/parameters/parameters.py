@@ -6,8 +6,14 @@ from read_smx_sheet.app_Lib import functions as funcs
 
 parameters = ""
 param_dic = {}
-module_path = os.path.dirname(sys.modules['__main__'].__file__)
-config_file = open(module_path+"/config.txt","r")
+
+config_file_path = os.path.dirname(sys.modules['__main__'].__file__)
+try:
+    config_file = open(config_file_path+"/config.txt","r")
+except:
+    config_file_path = input("Enter config.txt path please:")
+    config_file = open(config_file_path + "/config.txt", "r")
+
 for i in config_file.readlines():
     line = i.strip()
     if line != "":

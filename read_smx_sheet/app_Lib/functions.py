@@ -35,6 +35,7 @@ def read_excel(file_path, sheet_name, filter=None, reserved_words_validation=Non
 
 
 def df_filter(df, filter=None, filter_index=True):
+    df_cols = list(df.columns.values)
     if filter:
         for i in filter:
             if filter_index:
@@ -42,8 +43,10 @@ def df_filter(df, filter=None, filter_index=True):
             else:
                 df = df[df[i[0]].isin(i[1])]
 
-    if not df.empty:
-        return df
+    if df.empty:
+        df = pd.DataFrame(columns=df_cols)
+
+    return df
 
 
 def replace_nan(df, replace_with):

@@ -8,6 +8,7 @@ from dask.diagnostics import ProgressBar
 import datetime as dt
 from read_smx_sheet.templates import D300, D320, D200, D330, D400, D610, D640
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
+import multiprocessing
 
 
 class GenerateScripts:
@@ -126,6 +127,7 @@ class GenerateScripts:
 
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     start_time = dt.datetime.now()
     g = GenerateScripts()
     g.generate_scripts()

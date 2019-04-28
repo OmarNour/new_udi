@@ -1,34 +1,12 @@
-import os
-import sys
-sys.path.append(os.getcwd())
 import datetime as dt
 from read_smx_sheet.app_Lib import functions as funcs
 
-parameters = ""
-param_dic = {}
-
-config_file_path = os.path.dirname(sys.modules['__main__'].__file__)
-try:
-    config_file = open(config_file_path+"/config.txt","r")
-except:
-    config_file_path = input("Enter config.txt path please:")
-    config_file = open(config_file_path + "/config.txt", "r")
-
-for i in config_file.readlines():
-    line = i.strip()
-    if line != "":
-        if line[0] != '#':
-            parameters = parameters + line + "$$$"
-
-param_dic = funcs.string_to_dict(parameters, "$$$")
+param_dic = funcs.get_config_file_values()
 
 smx_path = param_dic['smx_path']
 home_output_folder = param_dic['home_output_folder']
-
-source_names = param_dic['source_names'].split(',')
-source_names = None if source_names[0] == "" and len(source_names) > 0 else source_names
+source_names = param_dic['source_names']
 # source_names = ["TAMWEEN", "TAX", "EDU", "CUSTOMS"]
-
 etl_process_table = param_dic['etl_process_table']
 SOURCE_TABLES_LKP_table = param_dic['SOURCE_TABLES_LKP_table']
 SOURCE_NAME_LKP_table = param_dic['SOURCE_NAME_LKP_table']
@@ -88,6 +66,7 @@ P_UT = db_prefix + "P_UT"
 core_table = db_prefix + "T_BASE"
 core_view = db_prefix + "V_BASE"
 
+################################################################################################
 parquet_db_name = "smx_data"
 sys_argv_separator = "|#|"
 stg_cols_separator = "||'_'||"

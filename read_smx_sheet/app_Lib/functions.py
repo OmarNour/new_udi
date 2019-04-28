@@ -1,10 +1,13 @@
 import os
+import sys
+sys.path.append(os.getcwd())
 import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 import pyarrow as pa
 from pyarrow.formatting import *
 import dask.dataframe as dd
+from read_smx_sheet.app_Lib import manage_directories as md
 
 
 def read_excel(file_path, sheet_name, filter=None, reserved_words_validation=None, nan_to_empty=True):
@@ -225,3 +228,47 @@ def get_sheet_data(parquet_db_name, smx_file_path, output_path, sheet_name, df_f
     if not isinstance(df_sheet, pd.DataFrame):
         df_sheet = pd.DataFrame()
     return df_sheet
+
+
+def is_smx_file(file, sheets):
+    file_sheets = pd.ExcelFile(file).sheet_names
+    required_sheets = list(sheets)
+    for required_sheet in sheets:
+        for file_sheet in file_sheets:
+            if file_sheet == required_sheet:
+                required_sheets.remove(required_sheet)
+
+    return True if len(required_sheets) == 0 else False
+
+
+def get_smx_files(smx_path, smx_ext, sheets):
+    smx_files = []
+    all_files = md.get_files_in_dir(smx_path, smx_ext)
+    for i in all_files:
+        file = smx_path + "/" + i
+        smx_files.append(i) if is_smx_file(file, sheets) else None
+    return smx_files
+
+
+def get_config_file_values():
+    separator = "$$$"
+    parameters = ""
+    # config_file_path = os.path.dirname(sys.modules['__main__'].__file__)
+    try:
+        # config_file = open(config_file_path + "/config.txt", "r")
+        config_file = open("config.txt", "r")
+    except:
+        config_file_path = input("Enter config.txt path please:")
+        config_file = open(config_file_path + "/config.txt", "r")
+
+    for i in config_file.readlines():
+        line = i.strip()
+        if line != "":
+            if line[0] != '#':
+                parameters = parameters + line + separator
+
+    param_dic = string_to_dict(parameters, separator)
+    source_names = param_dic['source_names'].split(',')
+    source_names = None if source_names[0] == "" and len(source_names) > 0 else source_names
+    param_dic['source_names'] = source_names
+    return param_dic

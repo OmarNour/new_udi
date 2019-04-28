@@ -26,7 +26,8 @@ def generate_scripts():
     print("Output folder: ", output_path)
     print(pm.smx_ext + " files:")
     try:
-        for smx in md.get_files_in_dir(pm.smx_path,pm.smx_ext):
+        smx_files = funcs.get_smx_files(pm.smx_path, pm.smx_ext, pm.sheets)
+        for smx in smx_files:
             count_smx = count_smx + 1
             smx_file_path = pm.smx_path + "/" + smx
             smx_file_name = os.path.splitext(smx)[0]
@@ -40,9 +41,14 @@ def generate_scripts():
 
             parallel_templates.append(delayed(gcfr.gcfr)(home_output_path))
             ##################################### end of read_smx_folder ################################
+            if pm.source_names:
+                System_sht_filter = [['Source system name', pm.source_names]]
+            else:
+                System_sht_filter = None
 
             System = funcs.read_excel(smx_file_path, sheet_name='System')
             teradata_sources = System[System['Source type'] == 'TERADATA']
+            teradata_sources = funcs.df_filter(teradata_sources, System_sht_filter, False)
             count_sources = count_sources + len(teradata_sources.index)
 
             Supplements = delayed(funcs.read_excel)(smx_file_path, sheet_name='Supplements')
@@ -53,6 +59,7 @@ def generate_scripts():
             Core_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name='Core tables')
             Core_tables = delayed(funcs.rename_sheet_reserved_word)(Core_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
             ##################################### end of read_smx_sheet ################################
+
             for system_index, system_row in teradata_sources.iterrows():
                 try:
                     Loading_Type = system_row['Loading type'].upper()
@@ -130,4 +137,4 @@ if __name__ == '__main__':
 
     end_time = dt.datetime.now()
     print("\nTotal Elapsed time: ", end_time - start_time)
-    k = input("press any key to exit!")
+    k = input("")

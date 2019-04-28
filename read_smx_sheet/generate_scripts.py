@@ -13,14 +13,11 @@ from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D
 def generate_scripts():
     parallel_remove_output_home_path = []
     parallel_create_output_home_path = []
-    # parallel_remove_output_source_path = []
     parallel_create_output_source_path = []
     parallel_templates = []
     count_sources = 0
     count_smx = 0
-    dt_now = dt.datetime.now()
-    dt_folder = dt_now.strftime("%Y") + "_" + dt_now.strftime("%b").upper() + "_" + dt_now.strftime("%d") + "_" + dt_now.strftime("%H") + "_" + dt_now.strftime("%M")
-    output_path = pm.output_path + "/" + dt_folder
+    output_path = pm.output_path
 
     print("Reading from: ", pm.smx_path)
     print("Output folder: ", output_path)
@@ -118,7 +115,6 @@ def generate_scripts():
     if len(parallel_templates) > 0:
         compute(*parallel_remove_output_home_path)
         compute(*parallel_create_output_home_path)
-        # compute(*parallel_remove_output_source_path)
         compute(*parallel_create_output_source_path)
         with ProgressBar():
             smx_files = " smx files" if count_smx > 1 else " smx file"

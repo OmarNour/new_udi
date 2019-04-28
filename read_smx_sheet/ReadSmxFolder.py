@@ -26,27 +26,9 @@ class ReadSmxFolder:
         self.count_smx = 0
         self.count_sources = 0
 
-    def is_smx_file(self, file):
-        file_sheets = pd.ExcelFile(file).sheet_names
-        required_sheets = list(pm.sheets)
-        for required_sheet in pm.sheets:
-            for file_sheet in file_sheets:
-                if file_sheet == required_sheet:
-                    required_sheets.remove(required_sheet)
-
-        return True if len(required_sheets) == 0 else False
-
-    def get_smx_files(self):
-        smx_files = []
-        all_files = md.get_files_in_dir(pm.smx_path, pm.smx_ext)
-        for i in all_files:
-            file = pm.smx_path + "/" + i
-            smx_files.append(i) if self.is_smx_file(file) else None
-        return smx_files
-
     def read_smx_folder(self):
         print("\nReading from: \t", pm.smx_path)
-        smx_files = self.get_smx_files()
+        smx_files = funcs.get_smx_files(pm.smx_path, pm.smx_ext, pm.sheets)
         if len(smx_files) > 0:
             print("Output folder: \t", self.output_path)
             print("SMX files:")

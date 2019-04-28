@@ -25,6 +25,7 @@ class GenerateScripts:
         print("Reading from: \t" + pm.smx_path)
         print("Output folder: \t" + self.output_path)
         print(pm.smx_ext + " files:")
+        filtered_sources = []
         try:
             smx_files = funcs.get_smx_files(pm.smx_path, pm.smx_ext, pm.sheets)
             for smx in smx_files:
@@ -62,6 +63,7 @@ class GenerateScripts:
                     try:
                         Loading_Type = system_row['Loading type'].upper()
                         source_name = system_row['Source system name']
+                        filtered_sources.append(source_name)
                         source_name_filter = [['Source', [source_name]]]
                         stg_source_name_filter = [['Source system name', [source_name]]]
 
@@ -110,6 +112,7 @@ class GenerateScripts:
             self.count_smx = self.count_smx - 1
 
         if len(self.parallel_templates) > 0:
+            print("Sources:", funcs.list_to_string(filtered_sources, ', '))
             scheduler_value = 'processes' if pm.read_sheets_parallel else ''
             with config.set(scheduler=scheduler_value):
                 compute(*self.parallel_remove_output_home_path)

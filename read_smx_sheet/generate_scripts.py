@@ -43,17 +43,17 @@ def generate_scripts():
             else:
                 System_sht_filter = None
 
-            System = funcs.read_excel(smx_file_path, sheet_name='System')
+            System = funcs.read_excel(smx_file_path, sheet_name=pm.System_sht)
             teradata_sources = System[System['Source type'] == 'TERADATA']
             teradata_sources = funcs.df_filter(teradata_sources, System_sht_filter, False)
             count_sources = count_sources + len(teradata_sources.index)
 
-            Supplements = delayed(funcs.read_excel)(smx_file_path, sheet_name='Supplements')
-            Column_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name='Column mapping')
-            BMAP_values = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP values')
-            BMAP = delayed(funcs.read_excel)(smx_file_path, sheet_name='BMAP')
-            BKEY = delayed(funcs.read_excel)(smx_file_path, sheet_name='BKEY')
-            Core_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name='Core tables')
+            Supplements = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.Supplements_sht)
+            Column_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.Column_mapping_sht)
+            BMAP_values = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.BMAP_values_sht)
+            BMAP = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.BMAP_sht)
+            BKEY = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.BKEY_sht)
+            Core_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.Core_tables_sht)
             Core_tables = delayed(funcs.rename_sheet_reserved_word)(Core_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
             ##################################### end of read_smx_sheet ################################
 
@@ -64,9 +64,9 @@ def generate_scripts():
                     source_name_filter = [['Source', [source_name]]]
                     stg_source_name_filter = [['Source system name', [source_name]]]
 
-                    Table_mapping = delayed(funcs.read_excel)(smx_file_path, 'Table mapping', source_name_filter)
+                    Table_mapping = delayed(funcs.read_excel)(smx_file_path, pm.Table_mapping_sht, source_name_filter)
 
-                    STG_tables = delayed(funcs.read_excel)(smx_file_path, 'STG tables', stg_source_name_filter)
+                    STG_tables = delayed(funcs.read_excel)(smx_file_path, pm.STG_tables_sht, stg_source_name_filter)
                     STG_tables = delayed(funcs.rename_sheet_reserved_word)(STG_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
 
                     source_output_path = home_output_path + "/" + Loading_Type + "/" + source_name

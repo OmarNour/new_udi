@@ -198,7 +198,7 @@ class GenerateScripts:
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
-    config_file_path = funcs.get_config_file() + "/" + pm.default_config_file_name
+    config_file_path = funcs.get_config_file() + "\\" + pm.default_config_file_name
     try:
         x = open(config_file_path)
     except:

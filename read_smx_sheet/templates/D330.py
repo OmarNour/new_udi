@@ -1,8 +1,7 @@
-from read_smx_sheet.parameters import parameters as pm
 from read_smx_sheet.app_Lib import functions as funcs
 import numpy as np
 
-def d330(source_output_path, STG_tables, BKEY):
+def d330(cf, source_output_path, STG_tables, BKEY):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
@@ -21,19 +20,19 @@ def d330(source_output_path, STG_tables, BKEY):
             Key_domain_ID = str(int(bkey_df['Key domain ID'].values[0]))
             Physical_table = bkey_df['Physical table'].values[0]
 
-            script = "EXEC " + pm.MACRO_DB + ".GCFR_Register_Process("
+            script = "EXEC " + cf.MACRO_DB + ".GCFR_Register_Process("
             script = script + "'BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "',"
             script = script + "'define bkey for the table " + key_set_name + " and the domain " + key_domain_name + "',"
-            script = script + str(pm.gcfr_bkey_process_type) + ","
-            script = script + str(pm.gcfr_ctl_Id) + ","
-            script = script + str(pm.gcfr_stream_key) + ","
-            script = script + "'" + pm.INPUT_VIEW_DB + "',"
+            script = script + str(cf.gcfr_bkey_process_type) + ","
+            script = script + str(cf.gcfr_ctl_Id) + ","
+            script = script + str(cf.gcfr_stream_key) + ","
+            script = script + "'" + cf.INPUT_VIEW_DB + "',"
             script = script + "'BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "_IN',"
-            script = script + "'" + pm.UTLFW_v + "',"
+            script = script + "'" + cf.UTLFW_v + "',"
             script = script + "'" + Physical_table + "',"
-            script = script + "'" + pm.UTLFW_t + "',"
+            script = script + "'" + cf.UTLFW_t + "',"
             script = script + "'" + Physical_table + "',"
-            script = script + "'" + pm.TMP_DB + "',"
+            script = script + "'" + cf.TMP_DB + "',"
             script = script + "'" + Key_set_ID + "',"
             script = script + "'" + Key_domain_ID + "',"
             script = script + "'',0,0,0,0);"

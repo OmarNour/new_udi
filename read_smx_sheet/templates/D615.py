@@ -1,8 +1,7 @@
-from read_smx_sheet.parameters import parameters as pm
 from read_smx_sheet.app_Lib import functions as funcs
 
 
-def d615(source_output_path, Core_tables):
+def d615(cf, source_output_path, Core_tables):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
@@ -11,12 +10,12 @@ def d615(source_output_path, Core_tables):
         for core_tables_df_index, core_tables_df_row in core_tables_df.iterrows():
             core_table_name = core_tables_df_row['Table name']
 
-            del_script = "DEL FROM " + pm.GCFR_V + ".GCFR_Transform_KeyCol "
-            del_script = del_script + " WHERE OUT_DB_NAME = '" + pm.core_view + "' AND OUT_OBJECT_NAME = '" + core_table_name + "';\n"
+            del_script = "DEL FROM " + cf.GCFR_V + ".GCFR_Transform_KeyCol "
+            del_script = del_script + " WHERE OUT_DB_NAME = '" + cf.core_view + "' AND OUT_OBJECT_NAME = '" + core_table_name + "';\n"
 
             core_table_columns = funcs.get_core_table_columns(Core_tables, core_table_name )
 
-            exe_ = "EXEC " + pm.MACRO_DB + ".GCFR_Register_Tfm_KeyCol('" + pm.core_view + "'"
+            exe_ = "EXEC " + cf.MACRO_DB + ".GCFR_Register_Tfm_KeyCol('" + cf.core_view + "'"
             _p = ",'" + core_table_name + "'"
             _p = _p + ",'SEQ_NO' );\n\n"
             exe_p = exe_ + _p

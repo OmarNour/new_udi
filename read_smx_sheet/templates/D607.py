@@ -1,4 +1,3 @@
-from read_smx_sheet.parameters import parameters as pm
 from read_smx_sheet.app_Lib import functions as funcs
 from read_smx_sheet.app_Lib import TransformDDL
 
@@ -33,7 +32,7 @@ from read_smx_sheet.app_Lib import TransformDDL
 #     f.close()
 
 
-def d607(source_output_path, Core_tables, BMAP_values):
+def d607(cf, source_output_path, Core_tables, BMAP_values):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+", encoding="utf-8")
 
@@ -43,7 +42,7 @@ def d607(source_output_path, Core_tables, BMAP_values):
 
         for code_set in code_set_names:
             lkp_ddl = ''
-            lkp_tbl_header = 'CREATE SET TABLE ' + pm.core_table + '.' + code_set + ', FALLBACK (\n'
+            lkp_tbl_header = 'CREATE SET TABLE ' + cf.core_table + '.' + code_set + ', FALLBACK (\n'
 
             if code_set not in core_tables_list:
                 error_txt = "--Error: Table " + code_set + " Not Found in Core tables. Can't generate its ddl. \n"

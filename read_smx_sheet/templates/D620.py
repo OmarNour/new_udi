@@ -1,9 +1,8 @@
-from read_smx_sheet.parameters import parameters as pm
 from read_smx_sheet.app_Lib import functions as funcs
 from read_smx_sheet.app_Lib import TransformDDL
 
 
-def d620(source_output_path, Table_mapping,Column_mapping,Core_tables, Loading_Type):
+def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loading_Type):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+", encoding="utf-8")
 
@@ -23,7 +22,7 @@ def d620(source_output_path, Table_mapping,Column_mapping,Core_tables, Loading_T
             src_layer=str(table_maping_row['Source layer'])
             process_name = prcess_type + "_" + layer + "_" + table_maping_name
 
-            inp_view_header = 'REPLACE VIEW ' + pm.INPUT_VIEW_DB + '.' + process_name + '_IN AS'
+            inp_view_header = 'REPLACE VIEW ' + cf.INPUT_VIEW_DB + '.' + process_name + '_IN AS'
             target_table = str(table_maping_row['Target table name'])
             main_src=table_maping_row['Main source']
             # core_tables_list= pd.unique(list(Core_tables['Table name']))
@@ -52,7 +51,7 @@ def d620(source_output_path, Table_mapping,Column_mapping,Core_tables, Loading_T
             sub="/* Target table:	"+target_table+"*/"+'\n'+"/* Table mapping:	"+table_maping_name +"*/"+'\n'+"/* Mapping group:	"+table_maping_row['Mapping group'] +"*/"
             inp_view_select_clause='SELECT ' +'\n' + sub + TransformDDL.get_select_clause(target_table, Core_tables, table_maping_name, Column_mapping)
             map_grp = ' CAST(' +funcs.single_quotes(table_maping_row['Mapping group'])+' AS VARCHAR(100)) AS  MAP_GROUP ,'
-            start_date = '(SELECT Business_Date FROM ' + pm.GCFR_V + '.GCFR_Process_Id'+'\n'+'   WHERE Process_Name = ' + "'" + process_name + "'"+'\n'+') AS Start_Date,'
+            start_date = '(SELECT Business_Date FROM ' + cf.GCFR_V + '.GCFR_Process_Id'+'\n'+'   WHERE Process_Name = ' + "'" + process_name + "'"+'\n'+') AS Start_Date,'
             end_date='DATE '+"'9999-12-31'"+' AS End_Date,'
             modification_type=''
             if (Loading_Type == 'ONLINE'):
@@ -63,17 +62,17 @@ def d620(source_output_path, Table_mapping,Column_mapping,Core_tables, Loading_T
             inp_view_select_clause=inp_view_select_clause+'\n'+ map_grp+'\n'+start_date+ '\n'+end_date+ '\n'+modification_type+'\n'
 
             if table_maping_row['Join'] == "":
-                inp_view_from_clause = 'FROM ' + pm.SI_VIEW + '.' + table_maping_row['Main source'] + ' ' + table_maping_row['Main source']
+                inp_view_from_clause = 'FROM ' + cf.SI_VIEW + '.' + table_maping_row['Main source'] + ' ' + table_maping_row['Main source']
             elif table_maping_row['Join'] != "":
                      if (table_maping_row['Join'].find("FROM".strip()) == -1): #no subquery in join clause
-                        inp_view_from_clause = 'FROM ' + pm.SI_VIEW + '.' + table_maping_row['Main source'] + ' ' +table_maping_row['Main source']
+                        inp_view_from_clause = 'FROM ' + cf.SI_VIEW + '.' + table_maping_row['Main source'] + ' ' +table_maping_row['Main source']
                         inp_view_from_clause = inp_view_from_clause+'\n'+table_maping_row['Join']
-                        join = 'JOIN '+pm.SI_VIEW+'.'
+                        join = 'JOIN '+cf.SI_VIEW+'.'
                         inp_view_from_clause = inp_view_from_clause.replace('JOIN',join)
                      else:
                          sub_query_flag=1
                          join_clause=table_maping_row['Join']
-                         subquery_clause= TransformDDL.get_sub_query(join_clause, src_layer, main_src)
+                         subquery_clause= TransformDDL.get_sub_query(cf, join_clause, src_layer, main_src)
                          inp_view_from_clause = ' FROM \n'+ subquery_clause
 
             inp_view_where_clause=';'

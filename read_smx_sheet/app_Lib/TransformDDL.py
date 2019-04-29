@@ -1,14 +1,13 @@
 import pandas as pd
-from read_smx_sheet.parameters import parameters as pm
 
 
-def get_sub_query(subquery,src_layer,main_src):
+def get_sub_query(cf, subquery,src_layer,main_src):
     if src_layer == "SEM":
         join_ = 'JOIN '
         from_ = 'FROM '
     else:
-        join_ = 'JOIN ' + pm.SI_VIEW + '.'
-        from_ = 'FROM ' + pm.SI_VIEW + '.'
+        join_ = 'JOIN ' + cf.SI_VIEW + '.'
+        from_ = 'FROM ' + cf.SI_VIEW + '.'
     if subquery.find("UNION") != -1:
         subquery = "("+subquery + ")" + main_src
     out = subquery.replace("FROM ", from_)
@@ -17,8 +16,8 @@ def get_sub_query(subquery,src_layer,main_src):
     out_4 = out_3.replace(join_+"(","JOIN (")
     out_5 = out_4.replace(join_+" (","JOIN (")
     out_5 = out_5.replace(join_ + "\n (", "JOIN (")
-    out_6 = out_5.replace(join_+"CORE.", "JOIN "+ pm.core_view+".")
-    out_6 = out_6.replace(join_+" CORE.", "JOIN "+ pm.core_view+".")
+    out_6 = out_5.replace(join_+"CORE.", "JOIN " + cf.core_view+".")
+    out_6 = out_6.replace(join_+" CORE.", "JOIN " + cf.core_view+".")
     return out_6
 
 

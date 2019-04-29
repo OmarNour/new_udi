@@ -1,9 +1,8 @@
-from read_smx_sheet.parameters import parameters as pm
 from read_smx_sheet.app_Lib import functions as funcs
 from read_smx_sheet.app_Lib import TransformDDL
 
 
-def d002(source_output_path, Core_tables, Table_mapping):
+def d002(cf, source_output_path, Core_tables, Table_mapping):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
@@ -11,7 +10,7 @@ def d002(source_output_path, Core_tables, Table_mapping):
         # Core_tables=TransformDDL.get_src_core_tbls(source_name, Core_tables, Table_mapping)
         Table_mappings = Table_mapping
         hist_key_insert_header=""
-        history_tbl=pm.GCFR_t+"."+pm.history_tbl
+        history_tbl = cf.GCFR_t+"."+cf.history_tbl
         hist_key_insert_header += "INSERT INTO "+ history_tbl
         hist_key_insert_header += "( TRF_TABLE_NAME,PROCESS_NAME,TABLE_NAME,RECORD_ID,START_DATE_COLUMN,END_DATE_COLUMN,HISTORY_COLUMN, HISTORY_KEY)\n"
         hist_key_insert_header += "VALUES ('"

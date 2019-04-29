@@ -2,7 +2,7 @@ from read_smx_sheet.parameters import parameters as pm
 from read_smx_sheet.app_Lib import functions as funcs
 
 
-def d420(source_output_path, STG_tables, BKEY, BMAP):
+def d420(cf, source_output_path, STG_tables, BKEY, BMAP):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
@@ -33,8 +33,8 @@ def d420(source_output_path, STG_tables, BKEY, BMAP):
             else:
                 seq_pk_col = " "
 
-            create_view = "REPLACE VIEW " + pm.SI_VIEW + "." + stg_table_name + " AS\nSELECT \n"
-            from_clause = "FROM " + pm.v_stg + "." + stg_table_name + " t"
+            create_view = "REPLACE VIEW " + cf.SI_VIEW + "." + stg_table_name + " AS\nSELECT \n"
+            from_clause = "FROM " + cf.v_stg + "." + stg_table_name + " t"
             STG_table_columns = funcs.get_stg_table_columns(STG_tables, None, stg_table_name, True)
 
             bkeys_left_join = ""
@@ -81,7 +81,7 @@ def d420(source_output_path, STG_tables, BKEY, BMAP):
                             bk_alias = " bk" + str(bkeys_left_join_count)
                             comma_Column_name = comma + bk_alias + ".EDW_Key AS " + alias
                             bkey_columns = bkey_columns + comma_Column_name + "\n"
-                            bkeys_left_join = bkeys_left_join + "\nLEFT JOIN " + pm.UTLFW_v + "." + bkey_physical_table + bk_alias + "\n"
+                            bkeys_left_join = bkeys_left_join + "\nLEFT JOIN " + cf.UTLFW_v + "." + bkey_physical_table + bk_alias + "\n"
                             bkeys_left_join = bkeys_left_join + "\tON " + bk_alias + ".Source_Key = " + trimed_Natural_key + "\n"
                             bkeys_left_join = bkeys_left_join + "\tand " + bk_alias + ".Domain_ID = " + bkey_domain_id
 
@@ -95,7 +95,7 @@ def d420(source_output_path, STG_tables, BKEY, BMAP):
                             bmap_alias = " bm" + str(bmap_left_join_count)
                             comma_Column_name = comma + bmap_alias + ".EDW_Code AS " + alias
                             bmap_columns = bmap_columns + comma_Column_name + "\n"
-                            bmap_left_join = bmap_left_join + "\nLEFT JOIN " + pm.UTLFW_v + "." + bmap_physical_table + bmap_alias + "\n"
+                            bmap_left_join = bmap_left_join + "\nLEFT JOIN " + cf.UTLFW_v + "." + bmap_physical_table + bmap_alias + "\n"
                             bmap_left_join = bmap_left_join + "\tON " + bmap_alias + ".Source_Code = " + trimed_Natural_key + "\n"
                             bmap_left_join = bmap_left_join + "\tand " + bmap_alias + ".Code_Set_id = " + Code_set_ID + "\n"
                             bmap_left_join = bmap_left_join + "\tand " + bmap_alias + ".Domain_ID = " + Code_domain_ID

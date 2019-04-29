@@ -1,15 +1,14 @@
-from read_smx_sheet.parameters import parameters as pm
 from read_smx_sheet.app_Lib import functions as funcs
 from read_smx_sheet.app_Lib import TransformDDL
 
 
-def d003(source_output_path,BMAP_values, BMAP):
+def d003(cf, source_output_path,BMAP_values, BMAP):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+", encoding="utf-8")
 
     try:
         BMAP_values = BMAP_values[BMAP_values["Code set name"] != '']
-        insert_st_header = "INSERT INTO " + pm.UTLFW_v + ".BMAP_STANDARD_MAP ( \n"
+        insert_st_header = "INSERT INTO " + cf.UTLFW_v + ".BMAP_STANDARD_MAP ( \n"
         bm_tbl_cols = "Source_Code \n"+",Domain_Id  \n" + ",Code_Set_Id  \n" + ",EDW_Code  \n" + ",Description  \n"
         bm_tbl_cols += ",Start_Date  \n" + ",End_Date  \n" + ",Record_Deleted_Flag  \n" + ",Ctl_Id  \n" + ",Process_Name \n"
         bm_tbl_cols += ",Process_Id  \n" + ",Update_Process_Name  \n" + ",Update_Process_Id  \n) VALUES ( \n"
@@ -35,7 +34,7 @@ def d003(source_output_path,BMAP_values, BMAP):
 
             insert_st= insert_st_header + insert_vals
 
-            del_st = "DELETE FROM " + pm.UTLFW_v + ".BMAP_STANDARD_MAP ( \n WHERE Domain_Id = '" + domain_id + "'\n"
+            del_st = "DELETE FROM " + cf.UTLFW_v + ".BMAP_STANDARD_MAP ( \n WHERE Domain_Id = '" + domain_id + "'\n"
             del_st += "AND EDW_Code = '" + edw_code + "' \n AND Code_Set_Id = '" + code_set_id + "';"
             f.write(del_st)
             f.write("\n")

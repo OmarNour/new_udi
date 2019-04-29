@@ -1,7 +1,7 @@
-from read_smx_sheet.parameters import parameters as pm
 from read_smx_sheet.app_Lib import functions as funcs
 
-def d000(source_output_path, source_name, Table_mapping, STG_tables, BKEY):
+
+def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
@@ -13,8 +13,8 @@ def d000(source_output_path, source_name, Table_mapping, STG_tables, BKEY):
             target_table = str(table_maping_row['Target table name'])
             Historization_algorithm = str(table_maping_row['Historization algorithm'])
 
-            f.write("delete from " + pm.GCFR_t + "." + pm.etl_process_table + " where process_name = '" + process_name + "';\n")
-            f.write("insert into " + pm.GCFR_t + "." + pm.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID)\n")
+            f.write("delete from " + cf.GCFR_t + "." + cf.etl_process_table + " where process_name = '" + process_name + "';\n")
+            f.write("insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID)\n")
             f.write("VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL)" + ";\n")
             f.write("\n")
 
@@ -33,8 +33,8 @@ def d000(source_output_path, source_name, Table_mapping, STG_tables, BKEY):
 
                 process_name = "BK_" + str(Key_set_id) + "_" + Table_name + "_" + Column_name + "_" + str(Key_domain_ID)
 
-                f.write("delete from " + pm.GCFR_t + "." + pm.etl_process_table + " where process_name = '" + process_name + "';\n")
-                f.write("insert into " + pm.GCFR_t + "." + pm.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID)\n")
+                f.write("delete from " + cf.GCFR_t + "." + cf.etl_process_table + " where process_name = '" + process_name + "';\n")
+                f.write("insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID)\n")
                 f.write("VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL)" + ";\n")
                 f.write("\n")
     except:

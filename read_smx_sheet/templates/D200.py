@@ -1,8 +1,7 @@
-from read_smx_sheet.parameters import parameters as pm
 from read_smx_sheet.app_Lib import functions as funcs
 
 
-def d200(source_output_path, STG_tables):
+def d200(cf, source_output_path, STG_tables):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
@@ -14,8 +13,8 @@ def d200(source_output_path, STG_tables):
 
             Fallback = ', Fallback' if stg_tables_df_row['Fallback'].upper() == 'Y' else ''
 
-            create_stg_table = "create multiset table " + pm.T_STG + "." + Table_name + Fallback + "\n" + "(\n"
-            create_wrk_table = "create multiset table " + pm.t_WRK + "." + Table_name + Fallback + "\n" + "(\n"
+            create_stg_table = "create multiset table " + cf.T_STG + "." + Table_name + Fallback + "\n" + "(\n"
+            create_wrk_table = "create multiset table " + cf.t_WRK + "." + Table_name + Fallback + "\n" + "(\n"
 
             STG_table_columns = funcs.get_stg_table_columns(STG_tables, None, Table_name, False)
             pi_columns = ""

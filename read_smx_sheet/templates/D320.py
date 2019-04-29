@@ -4,7 +4,7 @@ from read_smx_sheet.app_Lib import functions as funcs
 import numpy as np
 
 
-def d320(source_output_path, STG_tables, BKEY):
+def d320(cf, source_output_path, STG_tables, BKEY):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+")
 
@@ -41,9 +41,9 @@ def d320(source_output_path, STG_tables, BKEY):
             Key_set_ID = str(int(bkey_df['Key set ID'].values[0]))
             Key_domain_ID = str(int(bkey_df['Key domain ID'].values[0]))
 
-            script = "REPLACE VIEW " + pm.INPUT_VIEW_DB + ".BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "_IN AS LOCK ROW FOR ACCESS\n"
+            script = "REPLACE VIEW " + cf.INPUT_VIEW_DB + ".BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "_IN AS LOCK ROW FOR ACCESS\n"
             script = script + "SELECT " + Source_Key + " AS Source_Key\n"
-            script = script + "FROM " + pm.v_stg + "." + stg_table_name + "\n"
+            script = script + "FROM " + cf.v_stg + "." + stg_table_name + "\n"
             script = script + Bkey_filter + Source_Key_cond + "\n"
             script = script + "GROUP BY 1;" + "\n"
 

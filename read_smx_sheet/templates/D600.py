@@ -1,9 +1,8 @@
-from read_smx_sheet.parameters import parameters as pm
 from read_smx_sheet.app_Lib import functions as funcs
 from read_smx_sheet.app_Lib import TransformDDL
 
 
-def d600(source_output_path, Table_mapping, Core_tables):
+def d600(cf, source_output_path, Table_mapping, Core_tables):
     file_name = funcs.get_file_name(__file__)
     f = open(source_output_path + "/" + file_name + ".sql", "w+", encoding="utf-8")
 
@@ -12,7 +11,7 @@ def d600(source_output_path, Table_mapping, Core_tables):
         core_tbl_ddl=''
         for tbl_name in core_tables_list:
             col_ddl=''
-            core_tbl_header = 'CREATE SET TABLE ' + pm.core_table + '.' +tbl_name+ ', FALLBACK (\n'
+            core_tbl_header = 'CREATE SET TABLE ' + cf.core_table + '.' +tbl_name+ ', FALLBACK (\n'
 
             for core_tbl_index, core_tbl_row in Core_tables[(Core_tables['Table name'] == tbl_name)].iterrows():
                 col_ddl+= core_tbl_row['Column name']+ ' '+ core_tbl_row['Data type']+' '

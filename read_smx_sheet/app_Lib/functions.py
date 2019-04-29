@@ -255,7 +255,7 @@ def get_smx_files(smx_path, smx_ext, sheets):
     return smx_files
 
 
-def get_config_file():
+def get_config_file_path():
     config_file_path = md.get_dirs()[1]
     return config_file_path
 
@@ -267,7 +267,7 @@ def get_config_file_values(config_file_path=None):
     # config_file_path = os.path.dirname(sys.modules['__main__'].__file__)
     if config_file_path is None:
         try:
-            config_file_path = get_config_file()
+            config_file_path = get_config_file_path()
             config_file = open(config_file_path + "/" + pm.default_config_file_name, "r")
         except:
             config_file_path = input("Enter config.txt path please:")

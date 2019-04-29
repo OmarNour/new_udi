@@ -9,6 +9,7 @@ import datetime as dt
 from read_smx_sheet.templates import D300, D320, D200, D330, D400, D610, D640
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
 import multiprocessing
+from tkinter import *
 
 
 class GenerateScripts:
@@ -22,7 +23,8 @@ class GenerateScripts:
         self.output_path = pm.output_path
 
     def generate_scripts(self):
-        print("Reading from: \t" + pm.smx_path)
+        start_time = dt.datetime.now()
+        print("\nReading from: \t" + pm.smx_path)
         print("Output folder: \t" + self.output_path)
         print(pm.smx_ext + " files:")
         filtered_sources = []
@@ -128,13 +130,24 @@ class GenerateScripts:
         else:
             print("No SMX sheets found!")
 
+        end_time = dt.datetime.now()
+        print("Total Elapsed time: ", end_time - start_time)
+
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
-    start_time = dt.datetime.now()
     g = GenerateScripts()
-    g.generate_scripts()
 
-    end_time = dt.datetime.now()
-    print("\nTotal Elapsed time: ", end_time - start_time)
-    k = input("")
+    def start():
+        start_time = dt.datetime.now()
+        g.generate_scripts()
+        end_time = dt.datetime.now()
+        print("Total Elapsed time: ", end_time - start_time)
+
+    window = Tk()
+    window.wm_title("SMX Scripts Builder v2")
+    b1 = Button(window, text="Generate", width=12, command=g.generate_scripts)
+    b1.grid(row=2, column=3)
+
+    # k = input("")
+    window.mainloop()

@@ -9,12 +9,13 @@ from read_smx_sheet.templates import D300, D320, D200, D330, D400, D610, D640
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
 import multiprocessing
 from tkinter import *
+from tkinter import filedialog
 from read_smx_sheet.parameters import parameters as pm
 
 
 class ConfigFile:
-    def __init__(self):
-        self.config_file_values = funcs.get_config_file_values()
+    def __init__(self, config_file=None):
+        self.config_file_values = funcs.get_config_file_values(config_file)
         self.read_sheets_parallel = self.config_file_values["read_sheets_parallel"]
         self.output_path = self.config_file_values["output_path"]
         self.smx_path = self.config_file_values["smx_path"]
@@ -53,8 +54,8 @@ class ConfigFile:
 
 
 class GenerateScripts:
-    def __init__(self):
-        self.cf = ConfigFile()
+    def __init__(self, config_file=None):
+        self.cf = ConfigFile(config_file)
         self.read_sheets_parallel = self.cf.read_sheets_parallel
         self.output_path = self.cf.output_path
         self.smx_path = self.cf.smx_path
@@ -81,6 +82,7 @@ class GenerateScripts:
         # print("self.source_names1", self.source_names)
 
     def generate_scripts(self):
+
         start_time = dt.datetime.now()
         print("Reading from: \t" + self.smx_path)
         print("Output folder: \t" + self.output_path)
@@ -196,16 +198,41 @@ class GenerateScripts:
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
+    config_file_path = funcs.get_config_file() + "/" + pm.default_config_file_name
+    try:
+        x = open(config_file_path)
+    except:
+        config_file_path = ""
+    # print(md.get_dirs())
 
+    def browsefunc():
+        filename = filedialog.askopenfilename()
+        e1.delete(0, END)
+        e1.insert(END, filename)
 
     def start():
-        g = GenerateScripts()
+        g = GenerateScripts(title_text.get())
         g.generate_scripts()
 
     window = Tk()
+
     window.wm_title("SMX Scripts Builder v2")
+
+    l1 = Label(window, text="Config File")
+    l1.grid(row=0, column=0)
+
+    title_text = StringVar()
+    e1 = Entry(window, textvariable=title_text, width=100)
+    e1.insert(END, config_file_path)
+    e1.grid(row=0, column=1)
+
+    browsebutton = Button(window, text="...", command=browsefunc)
+    browsebutton.grid(row=0, column=2)
+
     b1 = Button(window, text="Generate", width=12, command=start)
-    b1.grid(row=2, column=3)
+    b1.grid(row=2, column=0, columnspan=3)
+
+
 
     # k = input("")
     window.mainloop()

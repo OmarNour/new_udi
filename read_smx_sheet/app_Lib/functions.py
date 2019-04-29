@@ -8,6 +8,7 @@ import pyarrow as pa
 from pyarrow.formatting import *
 import dask.dataframe as dd
 from read_smx_sheet.app_Lib import manage_directories as md
+from read_smx_sheet.parameters import parameters as pm
 import datetime as dt
 
 
@@ -254,16 +255,25 @@ def get_smx_files(smx_path, smx_ext, sheets):
     return smx_files
 
 
-def get_config_file_values():
+def get_config_file():
+    config_file_path = md.get_dirs()[1]
+    return config_file_path
+
+
+def get_config_file_values(config_file_path=None):
     separator = "$$$"
     parameters = ""
+
     # config_file_path = os.path.dirname(sys.modules['__main__'].__file__)
-    try:
-        # config_file = open(config_file_path + "/config.txt", "r")
-        config_file = open("config.txt", "r")
-    except:
-        config_file_path = input("Enter config.txt path please:")
-        config_file = open(config_file_path + "/config.txt", "r")
+    if config_file_path is None:
+        try:
+            config_file_path = get_config_file()
+            config_file = open(config_file_path + "/" + pm.default_config_file_name, "r")
+        except:
+            config_file_path = input("Enter config.txt path please:")
+            config_file = open(config_file_path + "/" + pm.default_config_file_name, "r")
+    else:
+        config_file = open(config_file_path, "r")
 
     for i in config_file.readlines():
         line = i.strip()

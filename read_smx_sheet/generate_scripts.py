@@ -197,19 +197,41 @@ class GenerateScripts:
         print("Total Elapsed time: ", end_time - start_time, "\n")
 
 
-if __name__ == '__main__':
-    multiprocessing.freeze_support()
+class FrontEnd:
+    def __init__(self):
+        window = Tk()
 
-    # print(md.get_dirs())
+        window.wm_title("SMX Scripts Builder v2")
 
-    def browsefunc():
-        filename = filedialog.askopenfilename()
-        e1.delete(0, END)
-        e1.insert(END, filename)
+        l1 = Label(window, text="Config File")
+        l1.grid(row=0, column=0)
 
-    def start():
+        self.title_text = StringVar()
+        self.e1 = Entry(window, textvariable=self.title_text, width=100)
+        config_file_path = os.path.join(funcs.get_config_file_path(), pm.default_config_file_name)
         try:
-            config_file_path = title_text.get()
+            x = open(config_file_path)
+        except:
+            config_file_path = ""
+        self.e1.insert(END, config_file_path)
+        self.e1.grid(row=0, column=1)
+
+        browsebutton = Button(window, text="...", command=self.browsefunc)
+        browsebutton.grid(row=0, column=2)
+
+        b1 = Button(window, text="Generate", width=12, command=self.start)
+        b1.grid(row=2, column=0, columnspan=3)
+
+        window.mainloop()
+
+    def browsefunc(self):
+        filename = filedialog.askopenfilename()
+        self.e1.delete(0, END)
+        self.e1.insert(END, filename)
+
+    def start(self):
+        try:
+            config_file_path = self.title_text.get()
             x = open(config_file_path)
             g = GenerateScripts(config_file_path)
             g.generate_scripts()
@@ -217,28 +239,7 @@ if __name__ == '__main__':
             messagebox.showerror("Error", "Invalid File!")
 
 
-
-    window = Tk()
-
-    window.wm_title("SMX Scripts Builder v2")
-
-    l1 = Label(window, text="Config File")
-    l1.grid(row=0, column=0)
-
-    title_text = StringVar()
-    e1 = Entry(window, textvariable=title_text, width=100)
-    config_file_path = os.path.join(funcs.get_config_file_path(), pm.default_config_file_name)
-    try:
-        x = open(config_file_path)
-    except:
-        config_file_path = ""
-    e1.insert(END, config_file_path)
-    e1.grid(row=0, column=1)
-
-    browsebutton = Button(window, text="...", command=browsefunc)
-    browsebutton.grid(row=0, column=2)
-
-    b1 = Button(window, text="Generate", width=12, command=start)
-    b1.grid(row=2, column=0, columnspan=3)
-
-    window.mainloop()
+if __name__ == '__main__':
+    multiprocessing.freeze_support()
+    fe = FrontEnd()
+    fe.__init__()

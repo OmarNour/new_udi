@@ -10,6 +10,7 @@ from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D
 import multiprocessing
 from tkinter import *
 from tkinter import filedialog
+from tkinter import messagebox
 from read_smx_sheet.parameters import parameters as pm
 
 
@@ -211,8 +212,15 @@ if __name__ == '__main__':
         e1.insert(END, filename)
 
     def start():
-        g = GenerateScripts(title_text.get())
-        g.generate_scripts()
+        try:
+            config_file_path = title_text.get()
+            x = open(config_file_path)
+            g = GenerateScripts(config_file_path)
+            g.generate_scripts()
+        except:
+            messagebox.showerror("Error", "Invalid File!")
+
+
 
     window = Tk()
 
@@ -232,7 +240,4 @@ if __name__ == '__main__':
     b1 = Button(window, text="Generate", width=12, command=start)
     b1.grid(row=2, column=0, columnspan=3)
 
-
-
-    # k = input("")
     window.mainloop()

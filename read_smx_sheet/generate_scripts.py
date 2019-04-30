@@ -199,15 +199,19 @@ class GenerateScripts:
 
 class FrontEnd:
     def __init__(self):
-        window = Tk()
+        root = Tk()
+        root.wm_title("SMX Scripts Builder v2")
 
-        window.wm_title("SMX Scripts Builder v2")
+        # termf = Frame(root, height=400, width=500)
+        # termf.pack(fill=BOTH, expand=YES)
+        # wid = termf.winfo_id()
+        # os.system('cmd.exe -into %d -geometry 40x20 -sb &' % wid)
 
-        l1 = Label(window, text="Config File")
+        l1 = Label(root, text="Config File")
         l1.grid(row=0, column=0)
 
         self.title_text = StringVar()
-        self.e1 = Entry(window, textvariable=self.title_text, width=100)
+        self.e1 = Entry(root, textvariable=self.title_text, width=100)
         config_file_path = os.path.join(funcs.get_config_file_path(), pm.default_config_file_name)
         try:
             x = open(config_file_path)
@@ -216,13 +220,13 @@ class FrontEnd:
         self.e1.insert(END, config_file_path)
         self.e1.grid(row=0, column=1)
 
-        browsebutton = Button(window, text="...", command=self.browsefunc)
+        browsebutton = Button(root, text="...", command=self.browsefunc)
         browsebutton.grid(row=0, column=2)
 
-        b1 = Button(window, text="Generate", width=12, command=self.start)
+        b1 = Button(root, text="Generate", width=12, command=self.start)
         b1.grid(row=2, column=0, columnspan=3)
 
-        window.mainloop()
+        root.mainloop()
 
     def browsefunc(self):
         filename = filedialog.askopenfilename()
@@ -241,5 +245,4 @@ class FrontEnd:
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
-    fe = FrontEnd()
-    fe.__init__()
+    FrontEnd()

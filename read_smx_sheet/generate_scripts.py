@@ -199,11 +199,7 @@ class GenerateScripts:
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
-    config_file_path = os.path.join(funcs.get_config_file_path(), pm.default_config_file_name)
-    try:
-        x = open(config_file_path)
-    except:
-        config_file_path = ""
+
     # print(md.get_dirs())
 
     def browsefunc():
@@ -231,6 +227,11 @@ if __name__ == '__main__':
 
     title_text = StringVar()
     e1 = Entry(window, textvariable=title_text, width=100)
+    config_file_path = os.path.join(funcs.get_config_file_path(), pm.default_config_file_name)
+    try:
+        x = open(config_file_path)
+    except:
+        config_file_path = ""
     e1.insert(END, config_file_path)
     e1.grid(row=0, column=1)
 

@@ -9,9 +9,10 @@ from read_smx_sheet.templates import D300, D320, D200, D330, D400, D610, D640
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
 import multiprocessing
 from tkinter import *
-from tkinter import filedialog
+from tkinter import filedialog, ttk
 from tkinter import messagebox
 from read_smx_sheet.parameters import parameters as pm
+import time
 
 
 class ConfigFile:
@@ -83,8 +84,6 @@ class GenerateScripts:
         # print("self.source_names1", self.source_names)
 
     def generate_scripts(self):
-
-        start_time = dt.datetime.now()
         print("Reading from: \t" + self.smx_path)
         print("Output folder: \t" + self.output_path)
         print(self.smx_ext + " files:")
@@ -193,21 +192,20 @@ class GenerateScripts:
         else:
             print("No SMX sheets found!")
 
-        end_time = dt.datetime.now()
-        print("Total Elapsed time: ", end_time - start_time, "\n")
+
 
 
 class FrontEnd:
     def __init__(self):
-        root = Tk()
-        root.wm_title("SMX Scripts Builder v2")
-        root.resizable(width="false", height="false")
+        self.root = Tk()
+        self.root.wm_title("SMX Scripts Builder v2")
+        self.root.resizable(width="false", height="false")
 
-        l1 = Label(root, text="Config File")
+        l1 = Label(self.root, text="Config File")
         l1.grid(row=0, column=0, sticky='S')
 
         self.title_text = StringVar()
-        self.e1 = Entry(root, textvariable=self.title_text, width=100)
+        self.e1 = Entry(self.root, textvariable=self.title_text, width=100)
         config_file_path = os.path.join(funcs.get_config_file_path(), pm.default_config_file_name)
         try:
             x = open(config_file_path)
@@ -216,29 +214,48 @@ class FrontEnd:
         self.e1.insert(END, config_file_path)
         self.e1.grid(row=0, column=1)
 
-        browsebutton = Button(root, text="...", command=self.browsefunc)
+        browsebutton = Button(self.root, text="...", command=self.browsefunc)
         browsebutton.grid(row=0, column=3, sticky='S')
 
-        b1 = Button(root, text="Generate", width=12, command=self.start)
+        b1 = Button(self.root, text="Generate", width=12, command=self.start)
         b1.grid(row=2, column=0, columnspan=1)
 
-        b2 = Button(root, text="Close", width=12, command=root.destroy)
+        b2 = Button(self.root, text="Close", width=12, command=self.root.destroy)
         b2.grid(row=3, column=0, columnspan=1)
 
 
-        root.mainloop()
+        self.root.mainloop()
 
     def browsefunc(self):
         filename = filedialog.askopenfilename()
         self.e1.delete(0, END)
         self.e1.insert(END, filename)
 
+    def pb(self, tasks, task_len):
+        self.progress_var = IntVar()
+        pb = ttk.Progressbar(self.root, orient="horizontal",
+                             length=300, maximum=task_len - 1,
+                             mode="determinate",
+                             var=self.progress_var)
+        pb.grid(row=3, column=1)
+
+        for i, task in enumerate(tasks):
+            self.progress_var.set(i)
+            i += 1
+            # time.sleep(1 / 60)
+            compute(task)
+            self.root.update_idletasks()
+
     def start(self):
         try:
+            start_time = dt.datetime.now()
             config_file_path = self.title_text.get()
             x = open(config_file_path)
             g = GenerateScripts(config_file_path)
             g.generate_scripts()
+            end_time = dt.datetime.now()
+            print("Total Elapsed time: ", end_time - start_time, "\n")
+
         except:
             messagebox.showerror("Error", "Invalid File!")
 
@@ -246,3 +263,4 @@ class FrontEnd:
 if __name__ == '__main__':
     multiprocessing.freeze_support()
     FrontEnd()
+

@@ -201,14 +201,10 @@ class FrontEnd:
     def __init__(self):
         root = Tk()
         root.wm_title("SMX Scripts Builder v2")
-
-        # termf = Frame(root, height=400, width=500)
-        # termf.pack(fill=BOTH, expand=YES)
-        # wid = termf.winfo_id()
-        # os.system('cmd.exe -into %d -geometry 40x20 -sb &' % wid)
+        root.resizable(width="false", height="false")
 
         l1 = Label(root, text="Config File")
-        l1.grid(row=0, column=0)
+        l1.grid(row=0, column=0, sticky='S')
 
         self.title_text = StringVar()
         self.e1 = Entry(root, textvariable=self.title_text, width=100)
@@ -221,10 +217,14 @@ class FrontEnd:
         self.e1.grid(row=0, column=1)
 
         browsebutton = Button(root, text="...", command=self.browsefunc)
-        browsebutton.grid(row=0, column=2)
+        browsebutton.grid(row=0, column=3, sticky='S')
 
         b1 = Button(root, text="Generate", width=12, command=self.start)
-        b1.grid(row=2, column=0, columnspan=3)
+        b1.grid(row=2, column=0, columnspan=1)
+
+        b2 = Button(root, text="Close", width=12, command=root.destroy)
+        b2.grid(row=3, column=0, columnspan=1)
+
 
         root.mainloop()
 

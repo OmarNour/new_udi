@@ -218,7 +218,7 @@ class FrontEnd:
         self.e1.grid(row=0, column=1)
 
         frame_row1 = Frame(self.root, borderwidth="2", relief="ridge")
-        frame_row1.grid(column=0, row=1, sticky='w')
+        frame_row1.grid(column=0, row=1, sticky=W)
 
         frame_buttons = Frame(frame_row1, borderwidth="2", relief="ridge")
         frame_buttons.grid(column=0, row=0, sticky="w")
@@ -231,27 +231,52 @@ class FrontEnd:
         frame_config_file_values.grid(column=1, row=0, sticky="w")
 
         self.get_config_file_values()
+        frame_config_file_values_entry_width = 84
+
+        read_from_smx_label = Label(frame_config_file_values, text="SMXs Folder")
+        read_from_smx_label.grid(row=0, column=0, sticky='e')
 
         self.text_field_read_from_smx = StringVar()
-        self.entry_field_read_from_smx = Entry(frame_config_file_values, textvariable=self.text_field_read_from_smx, width=50)
-        # self.entry_field_read_from_smx.insert(END, self.smx_path)
-        self.entry_field_read_from_smx.grid(row=0, column=0, sticky="w")
-        # self.entry_field_read_from_smx.config(state=DISABLED)
+        self.entry_field_read_from_smx = Entry(frame_config_file_values, textvariable=self.text_field_read_from_smx, width=frame_config_file_values_entry_width)
+        self.entry_field_read_from_smx.grid(row=0, column=1, sticky="w")
+
+        output_path_label = Label(frame_config_file_values, text="Output Folder")
+        output_path_label.grid(row=1, column=0, sticky='e')
+
+        self.text_field_output_path = StringVar()
+        self.entry_field_output_path = Entry(frame_config_file_values, textvariable=self.text_field_output_path, width=frame_config_file_values_entry_width)
+        self.entry_field_output_path.grid(row=1, column=1, sticky="w")
+
+        source_names_label = Label(frame_config_file_values, text="Sources")
+        source_names_label.grid(row=2, column=0, sticky='e')
 
         self.text_field_source_names = StringVar()
-        self.entry_field_source_names = Entry(frame_config_file_values, textvariable=self.text_field_source_names, width=50)
-        # self.entry_field_source_names.insert(END, self.source_names)
-        self.entry_field_source_names.grid(row=1, column=0, sticky="w")
-        # self.entry_field_source_names.config(state=DISABLED)
+        self.entry_field_source_names = Entry(frame_config_file_values, textvariable=self.text_field_source_names, width=frame_config_file_values_entry_width)
+        self.entry_field_source_names.grid(row=2, column=1, sticky="w", columnspan=1)
+
+        db_prefix_label = Label(frame_config_file_values, text="DB Prefix")
+        db_prefix_label.grid(row=3, column=0, sticky='e')
+
+        self.text_db_prefix = StringVar()
+        self.entry_db_prefix = Entry(frame_config_file_values, textvariable=self.text_db_prefix, width=frame_config_file_values_entry_width)
+        self.entry_db_prefix.grid(row=3, column=1, sticky="w", columnspan=1)
 
         self.refresh_config_file_values()
         self.root.mainloop()
 
     def get_config_file_values(self):
         self.config_file_values = funcs.get_config_file_values(self.title_text.get())
-        self.smx_path = self.config_file_values["smx_path"]
-        self.source_names = self.config_file_values["source_names"]
-        self.source_names = "All" if self.source_names is None else self.source_names
+        try:
+            self.smx_path = self.config_file_values["smx_path"]
+            self.output_path = self.config_file_values["output_path"]
+            source_names = self.config_file_values["source_names"]
+            self.source_names = "All" if source_names is None else source_names
+            self.db_prefix = self.config_file_values["db_prefix"]
+        except:
+            self.smx_path = ""
+            self.output_path = ""
+            self.source_names = ""
+            self.db_prefix = ""
 
     def refresh_config_file_values(self):
         self.entry_field_read_from_smx.config(state=NORMAL)
@@ -259,10 +284,20 @@ class FrontEnd:
         self.entry_field_read_from_smx.insert(END, self.smx_path)
         self.entry_field_read_from_smx.config(state=DISABLED)
 
+        self.entry_field_output_path.config(state=NORMAL)
+        self.entry_field_output_path.delete(0, END)
+        self.entry_field_output_path.insert(END, self.output_path)
+        self.entry_field_output_path.config(state=DISABLED)
+
         self.entry_field_source_names.config(state=NORMAL)
-        self.entry_field_source_names.delete(0,END)
+        self.entry_field_source_names.delete(0, END)
         self.entry_field_source_names.insert(END, self.source_names)
         self.entry_field_source_names.config(state=DISABLED)
+
+        self.entry_db_prefix.config(state=NORMAL)
+        self.entry_db_prefix.delete(0, END)
+        self.entry_db_prefix.insert(END, self.db_prefix)
+        self.entry_db_prefix.config(state=DISABLED)
 
     def browsefunc(self):
         filename = filedialog.askopenfilename()

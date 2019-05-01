@@ -273,49 +273,54 @@ def get_config_file_values(config_file_path=None):
             config_file_path = input("Enter config.txt path please:")
             config_file = open(config_file_path + "/" + pm.default_config_file_name, "r")
     else:
-        config_file = open(config_file_path, "r")
+        try:
+            config_file = open(config_file_path, "r")
+        except:
+            config_file = None
 
-    for i in config_file.readlines():
-        line = i.strip()
-        if line != "":
-            if line[0] != '#':
-                parameters = parameters + line + separator
+    if config_file:
+        for i in config_file.readlines():
+            line = i.strip()
+            if line != "":
+                if line[0] != '#':
+                    parameters = parameters + line + separator
 
-    param_dic = string_to_dict(parameters, separator)
-    source_names = param_dic['source_names'].split(',')
-    source_names = None if source_names[0] == "" and len(source_names) > 0 else source_names
-    param_dic['source_names'] = source_names
+        param_dic = string_to_dict(parameters, separator)
+        source_names = param_dic['source_names'].split(',')
+        source_names = None if source_names[0] == "" and len(source_names) > 0 else source_names
+        param_dic['source_names'] = source_names
 
-    ################################################################################################
-    dt_now = dt.datetime.now()
-    dt_folder = dt_now.strftime("%Y") + "_" + dt_now.strftime("%b").upper() + "_" + dt_now.strftime("%d") + "_" + dt_now.strftime("%H") + "_" + dt_now.strftime("%M")
-    param_dic['output_path'] = param_dic["home_output_folder"] + "/" + dt_folder
+        ################################################################################################
+        dt_now = dt.datetime.now()
+        dt_folder = dt_now.strftime("%Y") + "_" + dt_now.strftime("%b").upper() + "_" + dt_now.strftime("%d") + "_" + dt_now.strftime("%H") + "_" + dt_now.strftime("%M")
+        param_dic['output_path'] = param_dic["home_output_folder"] + "/" + dt_folder
 
-    db_prefix = param_dic['db_prefix']
+        db_prefix = param_dic['db_prefix']
 
-    param_dic['T_STG'] = db_prefix + "T_STG"
-    param_dic['t_WRK'] = db_prefix + "T_WRK"
-    param_dic['v_stg'] = db_prefix + "V_STG"
-    param_dic['INPUT_VIEW_DB'] = db_prefix + "V_INP"
+        param_dic['T_STG'] = db_prefix + "T_STG"
+        param_dic['t_WRK'] = db_prefix + "T_WRK"
+        param_dic['v_stg'] = db_prefix + "V_STG"
+        param_dic['INPUT_VIEW_DB'] = db_prefix + "V_INP"
 
-    param_dic['MACRO_DB'] = db_prefix + "M_GCFR"
-    param_dic['UT_DB'] = db_prefix + "P_UT"
-    param_dic['UTLFW_v'] = db_prefix + "V_UTLFW"
-    param_dic['UTLFW_t'] = db_prefix + "T_UTLFW"
+        param_dic['MACRO_DB'] = db_prefix + "M_GCFR"
+        param_dic['UT_DB'] = db_prefix + "P_UT"
+        param_dic['UTLFW_v'] = db_prefix + "V_UTLFW"
+        param_dic['UTLFW_t'] = db_prefix + "T_UTLFW"
 
-    param_dic['TMP_DB'] = db_prefix + "T_TMP"
-    param_dic['APPLY_DB'] = db_prefix + "P_PP"
+        param_dic['TMP_DB'] = db_prefix + "T_TMP"
+        param_dic['APPLY_DB'] = db_prefix + "P_PP"
 
-    param_dic['SI_DB'] = db_prefix + "T_SRCI"
-    param_dic['SI_VIEW'] = db_prefix + "V_SRCI"
+        param_dic['SI_DB'] = db_prefix + "T_SRCI"
+        param_dic['SI_VIEW'] = db_prefix + "V_SRCI"
 
-    param_dic['GCFR_t'] = db_prefix + "t_GCFR"
-    param_dic['GCFR_V'] = db_prefix + "V_GCFR"
+        param_dic['GCFR_t'] = db_prefix + "t_GCFR"
+        param_dic['GCFR_V'] = db_prefix + "V_GCFR"
 
-    param_dic['M_GCFR'] = db_prefix + "M_GCFR"
-    param_dic['P_UT'] = db_prefix + "P_UT"
+        param_dic['M_GCFR'] = db_prefix + "M_GCFR"
+        param_dic['P_UT'] = db_prefix + "P_UT"
 
-    param_dic['core_table'] = db_prefix + "T_BASE"
-    param_dic['core_view'] = db_prefix + "V_BASE"
-
+        param_dic['core_table'] = db_prefix + "T_BASE"
+        param_dic['core_view'] = db_prefix + "V_BASE"
+    else:
+        param_dic = {}
     return param_dic

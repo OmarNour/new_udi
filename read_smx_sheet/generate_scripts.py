@@ -305,7 +305,9 @@ class FrontEnd:
         self.entry_db_prefix.config(state=DISABLED)
 
     def browsefunc(self):
+        current_file = self.title_text.get()
         filename = filedialog.askopenfilename()
+        filename = current_file if filename == "" else filename
         self.e1.delete(0, END)
         self.e1.insert(END, filename)
         self.refresh_config_file_values()

@@ -12,12 +12,13 @@ from tkinter import *
 from tkinter import filedialog, ttk
 from tkinter import messagebox
 from read_smx_sheet.parameters import parameters as pm
+import traceback
 import time
 
 
 class ConfigFile:
-    def __init__(self, config_file=None):
-        self.config_file_values = funcs.get_config_file_values(config_file)
+    def __init__(self, config_file=None, config_file_values=None):
+        self.config_file_values = funcs.get_config_file_values(config_file) if config_file_values is None else config_file_values
         self.read_sheets_parallel = self.config_file_values["read_sheets_parallel"]
         self.output_path = self.config_file_values["output_path"]
         self.smx_path = self.config_file_values["smx_path"]
@@ -56,8 +57,8 @@ class ConfigFile:
 
 
 class GenerateScripts:
-    def __init__(self, config_file=None):
-        self.cf = ConfigFile(config_file)
+    def __init__(self, config_file=None, config_file_values=None):
+        self.cf = ConfigFile(config_file, config_file_values)
         self.read_sheets_parallel = self.cf.read_sheets_parallel
         self.output_path = self.cf.output_path
         self.smx_path = self.cf.smx_path
@@ -193,8 +194,6 @@ class GenerateScripts:
             print("No SMX sheets found!")
 
 
-
-
 class FrontEnd:
     def __init__(self):
         self.root = Tk()
@@ -312,7 +311,6 @@ class FrontEnd:
         self.e1.insert(END, filename)
         self.refresh_config_file_values()
 
-
     def pb(self, tasks, task_len):
         self.progress_var = IntVar()
         pb = ttk.Progressbar(self.root, orient="horizontal",
@@ -333,12 +331,15 @@ class FrontEnd:
             start_time = dt.datetime.now()
             config_file_path = self.title_text.get()
             x = open(config_file_path)
-            g = GenerateScripts(config_file_path)
+            self.refresh_config_file_values()
+
+            g = GenerateScripts(None, self.config_file_values)
             g.generate_scripts()
             end_time = dt.datetime.now()
             print("Total Elapsed time: ", end_time - start_time, "\n")
 
         except:
+            # traceback.print_exc()
             messagebox.showerror("Error", "Invalid File!")
 
 

@@ -212,29 +212,64 @@ class FrontEnd:
         config_file_path = os.path.join(funcs.get_config_file_path(), pm.default_config_file_name)
         try:
             x = open(config_file_path)
-            self.config_file_values = funcs.get_config_file_values(config_file_path)
-            self.smx_path = self.config_file_values["smx_path"]
         except:
             config_file_path = ""
         self.e1.insert(END, config_file_path)
         self.e1.grid(row=0, column=1)
 
-        frame_buttons = Frame(self.root, borderwidth="2", relief="ridge")
-        frame_buttons.grid(column=0, row=1, sticky="w")
+        frame_row1 = Frame(self.root, borderwidth="2", relief="ridge")
+        frame_row1.grid(column=0, row=1, sticky='w')
+
+        frame_buttons = Frame(frame_row1, borderwidth="2", relief="ridge")
+        frame_buttons.grid(column=0, row=0, sticky="w")
         b1 = Button(frame_buttons, text="Generate", width=12, command=self.start)
         b1.grid(row=2, column=0, columnspan=1)
         b2 = Button(frame_buttons, text="Close", width=12, command=self.root.destroy)
         b2.grid(row=3, column=0, columnspan=1)
 
-        frame_config_file_values = Frame(self.root, borderwidth="2", relief="ridge")
-        frame_config_file_values.grid(column=2, row=1)
+        frame_config_file_values = Frame(frame_row1, borderwidth="2", relief="ridge")
+        frame_config_file_values.grid(column=1, row=0, sticky="w")
 
+        self.get_config_file_values()
+
+        self.text_field_read_from_smx = StringVar()
+        self.entry_field_read_from_smx = Entry(frame_config_file_values, textvariable=self.text_field_read_from_smx, width=50)
+        # self.entry_field_read_from_smx.insert(END, self.smx_path)
+        self.entry_field_read_from_smx.grid(row=0, column=0, sticky="w")
+        # self.entry_field_read_from_smx.config(state=DISABLED)
+
+        self.text_field_source_names = StringVar()
+        self.entry_field_source_names = Entry(frame_config_file_values, textvariable=self.text_field_source_names, width=50)
+        # self.entry_field_source_names.insert(END, self.source_names)
+        self.entry_field_source_names.grid(row=1, column=0, sticky="w")
+        # self.entry_field_source_names.config(state=DISABLED)
+
+        self.refresh_config_file_values()
         self.root.mainloop()
+
+    def get_config_file_values(self):
+        self.config_file_values = funcs.get_config_file_values(self.title_text.get())
+        self.smx_path = self.config_file_values["smx_path"]
+        self.source_names = self.config_file_values["source_names"]
+        self.source_names = "All" if self.source_names is None else self.source_names
+
+    def refresh_config_file_values(self):
+        self.entry_field_read_from_smx.config(state=NORMAL)
+        self.entry_field_read_from_smx.delete(0, END)
+        self.entry_field_read_from_smx.insert(END, self.smx_path)
+        self.entry_field_read_from_smx.config(state=DISABLED)
+
+        self.entry_field_source_names.config(state=NORMAL)
+        self.entry_field_source_names.delete(0,END)
+        self.entry_field_source_names.insert(END, self.source_names)
+        self.entry_field_source_names.config(state=DISABLED)
 
     def browsefunc(self):
         filename = filedialog.askopenfilename()
         self.e1.delete(0, END)
         self.e1.insert(END, filename)
+        self.get_config_file_values()
+        self.refresh_config_file_values()
 
     def pb(self, tasks, task_len):
         self.progress_var = IntVar()

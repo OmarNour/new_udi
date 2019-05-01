@@ -306,7 +306,7 @@ class FrontEnd:
 
     def browsefunc(self):
         current_file = self.title_text.get()
-        filename = filedialog.askopenfilename()
+        filename = filedialog.askopenfilename(initialdir=md.get_dirs()[1])
         filename = current_file if filename == "" else filename
         self.e1.delete(0, END)
         self.e1.insert(END, filename)

@@ -204,9 +204,9 @@ class FrontEnd:
         frame_config_file_entry = Frame(self.root, borderwidth="2", relief="ridge")
         frame_config_file_entry.grid(column=0, row=0)
         l1 = Label(frame_config_file_entry, text="Config File")
-        l1.grid(row=0, column=0, sticky='S')
+        l1.grid(row=0, column=0, sticky='e')
         browsebutton = Button(frame_config_file_entry, text="...", command=self.browsefunc)
-        browsebutton.grid(row=0, column=3, sticky='S')
+        browsebutton.grid(row=0, column=3, sticky='w')
         self.title_text = StringVar()
         self.e1 = Entry(frame_config_file_entry, textvariable=self.title_text, width=100)
         config_file_path = os.path.join(funcs.get_config_file_path(), pm.default_config_file_name)
@@ -221,14 +221,14 @@ class FrontEnd:
         frame_row1.grid(column=0, row=1, sticky=W)
 
         frame_buttons = Frame(frame_row1, borderwidth="2", relief="ridge")
-        frame_buttons.grid(column=0, row=0, sticky="w")
+        frame_buttons.grid(column=1, row=0, rowspan=1, sticky="w")
         b1 = Button(frame_buttons, text="Generate", width=12, command=self.start)
-        b1.grid(row=2, column=0, columnspan=1)
+        b1.grid(row=2, column=0)
         b2 = Button(frame_buttons, text="Close", width=12, command=self.root.destroy)
-        b2.grid(row=3, column=0, columnspan=1)
+        b2.grid(row=3, column=0)
 
         frame_config_file_values = Frame(frame_row1, borderwidth="2", relief="ridge")
-        frame_config_file_values.grid(column=1, row=0, sticky="w")
+        frame_config_file_values.grid(column=0, row=0, sticky="w")
 
         self.get_config_file_values()
         frame_config_file_values_entry_width = 84
@@ -261,7 +261,8 @@ class FrontEnd:
         self.entry_db_prefix = Entry(frame_config_file_values, textvariable=self.text_db_prefix, width=frame_config_file_values_entry_width)
         self.entry_db_prefix.grid(row=3, column=1, sticky="w", columnspan=1)
 
-        self.refresh_config_file_values()
+        self.populate_config_file_values()
+        self.title_text.trace("w", self.refresh_config_file_values)
         self.root.mainloop()
 
     def get_config_file_values(self):
@@ -278,7 +279,11 @@ class FrontEnd:
             self.source_names = ""
             self.db_prefix = ""
 
-    def refresh_config_file_values(self):
+    def refresh_config_file_values(self, *args):
+        self.get_config_file_values()
+        self.populate_config_file_values()
+
+    def populate_config_file_values(self):
         self.entry_field_read_from_smx.config(state=NORMAL)
         self.entry_field_read_from_smx.delete(0, END)
         self.entry_field_read_from_smx.insert(END, self.smx_path)
@@ -303,8 +308,8 @@ class FrontEnd:
         filename = filedialog.askopenfilename()
         self.e1.delete(0, END)
         self.e1.insert(END, filename)
-        self.get_config_file_values()
         self.refresh_config_file_values()
+
 
     def pb(self, tasks, task_len):
         self.progress_var = IntVar()

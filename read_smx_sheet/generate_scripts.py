@@ -201,28 +201,33 @@ class FrontEnd:
         self.root.wm_title("SMX Scripts Builder v2")
         self.root.resizable(width="false", height="false")
 
-        l1 = Label(self.root, text="Config File")
+        frame_config_file_entry = Frame(self.root, borderwidth="2", relief="ridge")
+        frame_config_file_entry.grid(column=0, row=0)
+        l1 = Label(frame_config_file_entry, text="Config File")
         l1.grid(row=0, column=0, sticky='S')
-
+        browsebutton = Button(frame_config_file_entry, text="...", command=self.browsefunc)
+        browsebutton.grid(row=0, column=3, sticky='S')
         self.title_text = StringVar()
-        self.e1 = Entry(self.root, textvariable=self.title_text, width=100)
+        self.e1 = Entry(frame_config_file_entry, textvariable=self.title_text, width=100)
         config_file_path = os.path.join(funcs.get_config_file_path(), pm.default_config_file_name)
         try:
             x = open(config_file_path)
+            self.config_file_values = funcs.get_config_file_values(config_file_path)
+            self.smx_path = self.config_file_values["smx_path"]
         except:
             config_file_path = ""
         self.e1.insert(END, config_file_path)
         self.e1.grid(row=0, column=1)
 
-        browsebutton = Button(self.root, text="...", command=self.browsefunc)
-        browsebutton.grid(row=0, column=3, sticky='S')
-
-        b1 = Button(self.root, text="Generate", width=12, command=self.start)
+        frame_buttons = Frame(self.root, borderwidth="2", relief="ridge")
+        frame_buttons.grid(column=0, row=1, sticky="w")
+        b1 = Button(frame_buttons, text="Generate", width=12, command=self.start)
         b1.grid(row=2, column=0, columnspan=1)
-
-        b2 = Button(self.root, text="Close", width=12, command=self.root.destroy)
+        b2 = Button(frame_buttons, text="Close", width=12, command=self.root.destroy)
         b2.grid(row=3, column=0, columnspan=1)
 
+        frame_config_file_values = Frame(self.root, borderwidth="2", relief="ridge")
+        frame_config_file_values.grid(column=2, row=1)
 
         self.root.mainloop()
 

@@ -147,7 +147,7 @@ class FrontEnd:
             # compute(task)
             self.root.update_idletasks()
 
-    def start(self):
+    def run_thread(self):
         try:
             config_file_path = self.title_text.get()
             x = open(config_file_path)
@@ -155,15 +155,24 @@ class FrontEnd:
                 self.refresh_config_file_values()
                 g = gs.GenerateScripts(None, self.config_file_values)
                 start_time = dt.datetime.now()
-                _thread.start_new_thread(g.generate_scripts, ())
-                # g.generate_scripts()
+                self.b1.config(state=DISABLED)
+                self.e1.config(state=DISABLED)
+
+                g.generate_scripts()
+                self.b1.config(state=NORMAL)
+                self.e1.config(state=NORMAL)
                 end_time = dt.datetime.now()
                 print("Total Elapsed time: ", end_time - start_time, "\n")
 
             except:
+                self.b1.config(state=NORMAL)
+                self.e1.config(state=NORMAL)
                 traceback.print_exc()
         except:
             messagebox.showerror("Error", "Invalid File!")
+
+    def start(self):
+        _thread.start_new_thread(self.run_thread, ())
 
 
 if __name__ == '__main__':

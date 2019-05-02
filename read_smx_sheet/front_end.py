@@ -10,6 +10,7 @@ import read_smx_sheet.generate_scripts as gs
 import datetime as dt
 import traceback
 import time
+import _thread
 
 
 class FrontEnd:
@@ -154,7 +155,8 @@ class FrontEnd:
                 self.refresh_config_file_values()
                 g = gs.GenerateScripts(None, self.config_file_values)
                 start_time = dt.datetime.now()
-                g.generate_scripts()
+                _thread.start_new_thread(g.generate_scripts, ())
+                # g.generate_scripts()
                 end_time = dt.datetime.now()
                 print("Total Elapsed time: ", end_time - start_time, "\n")
 

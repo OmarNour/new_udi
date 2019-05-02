@@ -39,8 +39,8 @@ class FrontEnd:
 
         frame_buttons = Frame(frame_row1, borderwidth="2", relief="ridge")
         frame_buttons.grid(column=1, row=0)
-        b1 = Button(frame_buttons, text="Generate", width=12, height=2, command=self.start)
-        b1.grid(row=2, column=0)
+        self.b1 = Button(frame_buttons, text="Generate", width=12, height=2, command=self.start)
+        self.b1.grid(row=2, column=0)
         b2 = Button(frame_buttons, text="Close", width=12, height=2, command=self.root.destroy)
         b2.grid(row=3, column=0)
 
@@ -83,14 +83,16 @@ class FrontEnd:
         self.root.mainloop()
 
     def get_config_file_values(self):
-        self.config_file_values = funcs.get_config_file_values(self.title_text.get())
         try:
+            self.config_file_values = funcs.get_config_file_values(self.title_text.get())
             self.smx_path = self.config_file_values["smx_path"]
             self.output_path = self.config_file_values["output_path"]
             source_names = self.config_file_values["source_names"]
             self.source_names = "All" if source_names is None else source_names
             self.db_prefix = self.config_file_values["db_prefix"]
+            self.b1.config(state=NORMAL)
         except:
+            self.b1.config(state=DISABLED)
             self.smx_path = ""
             self.output_path = ""
             self.source_names = ""

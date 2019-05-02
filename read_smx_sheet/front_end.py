@@ -15,7 +15,7 @@ import time
 class FrontEnd:
     def __init__(self):
         self.root = Tk()
-        self.root.wm_title("SMX Scripts Builder v2")
+        self.root.wm_title("SMX Scripts Builder v.13")
         self.root.resizable(width="false", height="false")
 
         frame_config_file_entry = Frame(self.root, borderwidth="2", relief="ridge")
@@ -38,10 +38,10 @@ class FrontEnd:
         frame_row1.grid(column=0, row=1, sticky=W)
 
         frame_buttons = Frame(frame_row1, borderwidth="2", relief="ridge")
-        frame_buttons.grid(column=1, row=0, rowspan=1, sticky="w")
-        b1 = Button(frame_buttons, text="Generate", width=12, command=self.start)
+        frame_buttons.grid(column=1, row=0)
+        b1 = Button(frame_buttons, text="Generate", width=12, height=2, command=self.start)
         b1.grid(row=2, column=0)
-        b2 = Button(frame_buttons, text="Close", width=12, command=self.root.destroy)
+        b2 = Button(frame_buttons, text="Close", width=12, height=2, command=self.root.destroy)
         b2.grid(row=3, column=0)
 
         frame_config_file_values = Frame(frame_row1, borderwidth="2", relief="ridge")

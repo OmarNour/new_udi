@@ -15,7 +15,7 @@ import time
 class FrontEnd:
     def __init__(self):
         self.root = Tk()
-        self.root.wm_title("SMX Scripts Builder v.13")
+        self.root.wm_title("SMX Scripts Builder v.14")
         self.root.resizable(width="false", height="false")
 
         frame_config_file_entry = Frame(self.root, borderwidth="2", relief="ridge")
@@ -148,19 +148,20 @@ class FrontEnd:
         try:
             config_file_path = self.title_text.get()
             x = open(config_file_path)
+            try:
+                self.refresh_config_file_values()
+                g = gs.GenerateScripts(None, self.config_file_values)
+                start_time = dt.datetime.now()
+                g.generate_scripts()
+                end_time = dt.datetime.now()
+                print("Total Elapsed time: ", end_time - start_time, "\n")
+
+            except:
+                traceback.print_exc()
         except:
             messagebox.showerror("Error", "Invalid File!")
 
-        try:
-            self.refresh_config_file_values()
-            g = gs.GenerateScripts(None, self.config_file_values)
-            start_time = dt.datetime.now()
-            g.generate_scripts()
-            end_time = dt.datetime.now()
-            print("Total Elapsed time: ", end_time - start_time, "\n")
 
-        except:
-            traceback.print_exc()
 
 
 if __name__ == '__main__':

@@ -146,19 +146,21 @@ class FrontEnd:
 
     def start(self):
         try:
-            start_time = dt.datetime.now()
             config_file_path = self.title_text.get()
             x = open(config_file_path)
-            self.refresh_config_file_values()
+        except:
+            messagebox.showerror("Error", "Invalid File!")
 
+        try:
+            self.refresh_config_file_values()
             g = gs.GenerateScripts(None, self.config_file_values)
+            start_time = dt.datetime.now()
             g.generate_scripts()
             end_time = dt.datetime.now()
             print("Total Elapsed time: ", end_time - start_time, "\n")
 
         except:
-            # traceback.print_exc()
-            messagebox.showerror("Error", "Invalid File!")
+            traceback.print_exc()
 
 
 if __name__ == '__main__':

@@ -3,8 +3,7 @@ from read_smx_sheet.app_Lib import functions as funcs
 
 def d210(cf, source_output_path, STG_tables):
     file_name = funcs.get_file_name(__file__)
-    f = open(source_output_path + "/" + file_name + ".sql", "w+")
-
+    f = funcs.WriteFile(source_output_path, file_name, "sql")
     try:
         INS_DTTM = ",CURRENT_TIMESTAMP AS INS_DTTM \n"
         stg_tables_df = funcs.get_stg_tables(STG_tables, None)

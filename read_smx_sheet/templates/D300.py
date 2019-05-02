@@ -3,8 +3,7 @@ from read_smx_sheet.app_Lib import functions as funcs
 
 def d300(cf, source_output_path, STG_tables, BKEY):
     file_name = funcs.get_file_name(__file__)
-    f = open(source_output_path + "/" + file_name + ".sql", "w+")
-
+    f = funcs.WriteFile(source_output_path, file_name, "sql")
     try:
         Key_domain_names_df = STG_tables.loc[STG_tables['Key domain name'] != ''][['Key domain name']].drop_duplicates()
 

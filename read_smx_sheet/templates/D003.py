@@ -4,8 +4,7 @@ from read_smx_sheet.app_Lib import TransformDDL
 
 def d003(cf, source_output_path,BMAP_values, BMAP):
     file_name = funcs.get_file_name(__file__)
-    f = open(source_output_path + "/" + file_name + ".sql", "w+", encoding="utf-8")
-
+    f = funcs.WriteFile(source_output_path, file_name, "sql")
     try:
         BMAP_values = BMAP_values[BMAP_values["Code set name"] != '']
         insert_st_header = "INSERT INTO " + cf.UTLFW_v + ".BMAP_STANDARD_MAP ( \n"

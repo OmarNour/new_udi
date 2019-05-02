@@ -27,8 +27,7 @@ from read_smx_sheet.app_Lib import TransformDDL
 
 def d608(cf, source_output_path, Core_tables, BMAP_values):
     file_name = funcs.get_file_name(__file__)
-    f = open(source_output_path + "/" + file_name + ".sql", "w+", encoding="utf-8")
-
+    f = funcs.WriteFile(source_output_path, file_name, "sql")
     try:
         code_set_names= TransformDDL.get_code_set_names(BMAP_values)
         for code_set in code_set_names:

@@ -34,8 +34,7 @@ from read_smx_sheet.app_Lib import TransformDDL
 
 def d607(cf, source_output_path, Core_tables, BMAP_values):
     file_name = funcs.get_file_name(__file__)
-    f = open(source_output_path + "/" + file_name + ".sql", "w+", encoding="utf-8")
-
+    f = funcs.WriteFile(source_output_path, file_name, "sql")
     try:
         core_tables_list = TransformDDL.get_core_tables_list(Core_tables)
         code_set_names = TransformDDL.get_code_set_names(BMAP_values)

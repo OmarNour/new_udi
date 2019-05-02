@@ -3,8 +3,7 @@ from read_smx_sheet.app_Lib import functions as funcs
 
 def d615(cf, source_output_path, Core_tables):
     file_name = funcs.get_file_name(__file__)
-    f = open(source_output_path + "/" + file_name + ".sql", "w+")
-
+    f = funcs.WriteFile(source_output_path, file_name, "sql")
     try:
         core_tables_df = funcs.get_core_tables(Core_tables)
         for core_tables_df_index, core_tables_df_row in core_tables_df.iterrows():

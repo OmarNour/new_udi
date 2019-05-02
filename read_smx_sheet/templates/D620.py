@@ -4,8 +4,7 @@ from read_smx_sheet.app_Lib import TransformDDL
 
 def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loading_Type):
     file_name = funcs.get_file_name(__file__)
-    f = open(source_output_path + "/" + file_name + ".sql", "w+", encoding="utf-8")
-
+    f = funcs.WriteFile(source_output_path, file_name, "sql")
     try:
         notes= list()
         for table_maping_index, table_maping_row in Table_mapping.iterrows(): #& (source_name=='CRA')& (Table_mapping['Mapping name'] == 'L1_PRTY_RLTD_L0_CRA_COMPANY_PERSON')].iterrows():

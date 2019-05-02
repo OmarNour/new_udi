@@ -1,15 +1,14 @@
 from read_smx_sheet.app_Lib import functions as funcs
-import numpy as np
+
 
 def d330(cf, source_output_path, STG_tables, BKEY):
     file_name = funcs.get_file_name(__file__)
-    f = open(source_output_path + "/" + file_name + ".sql", "w+")
-
+    f = funcs.WriteFile(source_output_path, file_name, "sql")
     try:
         stg_tables_df = STG_tables.loc[(STG_tables['Key domain name'] != "")
                                        & (STG_tables['Natural key'] != "")]
 
-        for stg_tables_df_index, stg_tables_df_row in stg_tables_df.replace(np.nan, "", regex=True).iterrows():
+        for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
             key_domain_name = stg_tables_df_row['Key domain name']
             stg_table_name = stg_tables_df_row['Table name']
             stg_Column_name = stg_tables_df_row['Column name']

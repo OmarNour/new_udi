@@ -324,3 +324,14 @@ def get_config_file_values(config_file_path=None):
     else:
         param_dic = {}
     return param_dic
+
+
+class WriteFile():
+    def __init__(self, file_path, file_name, ext):
+        self.f = open(os.path.join(file_path, file_name + "." + ext), "w+")
+
+    def write(self, txt):
+        self.f.write(txt)
+
+    def close(self):
+        self.f.close()

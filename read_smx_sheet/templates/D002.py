@@ -4,8 +4,7 @@ from read_smx_sheet.app_Lib import TransformDDL
 
 def d002(cf, source_output_path, Core_tables, Table_mapping):
     file_name = funcs.get_file_name(__file__)
-    f = open(source_output_path + "/" + file_name + ".sql", "w+")
-
+    f = funcs.WriteFile(source_output_path, file_name, "sql")
     try:
         # Core_tables=TransformDDL.get_src_core_tbls(source_name, Core_tables, Table_mapping)
         Table_mappings = Table_mapping

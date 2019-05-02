@@ -2,8 +2,8 @@ from read_smx_sheet.app_Lib import functions as funcs
 
 
 def gcfr(cf, output_path):
-    file_name = funcs.get_file_name(__file__)
-    f = open(output_path + "/" + "000_run_first_" + file_name.upper() + ".sql", "w+")
+    file_name = "000_run_first_" + funcs.get_file_name(__file__).upper()
+    f = funcs.WriteFile(output_path, file_name, "sql")
     system_name = funcs.single_quotes(cf.gcfr_system_name)
     stream_name = funcs.single_quotes(cf.gcfr_stream_name)
     register_system = "exec " + cf.M_GCFR + ".GCFR_Register_System(" + str(cf.gcfr_ctl_Id) + ", " + system_name + ", '',  " + system_name + ");"
@@ -28,4 +28,5 @@ def gcfr(cf, output_path):
     f.write(register_stream + "\n\n")
     f.write(delete_parameters + "\n")
     f.write(insert_into_parameters + "\n")
+
     f.close()

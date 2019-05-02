@@ -6,7 +6,7 @@ import time
 
 def d640(cf, source_output_path, source_name, Table_mapping):
     file_name = funcs.get_file_name(__file__)
-    f = open(source_output_path + "/" + file_name + ".sql", "w+", encoding="utf-8")
+    f = funcs.WriteFile(source_output_path, file_name, "sql")
     try:
         for table_maping_index, table_maping_row in Table_mapping.iterrows():
             process_type = table_maping_row['Historization algorithm']

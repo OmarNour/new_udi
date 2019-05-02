@@ -15,7 +15,7 @@ import time
 class FrontEnd:
     def __init__(self):
         self.root = Tk()
-        self.root.wm_title("SMX Scripts Builder v.14")
+        self.root.wm_title("SMX Scripts Builder v.15")
         self.root.resizable(width="false", height="false")
 
         frame_config_file_entry = Frame(self.root, borderwidth="2", relief="ridge")

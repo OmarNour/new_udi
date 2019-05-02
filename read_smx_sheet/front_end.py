@@ -166,8 +166,6 @@ class FrontEnd:
             messagebox.showerror("Error", "Invalid File!")
 
 
-
-
 if __name__ == '__main__':
     multiprocessing.freeze_support()
     FrontEnd()

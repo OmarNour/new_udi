@@ -11,12 +11,14 @@ import datetime as dt
 import traceback
 import time
 import threading
+import random
 
+global stop_threads
 
 class FrontEnd:
     def __init__(self):
         self.root = Tk()
-        self.root.wm_title("SMX Scripts Builder v.19")
+        self.root.wm_title("SMX Scripts Builder v.20")
         self.root.resizable(width="false", height="false")
         self.msg_no_config_file = "No Config File Found!"
         self.color_msg_no_config_file = "red"
@@ -32,6 +34,7 @@ class FrontEnd:
         frame_row2 = Frame(self.root, borderwidth="2", relief="ridge")
         frame_row2.grid(column=0, row=2, sticky=W + E)
 
+        self.status_label_text = StringVar()
         self.status_label = Label(frame_row2)
         self.status_label.grid(column=0, row=0, sticky=W + E)
 
@@ -101,6 +104,10 @@ class FrontEnd:
 
         self.root.mainloop()
 
+    def change_status_label(self, msg, color):
+        self.status_label_text.set(msg)
+        self.status_label.config(fg=color, text=self.status_label_text.get())
+
     def get_config_file_values(self):
         try:
             self.config_file_values = funcs.get_config_file_values(self.config_file_entry_txt.get())
@@ -110,9 +117,9 @@ class FrontEnd:
             self.source_names = "All" if source_names is None else source_names
             self.db_prefix = self.config_file_values["db_prefix"]
             self.generate_button.config(state=NORMAL)
-            self.status_label.config(fg=self.color_msg_ready, text=self.msg_ready)
+            self.change_status_label(self.msg_ready, self.color_msg_ready)
         except:
-            self.status_label.config(fg=self.color_msg_no_config_file, text=self.msg_no_config_file)
+            self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
             self.generate_button.config(state=DISABLED)
             self.smx_path = ""
             self.output_path = ""
@@ -176,44 +183,63 @@ class FrontEnd:
             config_file_path = self.config_file_entry_txt.get()
             x = open(config_file_path)
             try:
+                self.is_generating = 1
                 self.refresh_config_file_values()
-                start_time = dt.datetime.now()
+                self.start_time = dt.datetime.now()
                 self.enable_disable_fields(DISABLED)
-                self.status_label.config(fg=self.color_msg_generating, text=self.msg_generating)
-                g = gs.GenerateScripts(None, self.config_file_values)
-                g.generate_scripts()
+                self.change_status_label(self.msg_generating, self.color_msg_generating)
+                self.g = gs.GenerateScripts(None, self.config_file_values)
+                self.g.generate_scripts()
                 self.enable_disable_fields(NORMAL)
-                elapsed_time = dt.datetime.now() - start_time
-                print("Total Elapsed time: ", elapsed_time, "\n")
-                message = g.error_message if g.error_message != "" else self.msg_done+str(elapsed_time)
-                color = self.color_msg_done_with_error if g.error_message != "" else self.color_msg_done
-                self.status_label.config(fg=color, text= message)
+                self.elapsed_time = dt.datetime.now() - self.start_time
+                print("Total Elapsed time: ", self.elapsed_time, "\n")
+
             except Exception as error:
                 try:
-                    error_messager = g.error_message
+                    error_messager = self.g.error_message
                 except:
                     error_messager = error
-                self.status_label.config(fg=self.color_error_messager, text=error_messager)
+                self.change_status_label(error_messager, self.color_error_messager)
                 self.generate_button.config(state=NORMAL)
                 self.config_file_entry.config(state=NORMAL)
                 traceback.print_exc()
         except:
-            self.status_label.config(fg=self.color_msg_no_config_file, text=self.msg_no_config_file)
+            self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
 
     def start(self):
         thread1 = GenerateScriptsThread(1, "Thread-1", self)
         thread1.start()
 
+        thread2 = GenerateScriptsThread(2, "Thread-2", self, thread1)
+        thread2.start()
 
-class GenerateScriptsThread (threading.Thread):
-    def __init__(self,threadID ,name, front_end_c):
+    def generating_indicator(self, thread):
+        start_time = dt.datetime.now()
+        while thread.is_alive():
+            elapsed_time = dt.datetime.now() - start_time
+            msg = self.msg_generating + str(elapsed_time)
+            color_list = ["white", "black", "red", "green", "blue", "cyan", "yellow", "magenta"]
+            color = random.choice(color_list)
+            self.change_status_label(msg, color)
+
+        message = self.g.error_message if self.g.error_message != "" else self.msg_done + str(self.elapsed_time)
+        color = self.color_msg_done_with_error if self.g.error_message != "" else self.color_msg_done
+        self.change_status_label(message, color)
+
+
+class GenerateScriptsThread(threading.Thread):
+    def __init__(self,threadID ,name, front_end_c, thread=None):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name
         self.FrontEndC = front_end_c
+        self.thread = thread
 
     def run(self):
-        self.FrontEndC.generate_scripts_thread()
+        if self.threadID == 1:
+            self.FrontEndC.generate_scripts_thread()
+        if self.threadID == 2:
+            self.FrontEndC.generating_indicator(self.thread)
 
 
 if __name__ == '__main__':

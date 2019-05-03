@@ -51,6 +51,7 @@ class ConfigFile:
 
 class GenerateScripts:
     def __init__(self, config_file=None, config_file_values=None):
+        self.message = ""
         self.cf = ConfigFile(config_file, config_file_values)
         self.read_sheets_parallel = self.cf.read_sheets_parallel
         self.output_path = self.cf.output_path
@@ -182,9 +183,11 @@ class GenerateScripts:
                     print("Start generating " + str(len(self.parallel_templates)) + " script for " + str(self.count_sources) + " sources from " + str(self.count_smx) + smx_files)
                     compute(*self.parallel_templates)
 
+            self.message = "Done!"
             os.startfile(self.output_path)
         else:
-            print("No SMX sheets found!")
+            self.message = "No SMX sheets found!"
+            print(self.message)
 
 
 

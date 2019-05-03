@@ -16,34 +16,49 @@ import threading
 class FrontEnd:
     def __init__(self):
         self.root = Tk()
-        self.root.wm_title("SMX Scripts Builder v.18")
+        self.root.wm_title("SMX Scripts Builder v.19")
         self.root.resizable(width="false", height="false")
+        self.msg_no_config_file = "No Config File Found!"
+        self.color_msg_no_config_file = "red"
+        self.msg_ready = "Ready"
+        self.color_msg_ready = "green"
+        self.msg_generating = "Generating... "
+        self.color_msg_generating = "blue"
+        self.msg_done = "Done, Elapsed Time: "
+        self.color_msg_done = "green"
 
-        frame_config_file_entry = Frame(self.root, borderwidth="2", relief="ridge")
-        frame_config_file_entry.grid(column=0, row=0)
-        l1 = Label(frame_config_file_entry, text="Config File")
-        l1.grid(row=0, column=0, sticky='e')
-        browsebutton = Button(frame_config_file_entry, text="...", command=self.browsefunc)
-        browsebutton.grid(row=0, column=3, sticky='w')
-        self.title_text = StringVar()
-        self.e1 = Entry(frame_config_file_entry, textvariable=self.title_text, width=100)
+        frame_row2 = Frame(self.root, borderwidth="2", relief="ridge")
+        frame_row2.grid(column=0, row=2, sticky=W + E)
+
+        self.status_label = Label(frame_row2)
+        self.status_label.grid(column=0, row=0, sticky=W + E)
+
+        frame_row0 = Frame(self.root, borderwidth="2", relief="ridge")
+        frame_row0.grid(column=0, row=0)
+
+        config_file_label = Label(frame_row0, text="Config File")
+        config_file_label.grid(row=0, column=0, sticky='e')
+        config_file_browse_button = Button(frame_row0, text="...", command=self.browsefunc)
+        config_file_browse_button.grid(row=0, column=3, sticky='w')
+        self.config_file_entry_txt = StringVar()
+        self.config_file_entry = Entry(frame_row0, textvariable=self.config_file_entry_txt, width=100)
         config_file_path = os.path.join(funcs.get_config_file_path(), pm.default_config_file_name)
         try:
             x = open(config_file_path)
         except:
             config_file_path = ""
-        self.e1.insert(END, config_file_path)
-        self.e1.grid(row=0, column=1)
+        self.config_file_entry.insert(END, config_file_path)
+        self.config_file_entry.grid(row=0, column=1)
 
         frame_row1 = Frame(self.root, borderwidth="2", relief="ridge")
         frame_row1.grid(column=0, row=1, sticky=W)
 
         frame_buttons = Frame(frame_row1, borderwidth="2", relief="ridge")
         frame_buttons.grid(column=1, row=0)
-        self.b1 = Button(frame_buttons, text="Generate", width=12, height=2, command=self.start)
-        self.b1.grid(row=2, column=0)
-        b2 = Button(frame_buttons, text="Close", width=12, height=2, command=self.root.destroy)
-        b2.grid(row=3, column=0)
+        self.generate_button = Button(frame_buttons, text="Generate", width=12, height=2, command=self.start)
+        self.generate_button.grid(row=2, column=0)
+        close_button = Button(frame_buttons, text="Close", width=12, height=2, command=self.root.destroy)
+        close_button.grid(row=3, column=0)
 
         frame_config_file_values = Frame(frame_row1, borderwidth="2", relief="ridge")
         frame_config_file_values.grid(column=0, row=0, sticky="w")
@@ -80,20 +95,23 @@ class FrontEnd:
         self.entry_db_prefix.grid(row=3, column=1, sticky="w", columnspan=1)
 
         self.populate_config_file_values()
-        self.title_text.trace("w", self.refresh_config_file_values)
+        self.config_file_entry_txt.trace("w", self.refresh_config_file_values)
+
         self.root.mainloop()
 
     def get_config_file_values(self):
         try:
-            self.config_file_values = funcs.get_config_file_values(self.title_text.get())
+            self.config_file_values = funcs.get_config_file_values(self.config_file_entry_txt.get())
             self.smx_path = self.config_file_values["smx_path"]
             self.output_path = self.config_file_values["output_path"]
             source_names = self.config_file_values["source_names"]
             self.source_names = "All" if source_names is None else source_names
             self.db_prefix = self.config_file_values["db_prefix"]
-            self.b1.config(state=NORMAL)
+            self.generate_button.config(state=NORMAL)
+            self.status_label.config(fg=self.color_msg_ready, text=str(self.msg_ready))
         except:
-            self.b1.config(state=DISABLED)
+            self.status_label.config(fg=self.color_msg_no_config_file, text=str(self.msg_no_config_file))
+            self.generate_button.config(state=DISABLED)
             self.smx_path = ""
             self.output_path = ""
             self.source_names = ""
@@ -125,11 +143,11 @@ class FrontEnd:
         self.entry_db_prefix.config(state=DISABLED)
 
     def browsefunc(self):
-        current_file = self.title_text.get()
+        current_file = self.config_file_entry_txt.get()
         filename = filedialog.askopenfilename(initialdir=md.get_dirs()[1])
         filename = current_file if filename == "" else filename
-        self.e1.delete(0, END)
-        self.e1.insert(END, filename)
+        self.config_file_entry.delete(0, END)
+        self.config_file_entry.insert(END, filename)
         self.refresh_config_file_values()
 
     def pb(self, tasks, task_len):
@@ -148,28 +166,28 @@ class FrontEnd:
             self.root.update_idletasks()
 
     def enable_disable_fields(self, f_state):
-        self.b1.config(state=f_state)
-        self.e1.config(state=f_state)
+        self.generate_button.config(state=f_state)
+        self.config_file_entry.config(state=f_state)
 
     def generate_scripts_thread(self):
         try:
-            config_file_path = self.title_text.get()
+            config_file_path = self.config_file_entry_txt.get()
             x = open(config_file_path)
             try:
                 self.refresh_config_file_values()
                 start_time = dt.datetime.now()
                 self.enable_disable_fields(DISABLED)
-
+                self.status_label.config(fg=self.color_msg_generating, text=str(self.msg_generating))
                 g = gs.GenerateScripts(None, self.config_file_values)
                 g.generate_scripts()
-
                 self.enable_disable_fields(NORMAL)
-                end_time = dt.datetime.now()
-                print("Total Elapsed time: ", end_time - start_time, "\n")
-
+                elapsed_time = dt.datetime.now() - start_time
+                print("Total Elapsed time: ", elapsed_time, "\n")
+                self.status_label.config(fg=self.color_msg_done, text=str(self.msg_done)+str(elapsed_time))
             except:
-                self.b1.config(state=NORMAL)
-                self.e1.config(state=NORMAL)
+                self.refresh_config_file_values()
+                self.generate_button.config(state=NORMAL)
+                self.config_file_entry.config(state=NORMAL)
                 traceback.print_exc()
         except:
             messagebox.showerror("Error", "Invalid File!")
@@ -180,7 +198,7 @@ class FrontEnd:
 
 
 class GenerateScriptsThread (threading.Thread):
-    def __init__(self, threadID, name, front_end_c):
+    def __init__(self,threadID ,name, front_end_c):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name

@@ -13,7 +13,6 @@ import time
 import threading
 import random
 
-global stop_threads
 
 class FrontEnd:
     def __init__(self):
@@ -218,8 +217,10 @@ class FrontEnd:
         while thread.is_alive():
             elapsed_time = dt.datetime.now() - start_time
             msg = self.msg_generating + str(elapsed_time)
-            color_list = ["white", "black", "red", "green", "blue", "cyan", "yellow", "magenta"]
-            color = random.choice(color_list)
+            # color_list = ["white", "black", "red", "green", "blue", "cyan", "yellow", "magenta"]
+            # color = random.choice(color_list)
+            r = lambda: random.randint(0, 255)
+            color = '#%02X%02X%02X' % (r(),r(),r())
             self.change_status_label(msg, color)
 
         message = self.g.error_message if self.g.error_message != "" else self.msg_done + str(self.elapsed_time)

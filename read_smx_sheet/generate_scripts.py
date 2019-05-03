@@ -80,7 +80,7 @@ class GenerateScripts:
     def generate_scripts(self):
         print("Reading from: \t" + self.smx_path)
         print("Output folder: \t" + self.output_path)
-        print(self.smx_ext + " files:")
+        print("SMX files:")
         # print("self.source_names2", self.source_names)
         filtered_sources = []
         try:

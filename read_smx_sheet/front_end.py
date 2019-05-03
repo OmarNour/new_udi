@@ -26,6 +26,8 @@ class FrontEnd:
         self.color_msg_generating = "blue"
         self.msg_done = "Done, Elapsed Time: "
         self.color_msg_done = "green"
+        self.color_msg_done_with_error = "red"
+        self.color_error_messager = "red"
 
         frame_row2 = Frame(self.root, borderwidth="2", relief="ridge")
         frame_row2.grid(column=0, row=2, sticky=W + E)
@@ -108,9 +110,9 @@ class FrontEnd:
             self.source_names = "All" if source_names is None else source_names
             self.db_prefix = self.config_file_values["db_prefix"]
             self.generate_button.config(state=NORMAL)
-            self.status_label.config(fg=self.color_msg_ready, text=str(self.msg_ready))
+            self.status_label.config(fg=self.color_msg_ready, text=self.msg_ready)
         except:
-            self.status_label.config(fg=self.color_msg_no_config_file, text=str(self.msg_no_config_file))
+            self.status_label.config(fg=self.color_msg_no_config_file, text=self.msg_no_config_file)
             self.generate_button.config(state=DISABLED)
             self.smx_path = ""
             self.output_path = ""
@@ -177,20 +179,26 @@ class FrontEnd:
                 self.refresh_config_file_values()
                 start_time = dt.datetime.now()
                 self.enable_disable_fields(DISABLED)
-                self.status_label.config(fg=self.color_msg_generating, text=str(self.msg_generating))
+                self.status_label.config(fg=self.color_msg_generating, text=self.msg_generating)
                 g = gs.GenerateScripts(None, self.config_file_values)
                 g.generate_scripts()
                 self.enable_disable_fields(NORMAL)
                 elapsed_time = dt.datetime.now() - start_time
                 print("Total Elapsed time: ", elapsed_time, "\n")
-                self.status_label.config(fg=self.color_msg_done, text=str(self.msg_done)+str(elapsed_time))
-            except:
-                self.refresh_config_file_values()
+                message = g.error_message if g.error_message != "" else self.msg_done+str(elapsed_time)
+                color = self.color_msg_done_with_error if g.error_message != "" else self.color_msg_done
+                self.status_label.config(fg=color, text= message)
+            except Exception as error:
+                try:
+                    error_messager = g.error_message
+                except:
+                    error_messager = error
+                self.status_label.config(fg=self.color_error_messager, text=error_messager)
                 self.generate_button.config(state=NORMAL)
                 self.config_file_entry.config(state=NORMAL)
                 traceback.print_exc()
         except:
-            messagebox.showerror("Error", "Invalid File!")
+            self.status_label.config(fg=self.color_msg_no_config_file, text=self.msg_no_config_file)
 
     def start(self):
         thread1 = GenerateScriptsThread(1, "Thread-1", self)

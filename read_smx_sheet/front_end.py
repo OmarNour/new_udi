@@ -10,13 +10,13 @@ import read_smx_sheet.generate_scripts as gs
 import datetime as dt
 import traceback
 import time
-import _thread
+import threading
 
 
 class FrontEnd:
     def __init__(self):
         self.root = Tk()
-        self.root.wm_title("SMX Scripts Builder v.17")
+        self.root.wm_title("SMX Scripts Builder v.18")
         self.root.resizable(width="false", height="false")
 
         frame_config_file_entry = Frame(self.root, borderwidth="2", relief="ridge")
@@ -147,20 +147,23 @@ class FrontEnd:
             # compute(task)
             self.root.update_idletasks()
 
-    def run_thread(self):
+    def enable_disable_fields(self, f_state):
+        self.b1.config(state=f_state)
+        self.e1.config(state=f_state)
+
+    def generate_scripts_thread(self):
         try:
             config_file_path = self.title_text.get()
             x = open(config_file_path)
             try:
                 self.refresh_config_file_values()
-                g = gs.GenerateScripts(None, self.config_file_values)
                 start_time = dt.datetime.now()
-                self.b1.config(state=DISABLED)
-                self.e1.config(state=DISABLED)
+                self.enable_disable_fields(DISABLED)
 
+                g = gs.GenerateScripts(None, self.config_file_values)
                 g.generate_scripts()
-                self.b1.config(state=NORMAL)
-                self.e1.config(state=NORMAL)
+
+                self.enable_disable_fields(NORMAL)
                 end_time = dt.datetime.now()
                 print("Total Elapsed time: ", end_time - start_time, "\n")
 
@@ -172,7 +175,19 @@ class FrontEnd:
             messagebox.showerror("Error", "Invalid File!")
 
     def start(self):
-        _thread.start_new_thread(self.run_thread, ())
+        thread1 = GenerateScriptsThread(1, "Thread-1", self)
+        thread1.start()
+
+
+class GenerateScriptsThread (threading.Thread):
+    def __init__(self, threadID, name, front_end_c):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+        self.FrontEndC = front_end_c
+
+    def run(self):
+        self.FrontEndC.generate_scripts_thread()
 
 
 if __name__ == '__main__':

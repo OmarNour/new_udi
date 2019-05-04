@@ -1,6 +1,6 @@
 from read_smx_sheet.app_Lib import functions as funcs
 from read_smx_sheet.app_Lib import TransformDDL
-
+import traceback
 
 def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loading_Type):
     file_name = funcs.get_file_name(__file__)
@@ -37,11 +37,11 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
                 continue
 
             if target_table not in core_tables_list:
-              msg='TARGET TABLE NAME not found in Core Tables Sheet for Table Mapping:{}'.format(str(table_maping_row['Mapping name']))
+                msg='TARGET TABLE NAME not found in Core Tables Sheet for Table Mapping:{}'.format(str(table_maping_row['Mapping name']))
 
-              notes += msg
+                notes += msg
               #  raise Exception('TARGET TABLE NAME not found in Core Tables Sheet for Table Mapping:{}'.format(str(table_maping_row['Mapping name'])))
-              continue
+                continue
 
 
            # tgt_pk=tmp.TransformDDL.get_trgt_pk(Core_tables, target_table)
@@ -63,16 +63,16 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
             if table_maping_row['Join'] == "":
                 inp_view_from_clause = 'FROM ' + cf.SI_VIEW + '.' + table_maping_row['Main source'] + ' ' + table_maping_row['Main source']
             elif table_maping_row['Join'] != "":
-                     if (table_maping_row['Join'].find("FROM".strip()) == -1): #no subquery in join clause
-                        inp_view_from_clause = 'FROM ' + cf.SI_VIEW + '.' + table_maping_row['Main source'] + ' ' +table_maping_row['Main source']
-                        inp_view_from_clause = inp_view_from_clause+'\n'+table_maping_row['Join']
-                        join = 'JOIN '+cf.SI_VIEW+'.'
-                        inp_view_from_clause = inp_view_from_clause.replace('JOIN',join)
-                     else:
-                         sub_query_flag=1
-                         join_clause=table_maping_row['Join']
-                         subquery_clause= TransformDDL.get_sub_query(cf, join_clause, src_layer, main_src)
-                         inp_view_from_clause = ' FROM \n'+ subquery_clause
+                if (table_maping_row['Join'].find("FROM".strip()) == -1): #no subquery in join clause
+                    inp_view_from_clause = 'FROM ' + cf.SI_VIEW + '.' + table_maping_row['Main source'] + ' ' +table_maping_row['Main source']
+                    inp_view_from_clause = inp_view_from_clause+'\n'+table_maping_row['Join']
+                    join = 'JOIN '+cf.SI_VIEW+'.'
+                    inp_view_from_clause = inp_view_from_clause.replace('JOIN',join)
+                else:
+                    sub_query_flag=1
+                    join_clause=table_maping_row['Join']
+                    subquery_clause= TransformDDL.get_sub_query(cf, join_clause, src_layer, main_src)
+                    inp_view_from_clause = ' FROM \n'+ subquery_clause
 
             inp_view_where_clause=';'
             if table_maping_row['Filter criterion']!="":
@@ -93,8 +93,13 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
             f.write("\n")
             f.write("\n")
 
-    except:
-        pass
+    except Exception as error:
+        # print(str(error))
+        lf = funcs.WriteFile(cf.output_path, "log", "txt", "a+", True)
+        lf.write(source_output_path)
+        lf.write(file_name)
+        lf.write(traceback.format_exc())
+
     f.close()
 
 

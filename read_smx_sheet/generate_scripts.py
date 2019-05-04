@@ -171,11 +171,12 @@ class GenerateScripts:
                     except Exception as error:
                         # print(error)
                         # traceback.print_exc()
-                        self.log_file.write(traceback.print_exc())
+                        self.log_file.write(traceback.format_exc())
                         self.count_sources = self.count_sources - 1
         except Exception as error:
             # print(error)
             # traceback.print_exc()
+            self.log_file.write(traceback.format_exc())
             self.count_smx = self.count_smx - 1
 
         if len(self.parallel_templates) > 0:

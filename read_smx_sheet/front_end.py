@@ -19,7 +19,7 @@ class FrontEnd:
         self.root = Tk()
         img_icon = PhotoImage(file=os.path.join(md.get_dirs()[0], 'script_icon.png'))
         self.root.tk.call('wm', 'iconphoto', self.root._w, img_icon)
-        self.root.wm_title("SMX Scripts Builder v.21")
+        self.root.wm_title("SMX Scripts Builder v.22")
         self.root.resizable(width="false", height="false")
         self.msg_no_config_file = "No Config File Found!"
         self.color_msg_no_config_file = "red"
@@ -184,11 +184,8 @@ class FrontEnd:
             config_file_path = self.config_file_entry_txt.get()
             x = open(config_file_path)
             try:
-                self.is_generating = 1
-                self.refresh_config_file_values()
                 self.start_time = dt.datetime.now()
                 self.enable_disable_fields(DISABLED)
-                self.g = gs.GenerateScripts(None, self.config_file_values)
                 self.g.generate_scripts()
                 self.enable_disable_fields(NORMAL)
                 self.elapsed_time = dt.datetime.now() - self.start_time
@@ -207,6 +204,9 @@ class FrontEnd:
             self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
 
     def start(self):
+        self.refresh_config_file_values()
+        self.g = gs.GenerateScripts(None, self.config_file_values)
+
         thread1 = GenerateScriptsThread(1, "Thread-1", self)
         thread1.start()
 

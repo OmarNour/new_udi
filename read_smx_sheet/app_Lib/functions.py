@@ -327,11 +327,14 @@ def get_config_file_values(config_file_path=None):
 
 
 class WriteFile():
-    def __init__(self, file_path, file_name, ext):
-        self.f = open(os.path.join(file_path, file_name + "." + ext), "w+")
+    def __init__(self, file_path, file_name, ext, f_mode="w+", new_line=False):
+        self.new_line = new_line
+        self.f = open(os.path.join(file_path, file_name + "." + ext), f_mode)
 
-    def write(self, txt):
+    def write(self, txt, new_line=None):
         self.f.write(txt)
+        new_line = self.new_line if new_line is None else None
+        self.f.write("\n") if new_line else None
 
     def close(self):
         self.f.close()

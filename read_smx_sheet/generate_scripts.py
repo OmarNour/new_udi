@@ -7,14 +7,22 @@ from dask.diagnostics import ProgressBar
 from read_smx_sheet.templates import D300, D320, D200, D330, D400, D610, D640
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
 from read_smx_sheet.parameters import parameters as pm
+import traceback
+
+
+class LogFile(funcs.WriteFile):
+    def __init__(self, output_path):
+        self.output_path = output_path
+        self.file_name = "log"
+        self.ext = "txt"
+        super().__init__(self.output_path, self.file_name, self.ext, "a+", True)
 
 
 class ConfigFile:
     def __init__(self, config_file=None, config_file_values=None):
         self.config_file_values = funcs.get_config_file_values(config_file) if config_file_values is None else config_file_values
-
-        self.read_sheets_parallel = self.config_file_values["read_sheets_parallel"]
         self.output_path = self.config_file_values["output_path"]
+        self.read_sheets_parallel = self.config_file_values["read_sheets_parallel"]
         self.smx_path = self.config_file_values["smx_path"]
         self.source_names = self.config_file_values["source_names"]
         self.gcfr_system_name = self.config_file_values["gcfr_system_name"]
@@ -53,7 +61,9 @@ class ConfigFile:
 class GenerateScripts:
     def __init__(self, config_file=None, config_file_values=None):
         self.cf = ConfigFile(config_file, config_file_values)
-        print("self.cfself.cf", config_file_values, self.cf)
+        md.remove_folder(self.cf.output_path)
+        md.create_folder(self.cf.output_path)
+        self.log_file = LogFile(self.cf.output_path)
         self.error_message = ""
         self.parallel_remove_output_home_path = []
         self.parallel_create_output_home_path = []
@@ -74,10 +84,12 @@ class GenerateScripts:
         self.Supplements_sht = pm.Supplements_sht
 
     def generate_scripts(self):
+        self.log_file.write("Reading from: \t" + self.cf.smx_path)
+        self.log_file.write("Output folder: \t" + self.cf.output_path)
+        self.log_file.write("SMX files:")
         print("Reading from: \t" + self.cf.smx_path)
         print("Output folder: \t" + self.cf.output_path)
         print("SMX files:")
-        # print("self.source_names2", self.source_names)
         filtered_sources = []
         try:
             smx_files = funcs.get_smx_files(self.cf.smx_path, self.smx_ext, self.sheets)
@@ -86,14 +98,14 @@ class GenerateScripts:
                 smx_file_path = self.cf.smx_path + "/" + smx
                 smx_file_name = os.path.splitext(smx)[0]
                 print("\t" + smx_file_name)
+                self.log_file.write("\t" + smx_file_name)
                 home_output_path = self.cf.output_path + "/" + smx_file_name + "/"
 
-                self.parallel_remove_output_home_path.append(delayed(md.remove_folder)(home_output_path))
+                # self.parallel_remove_output_home_path.append(delayed(md.remove_folder)(home_output_path))
                 self.parallel_create_output_home_path.append(delayed(md.create_folder)(home_output_path))
 
                 self.parallel_templates.append(delayed(gcfr.gcfr)(self.cf, home_output_path))
                 ##################################### end of read_smx_folder ################################
-                # print("pm.source_names", pm.source_names)
                 if self.cf.source_names:
                     System_sht_filter = [['Source system name', self.cf.source_names]]
                 else:
@@ -159,6 +171,7 @@ class GenerateScripts:
                     except Exception as error:
                         # print(error)
                         # traceback.print_exc()
+                        self.log_file.write(traceback.print_exc())
                         self.count_sources = self.count_sources - 1
         except Exception as error:
             # print(error)
@@ -166,23 +179,27 @@ class GenerateScripts:
             self.count_smx = self.count_smx - 1
 
         if len(self.parallel_templates) > 0:
-            print("Sources:", funcs.list_to_string(filtered_sources, ', '))
+            sources = funcs.list_to_string(filtered_sources, ', ')
+            print("Sources:", sources)
+            self.log_file.write("Sources:" + sources)
             scheduler_value = 'processes' if self.cf.read_sheets_parallel == 1 else ''
             with config.set(scheduler=scheduler_value):
-                compute(*self.parallel_remove_output_home_path)
+                # compute(*self.parallel_remove_output_home_path)
                 compute(*self.parallel_create_output_home_path)
                 compute(*self.parallel_create_output_source_path)
 
                 with ProgressBar():
                     smx_files = " smx files" if self.count_smx > 1 else " smx file"
                     print("Start generating " + str(len(self.parallel_templates)) + " script for " + str(self.count_sources) + " sources from " + str(self.count_smx) + smx_files)
+                    self.log_file.write("Start generating " + str(len(self.parallel_templates)) + " script for " + str(self.count_sources) + " sources from " + str(self.count_smx) + smx_files)
                     compute(*self.parallel_templates)
 
             self.error_message = ""
             os.startfile(self.cf.output_path)
         else:
             self.error_message = "No SMX Files Found!"
-            print(self.error_message)
+
+        self.log_file.close()
 
 
 

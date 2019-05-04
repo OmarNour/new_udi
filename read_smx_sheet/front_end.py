@@ -19,7 +19,7 @@ class FrontEnd:
         self.root = Tk()
         img_icon = PhotoImage(file=os.path.join(md.get_dirs()[0], 'script_icon.png'))
         self.root.tk.call('wm', 'iconphoto', self.root._w, img_icon)
-        self.root.wm_title("SMX Scripts Builder v.23")
+        self.root.wm_title("SMX Scripts Builder v.24")
         self.root.resizable(width="false", height="false")
         self.msg_no_config_file = "No Config File Found!"
         self.color_msg_no_config_file = "red"
@@ -214,12 +214,12 @@ class FrontEnd:
 
     def generating_indicator(self, thread):
         elapsed_time = dt.datetime.now() - self.start_time
+        r = lambda: random.randint(0, 255)
         while thread.is_alive():
             elapsed_time = dt.datetime.now() - self.start_time
             msg = self.msg_generating + str(elapsed_time)
             # color_list = ["white", "black", "red", "green", "blue", "cyan", "yellow", "magenta"]
             # color = random.choice(color_list)
-            r = lambda: random.randint(0, 255)
             color = '#%02X%02X%02X' % (r(),r(),r())
             self.change_status_label(msg, color)
 

@@ -184,13 +184,11 @@ class FrontEnd:
             config_file_path = self.config_file_entry_txt.get()
             x = open(config_file_path)
             try:
-                self.start_time = dt.datetime.now()
                 self.enable_disable_fields(DISABLED)
                 self.g.generate_scripts()
                 self.enable_disable_fields(NORMAL)
                 self.elapsed_time = dt.datetime.now() - self.start_time
                 print("Total Elapsed time: ", self.elapsed_time, "\n")
-
             except Exception as error:
                 try:
                     error_messager = self.g.error_message

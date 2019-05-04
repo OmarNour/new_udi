@@ -17,15 +17,15 @@ import random
 class FrontEnd:
     def __init__(self):
         self.root = Tk()
-        imgicon = PhotoImage(file=os.path.join(md.get_dirs()[0], 'script_icon.png'))
-        self.root.tk.call('wm', 'iconphoto', self.root._w, imgicon)
-        self.root.wm_title("SMX Scripts Builder v.20")
+        img_icon = PhotoImage(file=os.path.join(md.get_dirs()[0], 'script_icon.png'))
+        self.root.tk.call('wm', 'iconphoto', self.root._w, img_icon)
+        self.root.wm_title("SMX Scripts Builder v.21")
         self.root.resizable(width="false", height="false")
         self.msg_no_config_file = "No Config File Found!"
         self.color_msg_no_config_file = "red"
         self.msg_ready = "Ready"
         self.color_msg_ready = "green"
-        self.msg_generating = "Generating... "
+        self.msg_generating = "In Progress... "
         self.color_msg_generating = "blue"
         self.msg_done = "Done, Elapsed Time: "
         self.color_msg_done = "green"
@@ -61,9 +61,9 @@ class FrontEnd:
 
         frame_buttons = Frame(frame_row1, borderwidth="2", relief="ridge")
         frame_buttons.grid(column=1, row=0)
-        self.generate_button = Button(frame_buttons, text="Generate", width=12, height=2, command=self.start)
+        self.generate_button = Button(frame_buttons, text="Start", width=12, height=2, command=self.start)
         self.generate_button.grid(row=2, column=0)
-        close_button = Button(frame_buttons, text="Close", width=12, height=2, command=self.root.destroy)
+        close_button = Button(frame_buttons, text="Exit", width=12, height=2, command=self.root.destroy)
         close_button.grid(row=3, column=0)
 
         frame_config_file_values = Frame(frame_row1, borderwidth="2", relief="ridge")
@@ -188,7 +188,6 @@ class FrontEnd:
                 self.refresh_config_file_values()
                 self.start_time = dt.datetime.now()
                 self.enable_disable_fields(DISABLED)
-                self.change_status_label(self.msg_generating, self.color_msg_generating)
                 self.g = gs.GenerateScripts(None, self.config_file_values)
                 self.g.generate_scripts()
                 self.enable_disable_fields(NORMAL)

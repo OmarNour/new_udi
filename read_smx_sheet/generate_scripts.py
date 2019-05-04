@@ -12,6 +12,7 @@ from read_smx_sheet.parameters import parameters as pm
 class ConfigFile:
     def __init__(self, config_file=None, config_file_values=None):
         self.config_file_values = funcs.get_config_file_values(config_file) if config_file_values is None else config_file_values
+
         self.read_sheets_parallel = self.config_file_values["read_sheets_parallel"]
         self.output_path = self.config_file_values["output_path"]
         self.smx_path = self.config_file_values["smx_path"]
@@ -49,9 +50,10 @@ class ConfigFile:
         self.SI_VIEW = self.config_file_values["SI_VIEW"]
 
 
-class GenerateScripts(ConfigFile):
+class GenerateScripts:
     def __init__(self, config_file=None, config_file_values=None):
-        super().__init__(config_file, config_file_values)
+        self.cf = ConfigFile(config_file, config_file_values)
+        print("self.cfself.cf", config_file_values, self.cf)
         self.error_message = ""
         self.parallel_remove_output_home_path = []
         self.parallel_create_output_home_path = []
@@ -70,32 +72,30 @@ class GenerateScripts(ConfigFile):
         self.Column_mapping_sht = pm.Column_mapping_sht
         self.System_sht = pm.System_sht
         self.Supplements_sht = pm.Supplements_sht
-        # print("pm.source_names1", pm.source_names)
-        # print("self.source_names1", self.source_names)
 
     def generate_scripts(self):
-        print("Reading from: \t" + self.smx_path)
-        print("Output folder: \t" + self.output_path)
+        print("Reading from: \t" + self.cf.smx_path)
+        print("Output folder: \t" + self.cf.output_path)
         print("SMX files:")
         # print("self.source_names2", self.source_names)
         filtered_sources = []
         try:
-            smx_files = funcs.get_smx_files(self.smx_path, self.smx_ext, self.sheets)
+            smx_files = funcs.get_smx_files(self.cf.smx_path, self.smx_ext, self.sheets)
             for smx in smx_files:
                 self.count_smx = self.count_smx + 1
-                smx_file_path = self.smx_path + "/" + smx
+                smx_file_path = self.cf.smx_path + "/" + smx
                 smx_file_name = os.path.splitext(smx)[0]
                 print("\t" + smx_file_name)
-                home_output_path = self.output_path + "/" + smx_file_name + "/"
+                home_output_path = self.cf.output_path + "/" + smx_file_name + "/"
 
                 self.parallel_remove_output_home_path.append(delayed(md.remove_folder)(home_output_path))
                 self.parallel_create_output_home_path.append(delayed(md.create_folder)(home_output_path))
 
-                self.parallel_templates.append(delayed(gcfr.gcfr)(self, home_output_path))
+                self.parallel_templates.append(delayed(gcfr.gcfr)(self.cf, home_output_path))
                 ##################################### end of read_smx_folder ################################
                 # print("pm.source_names", pm.source_names)
-                if self.source_names:
-                    System_sht_filter = [['Source system name', self.source_names]]
+                if self.cf.source_names:
+                    System_sht_filter = [['Source system name', self.cf.source_names]]
                 else:
                     System_sht_filter = None
 
@@ -130,32 +130,32 @@ class GenerateScripts(ConfigFile):
 
                         self.parallel_create_output_source_path.append(delayed(md.create_folder)(source_output_path))
 
-                        self.parallel_templates.append(delayed(D000.d000)(self, source_output_path, source_name, Table_mapping, STG_tables, BKEY))
-                        self.parallel_templates.append(delayed(D001.d001)(self, source_output_path, source_name, STG_tables))
-                        self.parallel_templates.append(delayed(D002.d002)(self, source_output_path, Core_tables, Table_mapping))
-                        self.parallel_templates.append(delayed(D003.d003)(self, source_output_path, BMAP_values, BMAP))
+                        self.parallel_templates.append(delayed(D000.d000)(self.cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY))
+                        self.parallel_templates.append(delayed(D001.d001)(self.cf, source_output_path, source_name, STG_tables))
+                        self.parallel_templates.append(delayed(D002.d002)(self.cf, source_output_path, Core_tables, Table_mapping))
+                        self.parallel_templates.append(delayed(D003.d003)(self.cf, source_output_path, BMAP_values, BMAP))
 
-                        self.parallel_templates.append(delayed(D200.d200)(self, source_output_path, STG_tables))
-                        self.parallel_templates.append(delayed(D210.d210)(self, source_output_path, STG_tables))
+                        self.parallel_templates.append(delayed(D200.d200)(self.cf, source_output_path, STG_tables))
+                        self.parallel_templates.append(delayed(D210.d210)(self.cf, source_output_path, STG_tables))
 
-                        self.parallel_templates.append(delayed(D300.d300)(self, source_output_path, STG_tables, BKEY))
-                        self.parallel_templates.append(delayed(D320.d320)(self, source_output_path, STG_tables, BKEY))
-                        self.parallel_templates.append(delayed(D330.d330)(self, source_output_path, STG_tables, BKEY))
-                        self.parallel_templates.append(delayed(D340.d340)(self, source_output_path, STG_tables, BKEY))
+                        self.parallel_templates.append(delayed(D300.d300)(self.cf, source_output_path, STG_tables, BKEY))
+                        self.parallel_templates.append(delayed(D320.d320)(self.cf, source_output_path, STG_tables, BKEY))
+                        self.parallel_templates.append(delayed(D330.d330)(self.cf, source_output_path, STG_tables, BKEY))
+                        self.parallel_templates.append(delayed(D340.d340)(self.cf, source_output_path, STG_tables, BKEY))
 
-                        self.parallel_templates.append(delayed(D400.d400)(self, source_output_path, STG_tables))
-                        self.parallel_templates.append(delayed(D410.d410)(self, source_output_path, STG_tables))
-                        self.parallel_templates.append(delayed(D415.d415)(self, source_output_path, STG_tables))
-                        self.parallel_templates.append(delayed(D420.d420)(self, source_output_path, STG_tables, BKEY, BMAP))
+                        self.parallel_templates.append(delayed(D400.d400)(self.cf, source_output_path, STG_tables))
+                        self.parallel_templates.append(delayed(D410.d410)(self.cf, source_output_path, STG_tables))
+                        self.parallel_templates.append(delayed(D415.d415)(self.cf, source_output_path, STG_tables))
+                        self.parallel_templates.append(delayed(D420.d420)(self.cf, source_output_path, STG_tables, BKEY, BMAP))
 
-                        self.parallel_templates.append(delayed(D600.d600)(self, source_output_path, Table_mapping, Core_tables))
-                        self.parallel_templates.append(delayed(D607.d607)(self, source_output_path, Core_tables, BMAP_values))
-                        self.parallel_templates.append(delayed(D608.d608)(self, source_output_path, Core_tables, BMAP_values))
-                        self.parallel_templates.append(delayed(D610.d610)(self, source_output_path, Table_mapping))
-                        self.parallel_templates.append(delayed(D615.d615)(self, source_output_path, Core_tables))
-                        self.parallel_templates.append(delayed(D620.d620)(self, source_output_path, Table_mapping, Column_mapping, Core_tables, Loading_Type))
-                        self.parallel_templates.append(delayed(D630.d630)(self, source_output_path, Table_mapping))
-                        self.parallel_templates.append(delayed(D640.d640)(self, source_output_path, source_name, Table_mapping))
+                        self.parallel_templates.append(delayed(D600.d600)(self.cf, source_output_path, Table_mapping, Core_tables))
+                        self.parallel_templates.append(delayed(D607.d607)(self.cf, source_output_path, Core_tables, BMAP_values))
+                        self.parallel_templates.append(delayed(D608.d608)(self.cf, source_output_path, Core_tables, BMAP_values))
+                        self.parallel_templates.append(delayed(D610.d610)(self.cf, source_output_path, Table_mapping))
+                        self.parallel_templates.append(delayed(D615.d615)(self.cf, source_output_path, Core_tables))
+                        self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loading_Type))
+                        self.parallel_templates.append(delayed(D630.d630)(self.cf, source_output_path, Table_mapping))
+                        self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, Table_mapping))
                     except Exception as error:
                         # print(error)
                         # traceback.print_exc()
@@ -167,7 +167,7 @@ class GenerateScripts(ConfigFile):
 
         if len(self.parallel_templates) > 0:
             print("Sources:", funcs.list_to_string(filtered_sources, ', '))
-            scheduler_value = 'processes' if self.read_sheets_parallel == 1 else ''
+            scheduler_value = 'processes' if self.cf.read_sheets_parallel == 1 else ''
             with config.set(scheduler=scheduler_value):
                 compute(*self.parallel_remove_output_home_path)
                 compute(*self.parallel_create_output_home_path)
@@ -179,7 +179,7 @@ class GenerateScripts(ConfigFile):
                     compute(*self.parallel_templates)
 
             self.error_message = ""
-            os.startfile(self.output_path)
+            os.startfile(self.cf.output_path)
         else:
             self.error_message = "No SMX Files Found!"
             print(self.error_message)

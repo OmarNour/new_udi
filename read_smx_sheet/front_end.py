@@ -17,6 +17,8 @@ import random
 class FrontEnd:
     def __init__(self):
         self.root = Tk()
+        imgicon = PhotoImage(file=os.path.join(md.get_dirs()[0], 'script_icon.png'))
+        self.root.tk.call('wm', 'iconphoto', self.root._w, imgicon)
         self.root.wm_title("SMX Scripts Builder v.20")
         self.root.resizable(width="false", height="false")
         self.msg_no_config_file = "No Config File Found!"

@@ -4,8 +4,8 @@ import traceback
 
 def gcfr(cf, output_path):
     file_name = "000_run_first_" + funcs.get_file_name(__file__).upper()
+    f = funcs.WriteFile(output_path, file_name, "sql")
     try:
-        f = funcs.WriteFile(output_path, file_name, "sql")
         system_name = funcs.single_quotes(cf.gcfr_system_name)
         stream_name = funcs.single_quotes(cf.gcfr_stream_name)
         register_system = "exec " + cf.M_GCFR + ".GCFR_Register_System(" + str(cf.gcfr_ctl_Id) + ", " + system_name + ", '',  " + system_name + ");"
@@ -31,6 +31,6 @@ def gcfr(cf, output_path):
         f.write(delete_parameters + "\n")
         f.write(insert_into_parameters + "\n")
 
-        f.close()
     except:
         funcs.TemplateLogError(cf.output_path, output_path, file_name, traceback.format_exc()).log_error()
+    f.close()

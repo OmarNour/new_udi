@@ -1,4 +1,5 @@
 from read_smx_sheet.app_Lib import functions as funcs
+import traceback
 
 
 def d300(cf, source_output_path, STG_tables, BKEY):
@@ -40,5 +41,5 @@ def d300(cf, source_output_path, STG_tables, BKEY):
 
             f.write('\n')
     except:
-        pass
+        funcs.TemplateLogError(cf.output_path, source_output_path, file_name, traceback.format_exc()).log_error()
     f.close()

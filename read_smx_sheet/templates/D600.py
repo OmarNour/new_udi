@@ -1,5 +1,6 @@
 from read_smx_sheet.app_Lib import functions as funcs
 from read_smx_sheet.app_Lib import TransformDDL
+import traceback
 
 
 def d600(cf, source_output_path, Table_mapping, Core_tables):
@@ -30,6 +31,6 @@ def d600(cf, source_output_path, Table_mapping, Core_tables):
             f.write(core_tbl_ddl)
 
     except:
-        pass
+        funcs.TemplateLogError(cf.output_path, source_output_path, file_name, traceback.format_exc()).log_error()
 
     f.close()

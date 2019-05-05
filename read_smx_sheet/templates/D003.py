@@ -1,5 +1,6 @@
 from read_smx_sheet.app_Lib import functions as funcs
 from read_smx_sheet.app_Lib import TransformDDL
+import traceback
 
 
 def d003(cf, source_output_path,BMAP_values, BMAP):
@@ -41,5 +42,5 @@ def d003(cf, source_output_path,BMAP_values, BMAP):
             f.write("\n")
 
     except:
-        pass
+        funcs.TemplateLogError(cf.output_path, source_output_path, file_name, traceback.format_exc()).log_error()
     f.close()

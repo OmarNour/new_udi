@@ -1,5 +1,6 @@
 from read_smx_sheet.parameters import parameters as pm
 from read_smx_sheet.app_Lib import functions as funcs
+import traceback
 
 
 def d420(cf, source_output_path, STG_tables, BKEY, BMAP):
@@ -102,5 +103,5 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP):
             create_view_script = create_view + normal_columns + bkey_columns + bmap_columns + from_clause + bkeys_left_join + bmap_left_join + ";\n"
             f.write(create_view_script+"\n")
     except:
-        pass
+        funcs.TemplateLogError(cf.output_path, source_output_path, file_name, traceback.format_exc()).log_error()
     f.close()

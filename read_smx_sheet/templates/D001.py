@@ -1,4 +1,5 @@
 from read_smx_sheet.app_Lib import functions as funcs
+import traceback
 
 
 def d001(cf, source_output_path, source_name, STG_tables):
@@ -14,6 +15,6 @@ def d001(cf, source_output_path, source_name, STG_tables):
             f.write("VALUES ('" + source_name + "', '" + Table_name + "')" + ";\n")
             f.write("\n")
     except:
-        pass
+        funcs.TemplateLogError(cf.output_path, source_output_path, file_name, traceback.format_exc()).log_error()
 
     f.close()

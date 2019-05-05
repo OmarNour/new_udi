@@ -2,6 +2,7 @@ from read_smx_sheet.app_Lib import functions as funcs
 from read_smx_sheet.app_Lib import TransformDDL
 import traceback
 
+
 def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loading_Type):
     file_name = funcs.get_file_name(__file__)
     f = funcs.WriteFile(source_output_path, file_name, "sql")
@@ -93,12 +94,8 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
             f.write("\n")
             f.write("\n")
 
-    except Exception as error:
-        # print(str(error))
-        lf = funcs.WriteFile(cf.output_path, "log", "txt", "a+", True)
-        lf.write(source_output_path)
-        lf.write(file_name)
-        lf.write(traceback.format_exc())
+    except:
+        funcs.TemplateLogError(cf.output_path, source_output_path, file_name, traceback.format_exc()).log_error()
 
     f.close()
 

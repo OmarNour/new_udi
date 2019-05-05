@@ -326,7 +326,7 @@ def get_config_file_values(config_file_path=None):
     return param_dic
 
 
-class WriteFile():
+class WriteFile:
     def __init__(self, file_path, file_name, ext, f_mode="w+", new_line=False):
         self.new_line = new_line
         self.f = open(os.path.join(file_path, file_name + "." + ext), f_mode)
@@ -338,3 +338,21 @@ class WriteFile():
 
     def close(self):
         self.f.close()
+
+
+class TemplateLogError(WriteFile):
+    def __init__(self, log_error_path, file_name_path, error_file_name, error):
+        self.log_error_path = log_error_path
+        self.log_file_name = "log"
+        self.ext = "txt"
+        super().__init__(self.log_error_path, self.log_file_name, self.ext, "a+", True)
+        self.file_name_path = file_name_path
+        self.error_file_name = error_file_name
+        self.error = error
+
+    def log_error(self):
+        error_separator = "##############################################################################"
+        self.write(self.file_name_path)
+        self.write(self.error_file_name)
+        self.write(self.error)
+        self.write(error_separator)

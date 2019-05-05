@@ -1,4 +1,5 @@
 from read_smx_sheet.app_Lib import functions as funcs
+import traceback
 
 
 def d415(cf, source_output_path, STG_tables):
@@ -33,6 +34,6 @@ def d415(cf, source_output_path, STG_tables):
             f.write(del_script)
             f.write(exe_p)
     except:
-        pass
+        funcs.TemplateLogError(cf.output_path, source_output_path, file_name, traceback.format_exc()).log_error()
 
     f.close()

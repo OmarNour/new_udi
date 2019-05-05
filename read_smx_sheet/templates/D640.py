@@ -1,7 +1,7 @@
 from read_smx_sheet.app_Lib import functions as funcs
 import calendar
 import time
-
+import traceback
 
 
 def d640(cf, source_output_path, source_name, Table_mapping):
@@ -21,5 +21,5 @@ def d640(cf, source_output_path, source_name, Table_mapping):
             f.write(call_exp)
 
     except:
-        pass
+        funcs.TemplateLogError(cf.output_path, source_output_path, file_name, traceback.format_exc()).log_error()
     f.close()

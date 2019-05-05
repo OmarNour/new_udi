@@ -1,5 +1,6 @@
 from read_smx_sheet.app_Lib import functions as funcs
 from read_smx_sheet.app_Lib import TransformDDL
+import traceback
 
 
 def d002(cf, source_output_path, Core_tables, Table_mapping):
@@ -54,5 +55,5 @@ def d002(cf, source_output_path, Core_tables, Table_mapping):
                 f.write(hist_col_insert_st)
             f.write("\n \n")
     except:
-        pass
+        funcs.TemplateLogError(cf.output_path, source_output_path, file_name, traceback.format_exc()).log_error()
     f.close()

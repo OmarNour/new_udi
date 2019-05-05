@@ -1,5 +1,6 @@
 from read_smx_sheet.app_Lib import functions as funcs
 from read_smx_sheet.app_Lib import TransformDDL
+import traceback
 
 
 def d610(cf, source_output_path, Table_mapping):
@@ -12,5 +13,5 @@ def d610(cf, source_output_path, Table_mapping):
             core_view = 'REPLACE VIEW '+cf.core_view+'.'+tbl_name+' AS SELECT * FROM ' +cf.core_table+'.'+tbl_name+'; \n'
             f.write(core_view)
     except:
-        pass
+        funcs.TemplateLogError(cf.output_path, source_output_path, file_name, traceback.format_exc()).log_error()
     f.close()

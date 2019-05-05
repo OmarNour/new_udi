@@ -1,6 +1,6 @@
 from read_smx_sheet.app_Lib import functions as funcs
 from read_smx_sheet.app_Lib import TransformDDL
-
+import traceback
 
 # def d607(source_output_path, Core_tables):
 #     file_name = funcs.get_file_name(__file__)
@@ -65,5 +65,5 @@ def d607(cf, source_output_path, Core_tables, BMAP_values):
             lkp_tbl_ddl = lkp_tbl_header + lkp_ddl + core_tech_cols + "\n" + lkp_tbl_pk
             f.write(lkp_tbl_ddl)
     except:
-        pass
+        funcs.TemplateLogError(cf.output_path, source_output_path, file_name, traceback.format_exc()).log_error()
     f.close()

@@ -1,4 +1,5 @@
 from read_smx_sheet.app_Lib import functions as funcs
+import traceback
 
 
 def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
@@ -38,6 +39,6 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
                 f.write("VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL)" + ";\n")
                 f.write("\n")
     except:
-        pass
+        funcs.TemplateLogError(cf.output_path, source_output_path, file_name, traceback.format_exc()).log_error()
 
     f.close()

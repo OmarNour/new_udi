@@ -10,6 +10,7 @@ import dask.dataframe as dd
 from read_smx_sheet.app_Lib import manage_directories as md
 from read_smx_sheet.parameters import parameters as pm
 import datetime as dt
+import psutil
 
 
 def read_excel(file_path, sheet_name, filter=None, reserved_words_validation=None, nan_to_empty=True):
@@ -330,6 +331,14 @@ def get_config_file_values(config_file_path=None):
         param_dic = {}
     return param_dic
 
+
+def server_info():
+    cpu_per = psutil.cpu_percent(interval=0.5, percpu=False)
+    # cpu_ghz = psutil.cpu_freq()
+    # io = psutil.disk_io_counters()
+    mem_per = psutil.virtual_memory()[2]
+
+    return (cpu_per,mem_per)
 
 class WriteFile:
     def __init__(self, file_path, file_name, ext, f_mode="w+", new_line=False):

@@ -352,6 +352,7 @@ class TemplateLogError(WriteFile):
 
     def log_error(self):
         error_separator = "##############################################################################"
+        self.write(str(dt.datetime.now()))
         self.write(self.file_name_path)
         self.write(self.error_file_name)
         self.write(self.error)

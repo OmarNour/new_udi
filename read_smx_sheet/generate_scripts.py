@@ -191,9 +191,10 @@ class GenerateScripts:
 
                 with ProgressBar():
                     smx_files = " smx files" if self.count_smx > 1 else " smx file"
-                    print("Start generating " + str(len(self.parallel_templates)) + " script for " + str(self.count_sources) + " sources from " + str(self.count_smx) + smx_files)
+                    smx_file_sources = " sources" if self.count_sources > 1 else " source"
+                    print("Start generating " + str(len(self.parallel_templates)) + " script for " + str(self.count_sources) + smx_file_sources + " from " + str(self.count_smx) + smx_files)
                     compute(*self.parallel_templates)
-                    self.log_file.write(str(len(self.parallel_templates)) + " script generated for " + str(self.count_sources) + " sources from " + str(self.count_smx) + smx_files)
+                    self.log_file.write(str(len(self.parallel_templates)) + " script generated for " + str(self.count_sources) + smx_file_sources + " from " + str(self.count_smx) + smx_files)
 
             self.error_message = ""
             os.startfile(self.cf.output_path)

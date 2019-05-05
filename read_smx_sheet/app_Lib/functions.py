@@ -292,7 +292,12 @@ def get_config_file_values(config_file_path=None):
 
         ################################################################################################
         dt_now = dt.datetime.now()
-        dt_folder = dt_now.strftime("%Y") + "_" + dt_now.strftime("%b").upper() + "_" + dt_now.strftime("%d") + "_" + dt_now.strftime("%H") + "_" + dt_now.strftime("%M")
+        dt_folder = dt_now.strftime("%Y") + "_" + \
+                    dt_now.strftime("%b").upper() + "_" + \
+                    dt_now.strftime("%d") + "_" + \
+                    dt_now.strftime("%H") + "_" + \
+                    dt_now.strftime("%M") + "_" + \
+                    dt_now.strftime("%S")
         param_dic['output_path'] = param_dic["home_output_folder"] + "/" + dt_folder
 
         db_prefix = param_dic['db_prefix']

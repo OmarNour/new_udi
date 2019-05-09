@@ -343,7 +343,7 @@ def server_info():
 class WriteFile:
     def __init__(self, file_path, file_name, ext, f_mode="w+", new_line=False):
         self.new_line = new_line
-        self.f = open(os.path.join(file_path, file_name + "." + ext), f_mode)
+        self.f = open(os.path.join(file_path, file_name + "." + ext), f_mode, encoding="utf-8")
 
     def write(self, txt, new_line=None):
         self.f.write(txt)

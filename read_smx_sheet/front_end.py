@@ -19,7 +19,7 @@ class FrontEnd:
         self.root = Tk()
         img_icon = PhotoImage(file=os.path.join(md.get_dirs()[0], 'script_icon.png'))
         self.root.tk.call('wm', 'iconphoto', self.root._w, img_icon)
-        self.root.wm_title("SMX Scripts Builder v.27")
+        self.root.wm_title("SMX Scripts Builder v.28")
         self.root.resizable(width="false", height="false")
         self.msg_no_config_file = "No Config File Found!"
         self.color_msg_no_config_file = "red"

@@ -340,6 +340,7 @@ def server_info():
 
     return (cpu_per,mem_per)
 
+
 class WriteFile:
     def __init__(self, file_path, file_name, ext, f_mode="w+", new_line=False):
         self.new_line = new_line

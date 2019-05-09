@@ -8,6 +8,7 @@ from read_smx_sheet.templates import D300, D320, D200, D330, D400, D610, D640
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
 from read_smx_sheet.parameters import parameters as pm
 import traceback
+import datetime as dt
 
 
 class LogFile(funcs.WriteFile):
@@ -60,6 +61,7 @@ class ConfigFile:
 
 class GenerateScripts:
     def __init__(self, config_file=None, config_file_values=None):
+        self.start_time = dt.datetime.now()
         self.cf = ConfigFile(config_file, config_file_values)
         md.remove_folder(self.cf.output_path)
         md.create_folder(self.cf.output_path)
@@ -91,6 +93,7 @@ class GenerateScripts:
         print("Output folder: \t" + self.cf.output_path)
         print("SMX files:")
         filtered_sources = []
+        self.start_time = dt.datetime.now()
         try:
             smx_files = funcs.get_smx_files(self.cf.smx_path, self.smx_ext, self.sheets)
             for smx in smx_files:
@@ -195,7 +198,8 @@ class GenerateScripts:
                     print("Start generating " + str(len(self.parallel_templates)) + " script for " + str(self.count_sources) + smx_file_sources + " from " + str(self.count_smx) + smx_files)
                     compute(*self.parallel_templates)
                     self.log_file.write(str(len(self.parallel_templates)) + " script generated for " + str(self.count_sources) + smx_file_sources + " from " + str(self.count_smx) + smx_files)
-
+                    self.elapsed_time = dt.datetime.now() - self.start_time
+                    self.log_file.write("Elapsed Time: " + str(self.elapsed_time))
             self.error_message = ""
             os.startfile(self.cf.output_path)
         else:

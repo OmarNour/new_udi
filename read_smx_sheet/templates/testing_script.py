@@ -54,16 +54,16 @@ def source_testing_script(cf, source_output_path, source_name, Table_mapping, Co
                                     "\nFROM" \
                                     "\n(" \
                                     "\n\tSELECT COUNT(*) BKEY_CNT" \
-                                    "\n\tFROM GDEV1V_STG." + SOURCE_TABLE + " X" \
-                                    "\n\tLEFT JOIN GDEV1V_UTLFW." + PHYSICAL_NAME + " AS BK1" \
+                                    "\n\tFROM " + cf.v_stg + "." + SOURCE_TABLE + " X" \
+                                    "\n\tLEFT JOIN " + cf.UTLFW_v + "." + PHYSICAL_NAME + " AS BK1" \
                                     "\n\tON BK1.SOURCE_KEY = TRIM(" + NATURAL_KEY + ") AND BK1.DOMAIN_ID = " + KEY_DOMAIN_ID_VALUE + "" \
                                     "\n\tWHERE EDW_KEY IS NULL" \
                                     "\n)BK_CHECK," \
                                     "\n(" \
                                     "\n\tSELECT COUNT(*) CORE_CNT" \
-                                    "\n\tFROM (SELECT * FROM GDEV1V_UTLFW." + PHYSICAL_NAME + " WHERE DOMAIN_ID=" + KEY_DOMAIN_ID_VALUE + ")BK1" \
-                                    "\n\tINNER JOIN GDEV1V_STG." + SOURCE_TABLE + " SRC ON BK1.SOURCE_KEY = TRIM(" + NATURAL_KEY + ")" \
-                                    "\n\tLEFT JOIN GDEV1V_BASE." + TARGET_TABLE_NAME + " CORE ON EDW_KEY = " + TARGET_COLUMN_NAME + "" \
+                                    "\n\tFROM (SELECT * FROM " + cf.UTLFW_v + "." + PHYSICAL_NAME + " WHERE DOMAIN_ID=" + KEY_DOMAIN_ID_VALUE + ")BK1" \
+                                    "\n\tINNER JOIN " + cf.v_stg + "." + SOURCE_TABLE + " SRC ON BK1.SOURCE_KEY = TRIM(" + NATURAL_KEY + ")" \
+                                    "\n\tLEFT JOIN " + cf.core_view + "." + TARGET_TABLE_NAME + " CORE ON EDW_KEY = " + TARGET_COLUMN_NAME + "" \
                                     "\n\tWHERE " + TARGET_COLUMN_NAME + " IS NULL" \
                                     "\n)CORE_CHECK;\n\n"
 

@@ -4,7 +4,7 @@ sys.path.append(os.getcwd())
 from read_smx_sheet.app_Lib import manage_directories as md, functions as funcs
 from dask import compute, delayed, config
 from dask.diagnostics import ProgressBar
-from read_smx_sheet.templates import D300, D320, D200, D330, D400, D610, D640
+from read_smx_sheet.templates import D300, D320, D200, D330, D400, D610, D640, testing_script
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
 from read_smx_sheet.parameters import parameters as pm
 import traceback
@@ -171,6 +171,8 @@ class GenerateScripts:
                         self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loading_Type))
                         self.parallel_templates.append(delayed(D630.d630)(self.cf, source_output_path, Table_mapping))
                         self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, Table_mapping))
+
+                        self.parallel_templates.append(delayed(testing_script.source_testing_script)(self.cf, source_output_path, source_name, Table_mapping, Column_mapping, STG_tables, BKEY))
                     except Exception as error:
                         # print(error)
                         # traceback.print_exc()

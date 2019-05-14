@@ -355,6 +355,25 @@ class WriteFile:
         self.f.close()
 
 
+class SMXFilesLogError(WriteFile):
+    def __init__(self, log_error_path, smx_file_name, system_row, error):
+        self.log_error_path = log_error_path
+        self.log_file_name = "log"
+        self.ext = "txt"
+        super().__init__(self.log_error_path, self.log_file_name, self.ext, "a+", True)
+        self.smx_file_name = smx_file_name
+        self.system_row = system_row
+        self.error = error
+
+    def log_error(self):
+        error_separator = "##############################################################################"
+        self.write(str(dt.datetime.now()))
+        self.write(self.smx_file_name) if self.smx_file_name else None
+        self.write(self.system_row) if self.system_row else None
+        self.write(self.error)
+        self.write(error_separator)
+
+
 class TemplateLogError(WriteFile):
     def __init__(self, log_error_path, file_name_path, error_file_name, error):
         self.log_error_path = log_error_path

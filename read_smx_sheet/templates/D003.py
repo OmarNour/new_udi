@@ -8,7 +8,7 @@ def d003(cf, source_output_path,BMAP_values, BMAP):
     f = funcs.WriteFile(source_output_path, file_name, "sql")
     try:
         BMAP_values = BMAP_values[BMAP_values["Code set name"] != '']
-        insert_st_header = "INSERT INTO " + cf.UTLFW_v + ".BMAP_STANDARD_MAP ( \n"
+        insert_st_header = "INSERT INTO " + cf.UTLFW_t + ".BMAP_STANDARD_MAP ( \n"
         bm_tbl_cols = "Source_Code \n"+",Domain_Id  \n" + ",Code_Set_Id  \n" + ",EDW_Code  \n" + ",Description  \n"
         bm_tbl_cols += ",Start_Date  \n" + ",End_Date  \n" + ",Record_Deleted_Flag  \n" + ",Ctl_Id  \n" + ",Process_Name \n"
         bm_tbl_cols += ",Process_Id  \n" + ",Update_Process_Name  \n" + ",Update_Process_Id  \n) VALUES ( \n"
@@ -17,12 +17,12 @@ def d003(cf, source_output_path,BMAP_values, BMAP):
         for bmap_index, bmap_row in BMAP_values.iterrows():
             domain_id = ""
             edw_code = ""
-            if (bmap_row["Code domain ID"] != ''):
+            if bmap_row["Code domain ID"] != '':
                 domain_id = int(bmap_row["Code domain ID"])#int( str(bmap_row["Code domain ID"]).strip())
                 domain_id = str(domain_id)
             code_set_id = TransformDDL.get_bmap_code_set_id(BMAP, bmap_row["Code set name"])
 
-            if (bmap_row["EDW code"] != ''):
+            if bmap_row["EDW code"] != '':
                  edw_code = int(bmap_row["EDW code"])
                  edw_code = str(edw_code)
 
@@ -34,7 +34,7 @@ def d003(cf, source_output_path,BMAP_values, BMAP):
 
             insert_st= insert_st_header + insert_vals
 
-            del_st = "DELETE FROM " + cf.UTLFW_v + ".BMAP_STANDARD_MAP \n WHERE Domain_Id = '" + domain_id + "'\n"
+            del_st = "DELETE FROM " + cf.UTLFW_t + ".BMAP_STANDARD_MAP \n WHERE Domain_Id = '" + domain_id + "'\n"
             del_st += "AND EDW_Code = '" + edw_code + "' \n AND Code_Set_Id = '" + code_set_id + "';"
             f.write(del_st)
             f.write("\n")

@@ -79,7 +79,7 @@ class FrontEnd:
         frame_buttons.grid(column=1, row=0)
         self.generate_button = Button(frame_buttons, text="Start", width=12, height=2, command=self.start)
         self.generate_button.grid(row=2, column=0)
-        close_button = Button(frame_buttons, text="Exit", width=12, height=2, command=self.root.destroy)
+        close_button = Button(frame_buttons, text="Exit", width=12, height=2, command=self.close)
         close_button.grid(row=3, column=0)
 
         frame_config_file_values = Frame(frame_row1, borderwidth="2", relief="ridge")
@@ -225,6 +225,14 @@ class FrontEnd:
                 traceback.print_exc()
         except:
             self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
+
+    def destroyer(self):
+        self.root.quit()
+        self.root.destroy()
+        sys.exit()
+
+    def close(self):
+        self.root.protocol("WM_DELETE_WINDOW", self.destroyer())
 
     def start(self):
 

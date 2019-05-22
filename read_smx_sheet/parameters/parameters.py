@@ -70,5 +70,5 @@ STG_tables_sht = "STG tables"
 Table_mapping_sht = "Table mapping"
 Core_tables_sht = "Core tables"
 sheets = [System_sht, Supplements_sht, Column_mapping_sht, BMAP_values_sht, BMAP_sht, BKEY_sht, STG_tables_sht, Table_mapping_sht, Core_tables_sht]
-ver_no = "v.35"
+ver_no = "v.38"
 # ################################################################################################

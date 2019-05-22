@@ -5,7 +5,7 @@ import traceback
 def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
     file_name = funcs.get_file_name(__file__)
     f = funcs.WriteFile(source_output_path, file_name, "sql")
-    f.write("delete from " + cf.GCFR_t + "." + cf.etl_process_table + " where SOURCE_NAME = '" + source_name + "';\n")
+    f.write("delete from " + cf.GCFR_t + "." + cf.etl_process_table + " where SOURCE_NAME = '" + source_name + "';\n\n")
     try:
         for table_maping_index, table_maping_row in Table_mapping.iterrows():
             prcess_type = "TXF"

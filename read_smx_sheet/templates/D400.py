@@ -11,7 +11,7 @@ def d400(cf, source_output_path, STG_tables):
             Table_name = stg_tables_df_row['Table name']
             Fallback = ', Fallback' if stg_tables_df_row['Fallback'].upper() == 'Y' else ''
 
-            create_stg_table = "create multiset table " + cf.T_STG + "." + Table_name + Fallback + "\n" + "(\n"
+            create_stg_table = "create multiset table " + cf.SI_DB + "." + Table_name + Fallback + "\n" + "(\n"
 
             STG_table_columns = funcs.get_stg_table_columns(STG_tables, None, Table_name, True)
 

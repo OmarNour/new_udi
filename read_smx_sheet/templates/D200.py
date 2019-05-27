@@ -5,8 +5,9 @@ import traceback
 def d200(cf, source_output_path, STG_tables):
     file_name = funcs.get_file_name(__file__)
     f = funcs.WriteFile(source_output_path, file_name, "sql")
+    MODIFICATION_TYPE_found = 0
+    INS_DTTM = ",INS_DTTM  TIMESTAMP(6) NOT NULL \n"
     try:
-        INS_DTTM = ",INS_DTTM  TIMESTAMP(6) NOT NULL \n"
         stg_tables_df = funcs.get_stg_tables(STG_tables, None)
         for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
             Table_name = stg_tables_df_row['Table name']
@@ -20,7 +21,8 @@ def d200(cf, source_output_path, STG_tables):
             pi_columns = ""
             for STG_table_columns_index, STG_table_columns_row in STG_table_columns.iterrows():
                 Column_name = STG_table_columns_row['Column name']
-
+                if Column_name == "MODIFICATION_TYPE":
+                    MODIFICATION_TYPE_found = 1
                 comma = ',' if STG_table_columns_index > 0 else ' '
                 comma_Column_name = comma + Column_name
 
@@ -44,8 +46,12 @@ def d200(cf, source_output_path, STG_tables):
 
             Primary_Index = ")Primary Index (" + pi_columns + ")"
 
-            create_stg_table = create_stg_table + INS_DTTM + seq_column + Primary_Index
-            create_wrk_table = create_wrk_table + INS_DTTM + wrk_extra_columns + seq_column + Primary_Index
+            if MODIFICATION_TYPE_found == 0:
+                MODIFICATION_TYPE = ",MODIFICATION_TYPE char(1) CHARACTER SET UNICODE NOT CASESPECIFIC  not null\n"
+            else:
+                MODIFICATION_TYPE = ""
+            create_stg_table = create_stg_table + MODIFICATION_TYPE + INS_DTTM + seq_column + Primary_Index
+            create_wrk_table = create_wrk_table + MODIFICATION_TYPE + INS_DTTM + wrk_extra_columns + seq_column + Primary_Index
 
             create_stg_table = create_stg_table + ";\n\n"
             create_wrk_table = create_wrk_table + ";\n\n"

@@ -132,48 +132,49 @@ class GenerateScripts:
                     for system_index, system_row in teradata_sources.iterrows():
                         try:
                             Loading_Type = system_row['Loading type'].upper()
-                            source_name = system_row['Source system name']
-                            filtered_sources.append(source_name)
-                            source_name_filter = [['Source', [source_name]]]
-                            stg_source_name_filter = [['Source system name', [source_name]]]
+                            if Loading_Type != "":
+                                source_name = system_row['Source system name']
+                                filtered_sources.append(source_name)
+                                source_name_filter = [['Source', [source_name]]]
+                                stg_source_name_filter = [['Source system name', [source_name]]]
 
-                            Table_mapping = delayed(funcs.read_excel)(smx_file_path, self.Table_mapping_sht, source_name_filter)
+                                Table_mapping = delayed(funcs.read_excel)(smx_file_path, self.Table_mapping_sht, source_name_filter)
 
-                            STG_tables = delayed(funcs.read_excel)(smx_file_path, self.STG_tables_sht, stg_source_name_filter)
-                            STG_tables = delayed(funcs.rename_sheet_reserved_word)(STG_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
+                                STG_tables = delayed(funcs.read_excel)(smx_file_path, self.STG_tables_sht, stg_source_name_filter)
+                                STG_tables = delayed(funcs.rename_sheet_reserved_word)(STG_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
 
-                            source_output_path = home_output_path + "/" + Loading_Type + "/" + source_name
+                                source_output_path = home_output_path + "/" + Loading_Type + "/" + source_name
 
-                            self.parallel_create_output_source_path.append(delayed(md.create_folder)(source_output_path))
+                                self.parallel_create_output_source_path.append(delayed(md.create_folder)(source_output_path))
 
-                            self.parallel_templates.append(delayed(D000.d000)(self.cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY))
-                            self.parallel_templates.append(delayed(D001.d001)(self.cf, source_output_path, source_name, STG_tables))
-                            self.parallel_templates.append(delayed(D002.d002)(self.cf, source_output_path, Core_tables, Table_mapping))
-                            self.parallel_templates.append(delayed(D003.d003)(self.cf, source_output_path, BMAP_values, BMAP))
+                                self.parallel_templates.append(delayed(D000.d000)(self.cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY))
+                                self.parallel_templates.append(delayed(D001.d001)(self.cf, source_output_path, source_name, STG_tables))
+                                self.parallel_templates.append(delayed(D002.d002)(self.cf, source_output_path, Core_tables, Table_mapping))
+                                self.parallel_templates.append(delayed(D003.d003)(self.cf, source_output_path, BMAP_values, BMAP))
 
-                            self.parallel_templates.append(delayed(D200.d200)(self.cf, source_output_path, STG_tables))
-                            self.parallel_templates.append(delayed(D210.d210)(self.cf, source_output_path, STG_tables))
+                                self.parallel_templates.append(delayed(D200.d200)(self.cf, source_output_path, STG_tables))
+                                self.parallel_templates.append(delayed(D210.d210)(self.cf, source_output_path, STG_tables))
 
-                            self.parallel_templates.append(delayed(D300.d300)(self.cf, source_output_path, STG_tables, BKEY))
-                            self.parallel_templates.append(delayed(D320.d320)(self.cf, source_output_path, STG_tables, BKEY))
-                            self.parallel_templates.append(delayed(D330.d330)(self.cf, source_output_path, STG_tables, BKEY))
-                            self.parallel_templates.append(delayed(D340.d340)(self.cf, source_output_path, STG_tables, BKEY))
+                                self.parallel_templates.append(delayed(D300.d300)(self.cf, source_output_path, STG_tables, BKEY))
+                                self.parallel_templates.append(delayed(D320.d320)(self.cf, source_output_path, STG_tables, BKEY))
+                                self.parallel_templates.append(delayed(D330.d330)(self.cf, source_output_path, STG_tables, BKEY))
+                                self.parallel_templates.append(delayed(D340.d340)(self.cf, source_output_path, STG_tables, BKEY))
 
-                            self.parallel_templates.append(delayed(D400.d400)(self.cf, source_output_path, STG_tables))
-                            self.parallel_templates.append(delayed(D410.d410)(self.cf, source_output_path, STG_tables))
-                            self.parallel_templates.append(delayed(D415.d415)(self.cf, source_output_path, STG_tables))
-                            self.parallel_templates.append(delayed(D420.d420)(self.cf, source_output_path, STG_tables, BKEY, BMAP))
+                                self.parallel_templates.append(delayed(D400.d400)(self.cf, source_output_path, STG_tables))
+                                self.parallel_templates.append(delayed(D410.d410)(self.cf, source_output_path, STG_tables))
+                                self.parallel_templates.append(delayed(D415.d415)(self.cf, source_output_path, STG_tables))
+                                self.parallel_templates.append(delayed(D420.d420)(self.cf, source_output_path, STG_tables, BKEY, BMAP))
 
-                            self.parallel_templates.append(delayed(D600.d600)(self.cf, source_output_path, Table_mapping, Core_tables))
-                            self.parallel_templates.append(delayed(D607.d607)(self.cf, source_output_path, Core_tables, BMAP_values))
-                            self.parallel_templates.append(delayed(D608.d608)(self.cf, source_output_path, Core_tables, BMAP_values))
-                            self.parallel_templates.append(delayed(D610.d610)(self.cf, source_output_path, Table_mapping))
-                            self.parallel_templates.append(delayed(D615.d615)(self.cf, source_output_path, Core_tables))
-                            self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loading_Type))
-                            self.parallel_templates.append(delayed(D630.d630)(self.cf, source_output_path, Table_mapping))
-                            self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, Table_mapping))
+                                self.parallel_templates.append(delayed(D600.d600)(self.cf, source_output_path, Table_mapping, Core_tables))
+                                self.parallel_templates.append(delayed(D607.d607)(self.cf, source_output_path, Core_tables, BMAP_values))
+                                self.parallel_templates.append(delayed(D608.d608)(self.cf, source_output_path, Core_tables, BMAP_values))
+                                self.parallel_templates.append(delayed(D610.d610)(self.cf, source_output_path, Table_mapping))
+                                self.parallel_templates.append(delayed(D615.d615)(self.cf, source_output_path, Core_tables))
+                                self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loading_Type))
+                                self.parallel_templates.append(delayed(D630.d630)(self.cf, source_output_path, Table_mapping))
+                                self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, Table_mapping))
 
-                            self.parallel_templates.append(delayed(testing_script.source_testing_script)(self.cf, source_output_path, source_name, Table_mapping, Column_mapping, STG_tables, BKEY))
+                                self.parallel_templates.append(delayed(testing_script.source_testing_script)(self.cf, source_output_path, source_name, Table_mapping, Column_mapping, STG_tables, BKEY))
 
                         except Exception as e_source:
                             # print(error)

@@ -2,7 +2,7 @@ from read_smx_sheet.app_Lib import functions as funcs
 import traceback
 
 
-def d200(cf, source_output_path, STG_tables):
+def d200(cf, source_output_path, STG_tables, Loading_Type):
     file_name = funcs.get_file_name(__file__)
     f = funcs.WriteFile(source_output_path, file_name, "sql")
     MODIFICATION_TYPE_found = 0
@@ -46,7 +46,7 @@ def d200(cf, source_output_path, STG_tables):
 
             Primary_Index = ")Primary Index (" + pi_columns + ")"
 
-            if MODIFICATION_TYPE_found == 0:
+            if MODIFICATION_TYPE_found == 0 and Loading_Type.upper() == "OFFLINE_CDC":
                 MODIFICATION_TYPE = ",MODIFICATION_TYPE char(1) CHARACTER SET UNICODE NOT CASESPECIFIC  not null\n"
             else:
                 MODIFICATION_TYPE = ""

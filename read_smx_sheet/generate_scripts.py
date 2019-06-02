@@ -153,7 +153,7 @@ class GenerateScripts:
                                 self.parallel_templates.append(delayed(D003.d003)(self.cf, source_output_path, BMAP_values, BMAP))
 
                                 self.parallel_templates.append(delayed(D200.d200)(self.cf, source_output_path, STG_tables, Loading_Type))
-                                self.parallel_templates.append(delayed(D210.d210)(self.cf, source_output_path, STG_tables))
+                                self.parallel_templates.append(delayed(D210.d210)(self.cf, source_output_path, STG_tables, Loading_Type))
 
                                 self.parallel_templates.append(delayed(D300.d300)(self.cf, source_output_path, STG_tables, BKEY))
                                 self.parallel_templates.append(delayed(D320.d320)(self.cf, source_output_path, STG_tables, BKEY))

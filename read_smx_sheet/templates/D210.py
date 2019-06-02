@@ -2,7 +2,7 @@ from read_smx_sheet.app_Lib import functions as funcs
 import traceback
 
 
-def d210(cf, source_output_path, STG_tables):
+def d210(cf, source_output_path, STG_tables, Loading_Type):
     file_name = funcs.get_file_name(__file__)
     f = funcs.WriteFile(source_output_path, file_name, "sql")
     INS_DTTM = ",CURRENT_TIMESTAMP AS INS_DTTM \n"
@@ -27,7 +27,7 @@ def d210(cf, source_output_path, STG_tables):
 
                 create_stg_view = create_stg_view + comma_Column_name + "\n"
 
-            if MODIFICATION_TYPE_found == 0:
+            if MODIFICATION_TYPE_found == 0 and Loading_Type == "OFFLINE_CDC":
                 MODIFICATION_TYPE = ",MODIFICATION_TYPE\n"
             else:
                 MODIFICATION_TYPE = ""

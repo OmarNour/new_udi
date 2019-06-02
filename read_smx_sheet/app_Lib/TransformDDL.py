@@ -1,5 +1,5 @@
 import pandas as pd
-
+from read_smx_sheet.app_Lib import functions as funcs
 
 def get_sub_query(cf, subquery,src_layer,main_src):
     if src_layer == "SEM":
@@ -116,14 +116,16 @@ def get_select_clause(target_table,Core_tables,table_maping_name, Column_mapping
         src_tbl = col_map_row['Mapped to table']
         src_col = col_map_row['Mapped to column']
 
-        sql_const=col_map_row['Transformation rule']
+        sql_const = str(col_map_row['Transformation rule'])
+        if sql_const.upper() == funcs.single_quotes("NULL"):
+            sql_const = "NULL"
 
         trgt_col_data_type = get_column_data_type(Core_tables, col_map_row['Column name'], target_table)
         src=""
         if src_tbl != "":
             src = 'Cast (' + src_tbl + '.' + src_col + ' AS ' + trgt_col_data_type + ')'
         if sql_const != "":
-            src = 'Cast (' + str(sql_const)+ ' AS ' + trgt_col_data_type + ')'
+            src = 'Cast (' + sql_const+ ' AS ' + trgt_col_data_type + ')'
 
         trgt_col = ' AS '+col_map_row['Column name']
         sel_ready=str(src)+str(trgt_col)+',\n'

@@ -37,8 +37,11 @@ def d002(cf, source_output_path, Core_tables, Table_mapping):
             f.write("--History_keys \n")
             for hist_key in history_key_list:
                 hist_key_insert_st = process_name + "','" + process_name + "','" + trgt_tbl + "','" + tbl_mapping_name + "','" + start_date_column
-                hist_key_insert_st += "','" + end_date_column + "'," + "null,'"
-                hist_key_insert_st += hist_key + "'); \n"
+                hist_key_insert_st += "','" + end_date_column + "'," + "null,"
+                if hist_key != "undefined":
+                    hist_key = funcs.single_quotes(hist_key)
+
+                hist_key_insert_st += hist_key + "); \n"
                 f.write(hist_key_insert_header)
                 f.write(hist_key_insert_st)
 
@@ -48,9 +51,13 @@ def d002(cf, source_output_path, Core_tables, Table_mapping):
             # f.write("\n")
 
             for hist_col in history_column_list:
-                if (hist_col == ''): hist_col = "undefined"
+                if hist_col == '':
+                    hist_col = "undefined"
+                else:
+                    hist_col = funcs.single_quotes(hist_col)
+
                 hist_col_insert_st = process_name + "','" + process_name + "','" + trgt_tbl + "','" + tbl_mapping_name + "','" + start_date_column
-                hist_col_insert_st += "','" + end_date_column + "','" + hist_col + "'," +"null); \n"
+                hist_col_insert_st += "','" + end_date_column + "'," + hist_col + "," +"null); \n"
                 f.write(hist_key_insert_header)
                 f.write(hist_col_insert_st)
             f.write("\n \n")

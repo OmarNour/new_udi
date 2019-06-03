@@ -33,7 +33,7 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP):
             else:
                 seq_pk_col = " "
 
-            create_view = "REPLACE VIEW " + cf.SI_VIEW + "." + stg_table_name + " AS\nSELECT \n"
+            create_view = "REPLACE VIEW " + cf.SI_VIEW + "." + stg_table_name + " AS LOCK ROW FOR ACCESS\nSELECT \n"
             from_clause = "FROM " + cf.v_stg + "." + stg_table_name + " t"
             STG_table_columns = funcs.get_stg_table_columns(STG_tables, None, stg_table_name, True)
 

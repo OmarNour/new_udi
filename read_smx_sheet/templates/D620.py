@@ -18,7 +18,7 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
             src_layer=str(table_maping_row['Source layer'])
             process_name = process_type + "_" + layer + "_" + table_maping_name
 
-            inp_view_header = 'REPLACE VIEW ' + cf.INPUT_VIEW_DB + '.' + process_name + '_IN AS'
+            inp_view_header = 'REPLACE VIEW ' + cf.INPUT_VIEW_DB + '.' + process_name + '_IN AS LOCK ROW FOR ACCESS'
             target_table = str(table_maping_row['Target table name'])
             main_src=table_maping_row['Main source']
             # core_tables_list= pd.unique(list(Core_tables['Table name']))

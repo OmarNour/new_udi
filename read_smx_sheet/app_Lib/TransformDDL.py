@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from read_smx_sheet.app_Lib import functions as funcs
 
 def get_sub_query(cf, subquery,src_layer,main_src):
@@ -171,16 +172,37 @@ def get_core_tbl_end_date_column (Core_tables, tbl_name):
     return end_date_col
 
 
-def get_core_tbl_hist_keys_list (Core_tables, tbl_name):
-    try:
-        hist_keys = Core_tables[ (Core_tables['Table name'] == tbl_name) & (Core_tables['Historization key'] == "Y")]
-        hist_keys_list=pd.unique(list(hist_keys['Column name']))
-        if (len(hist_keys_list)==0):
+# def get_core_tbl_hist_keys_list (Core_tables, tbl_name):
+#     try:
+#         hist_keys = Core_tables[ (Core_tables['Table name'] == tbl_name) & (Core_tables['Historization key'] == "Y")]
+#         hist_keys_list=pd.unique(list(hist_keys['Column name']))
+#         if (len(hist_keys_list)==0):
+#             hist_keys_list={"undefined"}
+#
+#     except Exception as error:
+#         hist_keys_list ={"undefined"}
+#         # print(error)
+#         # print("hist_keys for tbl ", tbl_name, " is undefined")
+#         return hist_keys_list
+#     return hist_keys_list
+
+
+def get_core_tbl_hist_keys_list (Core_tables, tbl_name , history_column_list):
+    # try:
+        # primary_keys = Core_tables[(Core_tables['Table name'] == tbl_name) & (Core_tables['PK'] == "Y")]
+        # hist_keys = Core_tables[ (Core_tables['Table name'] == tbl_name) & (Core_tables['Historization key'] == "Y")]
+    #
+        hist_keys = Core_tables[(Core_tables['Table name'] == tbl_name) & (Core_tables['PK'] == "Y") & (Core_tables['Historization key']!= "S") & (Core_tables['Historization key']!= "E")]
+        hist_keys_list = pd.unique(list(hist_keys['Column name']))
+        # print("tbl_name ", tbl_name, " hist keys : ", hist_keys, " hist_keys_list no diff: ", hist_keys_list)
+        hist_keys_list = np.setdiff1d(hist_keys_list, history_column_list )
+        # print("tbl_name ", tbl_name, " hist keys : ", hist_keys, " hist_keys_list  diff: ", hist_keys_list)
+        if len(hist_keys_list)== 0:
             hist_keys_list={"undefined"}
 
-    except Exception as error:
-        hist_keys_list ={"undefined"}
-        # print(error)
-        # print("hist_keys for tbl ", tbl_name, " is undefined")
+    # except Exception as error:
+    #     hist_keys_list ={"undefinedxx"}
+    #     # print(error)
+    #     # print("hist_keys for tbl ", tbl_name, " is undefined")
+    #     return hist_keys_list
         return hist_keys_list
-    return hist_keys_list

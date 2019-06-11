@@ -20,7 +20,8 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
 
             inp_view_header = 'REPLACE VIEW ' + cf.INPUT_VIEW_DB + '.' + process_name + '_IN AS LOCK ROW FOR ACCESS'
             target_table = str(table_maping_row['Target table name'])
-            main_src=table_maping_row['Main source']
+            apply_type = table_maping_row['Historization algorithm']
+            main_src = table_maping_row['Main source']
             # core_tables_list= pd.unique(list(Core_tables['Table name']))
             core_tables_list= TransformDDL.get_core_tables_list(Core_tables)
 
@@ -34,8 +35,10 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
                 notes += msg
                 continue
 
-
-            sub = "/* Target table:	"+target_table+"*/"+'\n'+"/* Table mapping:	"+table_maping_name +"*/"+'\n'+"/* Mapping group:	"+table_maping_row['Mapping group'] +"*/"
+            sub = "/* Target table:\t" + target_table + "*/" + '\n'\
+                  + "/* Table mapping:\t" + table_maping_name + "*/" + '\n'\
+                  + "/* Mapping group:\t" + table_maping_row['Mapping group'] + "*/" + '\n' \
+                  + "/* Apply type:\t\t" + apply_type + "*/"
             inp_view_select_clause='SELECT ' +'\n' + sub + TransformDDL.get_select_clause(target_table, Core_tables, table_maping_name, Column_mapping)
             map_grp = ' CAST(' +funcs.single_quotes(table_maping_row['Mapping group'])+' AS VARCHAR(100)) AS  MAP_GROUP ,'
             start_date = '(SELECT Business_Date FROM ' + cf.GCFR_V + '.GCFR_Process_Id'+'\n'+'   WHERE Process_Name = ' + "'" + process_name + "'"+'\n'+') AS Start_Date,'

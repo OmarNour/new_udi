@@ -4,7 +4,7 @@ sys.path.append(os.getcwd())
 from read_smx_sheet.app_Lib import manage_directories as md, functions as funcs
 from dask import compute, delayed, config
 from dask.diagnostics import ProgressBar
-from read_smx_sheet.templates import D300, D320, D200, D330, D400, D610, D640, testing_script
+from read_smx_sheet.templates import D110, D300, D320, D200, D330, D400, D610, D640, testing_script
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
 from read_smx_sheet.parameters import parameters as pm
 import traceback
@@ -57,6 +57,11 @@ class ConfigFile:
         self.TMP_DB = self.config_file_values["TMP_DB"]
         self.APPLY_DB = self.config_file_values["APPLY_DB"]
         self.SI_VIEW = self.config_file_values["SI_VIEW"]
+
+        self.online_source_t = self.config_file_values["online_source_t"]
+        self.online_source_v = self.config_file_values["online_source_v"]
+        self.offline_source_t = self.config_file_values["offline_source_t"]
+        self.offline_source_v = self.config_file_values["offline_source_v"]
 
 
 class GenerateScripts:
@@ -151,6 +156,8 @@ class GenerateScripts:
                                 self.parallel_templates.append(delayed(D001.d001)(self.cf, source_output_path, source_name, STG_tables))
                                 self.parallel_templates.append(delayed(D002.d002)(self.cf, source_output_path, Core_tables, Table_mapping))
                                 self.parallel_templates.append(delayed(D003.d003)(self.cf, source_output_path, BMAP_values, BMAP))
+
+                                self.parallel_templates.append(delayed(D110.d110)(self.cf, source_output_path, STG_tables, Loading_Type))
 
                                 self.parallel_templates.append(delayed(D200.d200)(self.cf, source_output_path, STG_tables, Loading_Type))
                                 self.parallel_templates.append(delayed(D210.d210)(self.cf, source_output_path, STG_tables, Loading_Type))

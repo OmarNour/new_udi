@@ -188,21 +188,20 @@ def get_core_tbl_end_date_column (Core_tables, tbl_name):
 
 
 def get_core_tbl_hist_keys_list (Core_tables, tbl_name , history_column_list):
-    # try:
+     try:
         # primary_keys = Core_tables[(Core_tables['Table name'] == tbl_name) & (Core_tables['PK'] == "Y")]
         # hist_keys = Core_tables[ (Core_tables['Table name'] == tbl_name) & (Core_tables['Historization key'] == "Y")]
-    #
+        hist_col_list = history_column_list
         hist_keys = Core_tables[(Core_tables['Table name'] == tbl_name) & (Core_tables['PK'] == "Y") & (Core_tables['Historization key']!= "S") & (Core_tables['Historization key']!= "E")]
         hist_keys_list = pd.unique(list(hist_keys['Column name']))
-        # print("tbl_name ", tbl_name, " hist keys : ", hist_keys, " hist_keys_list no diff: ", hist_keys_list)
-        hist_keys_list = np.setdiff1d(hist_keys_list, history_column_list )
-        # print("tbl_name ", tbl_name, " hist keys : ", hist_keys, " hist_keys_list  diff: ", hist_keys_list)
-        if len(hist_keys_list)== 0:
+        hist_keys_list = np.setdiff1d(hist_keys_list, hist_col_list )
+
+        if (len(hist_keys_list)==0):
             hist_keys_list={"undefined"}
 
-    # except Exception as error:
-    #     hist_keys_list ={"undefinedxx"}
-    #     # print(error)
-    #     # print("hist_keys for tbl ", tbl_name, " is undefined")
-    #     return hist_keys_list
+     except Exception as error:
+        hist_keys_list ={"undefine"}
+        # print(error)
+        # print("hist_keys for tbl ", tbl_name, " is undefined")
         return hist_keys_list
+     return hist_keys_list

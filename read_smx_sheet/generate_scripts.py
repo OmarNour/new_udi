@@ -167,10 +167,10 @@ class GenerateScripts:
                                 self.parallel_templates.append(delayed(D330.d330)(self.cf, source_output_path, STG_tables, BKEY))
                                 self.parallel_templates.append(delayed(D340.d340)(self.cf, source_output_path, STG_tables, BKEY))
 
-                                self.parallel_templates.append(delayed(D400.d400)(self.cf, source_output_path, STG_tables))
-                                self.parallel_templates.append(delayed(D410.d410)(self.cf, source_output_path, STG_tables))
-                                self.parallel_templates.append(delayed(D415.d415)(self.cf, source_output_path, STG_tables))
-                                self.parallel_templates.append(delayed(D420.d420)(self.cf, source_output_path, STG_tables, BKEY, BMAP))
+                                # self.parallel_templates.append(delayed(D400.d400)(self.cf, source_output_path, STG_tables))
+                                # self.parallel_templates.append(delayed(D410.d410)(self.cf, source_output_path, STG_tables))
+                                # self.parallel_templates.append(delayed(D415.d415)(self.cf, source_output_path, STG_tables))
+                                self.parallel_templates.append(delayed(D420.d420)(self.cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type))
 
                                 self.parallel_templates.append(delayed(D600.d600)(self.cf, source_output_path, Table_mapping, Core_tables))
                                 self.parallel_templates.append(delayed(D607.d607)(self.cf, source_output_path, Core_tables, BMAP_values))

@@ -3,7 +3,7 @@ from read_smx_sheet.app_Lib import functions as funcs
 import traceback
 
 
-def d420(cf, source_output_path, STG_tables, BKEY, BMAP):
+def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
     file_name = funcs.get_file_name(__file__)
     f = funcs.WriteFile(source_output_path, file_name, "sql")
     try:
@@ -100,6 +100,8 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP):
                             bmap_left_join = bmap_left_join + "\tand " + bmap_alias + ".Code_Set_id = " + Code_set_ID + "\n"
                             bmap_left_join = bmap_left_join + "\tand " + bmap_alias + ".Domain_ID = " + Code_domain_ID
 
+            modification_type = ",t.modification_type\n" if Loading_Type == "OFFLINE_CDC" else ""
+            normal_columns = normal_columns + modification_type
             create_view_script = create_view + normal_columns + bkey_columns + bmap_columns + from_clause + bkeys_left_join + bmap_left_join + ";\n"
             f.write(create_view_script+"\n")
     except:

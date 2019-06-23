@@ -4,7 +4,7 @@ sys.path.append(os.getcwd())
 from read_smx_sheet.app_Lib import manage_directories as md, functions as funcs
 from dask import compute, delayed, config
 from dask.diagnostics import ProgressBar
-from read_smx_sheet.templates import D110, D300, D320, D200, D330, D400, D610, D640, testing_script
+from read_smx_sheet.templates import D110, D300, D320, D200, D330, D400, D610, D640, testing_script_01
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
 from read_smx_sheet.parameters import parameters as pm
 import traceback
@@ -140,10 +140,16 @@ class GenerateScripts:
                             if Loading_Type != "":
                                 source_name = system_row['Source system name']
                                 filtered_sources.append(source_name)
+
                                 source_name_filter = [['Source', [source_name]]]
+                                core_layer_filter = [['Layer', ["CORE"]]]
+                                stg_layer_filter = [['Layer', ["STG"]]]
                                 stg_source_name_filter = [['Source system name', [source_name]]]
 
                                 Table_mapping = delayed(funcs.read_excel)(smx_file_path, self.Table_mapping_sht, source_name_filter)
+
+                                core_Table_mapping = delayed(funcs.df_filter)(Table_mapping, core_layer_filter, False)
+                                stg_Table_mapping = delayed(funcs.df_filter)(Table_mapping, stg_layer_filter, False)
 
                                 STG_tables = delayed(funcs.read_excel)(smx_file_path, self.STG_tables_sht, stg_source_name_filter)
                                 STG_tables = delayed(funcs.rename_sheet_reserved_word)(STG_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
@@ -152,12 +158,12 @@ class GenerateScripts:
 
                                 self.parallel_create_output_source_path.append(delayed(md.create_folder)(source_output_path))
 
-                                self.parallel_templates.append(delayed(D000.d000)(self.cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY))
+                                self.parallel_templates.append(delayed(D000.d000)(self.cf, source_output_path, source_name, core_Table_mapping, STG_tables, BKEY))
                                 self.parallel_templates.append(delayed(D001.d001)(self.cf, source_output_path, source_name, STG_tables))
-                                self.parallel_templates.append(delayed(D002.d002)(self.cf, source_output_path, Core_tables, Table_mapping))
+                                self.parallel_templates.append(delayed(D002.d002)(self.cf, source_output_path, Core_tables, core_Table_mapping))
                                 self.parallel_templates.append(delayed(D003.d003)(self.cf, source_output_path, BMAP_values, BMAP))
 
-                                self.parallel_templates.append(delayed(D110.d110)(self.cf, source_output_path, STG_tables, Loading_Type))
+                                self.parallel_templates.append(delayed(D110.d110)(self.cf, source_output_path, stg_Table_mapping, STG_tables, Loading_Type))
 
                                 self.parallel_templates.append(delayed(D200.d200)(self.cf, source_output_path, STG_tables, Loading_Type))
                                 self.parallel_templates.append(delayed(D210.d210)(self.cf, source_output_path, STG_tables, Loading_Type))
@@ -172,16 +178,16 @@ class GenerateScripts:
                                 # self.parallel_templates.append(delayed(D415.d415)(self.cf, source_output_path, STG_tables))
                                 self.parallel_templates.append(delayed(D420.d420)(self.cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type))
 
-                                self.parallel_templates.append(delayed(D600.d600)(self.cf, source_output_path, Table_mapping, Core_tables))
+                                self.parallel_templates.append(delayed(D600.d600)(self.cf, source_output_path, core_Table_mapping, Core_tables))
                                 self.parallel_templates.append(delayed(D607.d607)(self.cf, source_output_path, Core_tables, BMAP_values))
                                 self.parallel_templates.append(delayed(D608.d608)(self.cf, source_output_path, Core_tables, BMAP_values))
-                                self.parallel_templates.append(delayed(D610.d610)(self.cf, source_output_path, Table_mapping))
+                                self.parallel_templates.append(delayed(D610.d610)(self.cf, source_output_path, core_Table_mapping))
                                 self.parallel_templates.append(delayed(D615.d615)(self.cf, source_output_path, Core_tables))
-                                self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loading_Type))
-                                self.parallel_templates.append(delayed(D630.d630)(self.cf, source_output_path, Table_mapping))
-                                self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, Table_mapping))
+                                self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, core_Table_mapping, Column_mapping, Core_tables, Loading_Type))
+                                self.parallel_templates.append(delayed(D630.d630)(self.cf, source_output_path, core_Table_mapping))
+                                self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, core_Table_mapping))
 
-                                self.parallel_templates.append(delayed(testing_script.source_testing_script)(self.cf, source_output_path, source_name, Table_mapping, Column_mapping, STG_tables, BKEY))
+                                self.parallel_templates.append(delayed(testing_script_01.source_testing_script)(self.cf, source_output_path, source_name, core_Table_mapping, Column_mapping, STG_tables, BKEY))
 
                         except Exception as e_source:
                             # print(error)

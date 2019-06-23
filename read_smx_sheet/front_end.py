@@ -62,8 +62,8 @@ class FrontEnd:
         config_file_label = Label(frame_row0, text="Config File")
         config_file_label.grid(row=0, column=0, sticky='e')
 
-        config_file_browse_button = Button(frame_row0, text="...", command=self.browsefunc)
-        config_file_browse_button.grid(row=0, column=3, sticky='w')
+        self.config_file_browse_button = Button(frame_row0, text="...", command=self.browsefunc)
+        self.config_file_browse_button.grid(row=0, column=3, sticky='w')
 
         self.config_file_entry_txt = StringVar()
         self.config_file_entry = Entry(frame_row0, textvariable=self.config_file_entry_txt, width=100)
@@ -204,6 +204,7 @@ class FrontEnd:
     def enable_disable_fields(self, f_state):
         self.generate_button.config(state=f_state)
         self.config_file_entry.config(state=f_state)
+        self.config_file_browse_button.config(state=f_state)
 
     def generate_scripts_thread(self):
         try:

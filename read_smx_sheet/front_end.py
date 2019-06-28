@@ -277,6 +277,7 @@ class GenerateScriptsThread(threading.Thread):
         self.name = name
         self.FrontEndC = front_end_c
         self.thread = thread
+        self.daemon = True
 
     def run(self):
         if self.threadID == 1:

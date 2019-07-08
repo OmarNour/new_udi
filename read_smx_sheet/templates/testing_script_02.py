@@ -23,19 +23,35 @@ def source_testing_script(cf, source_output_path, source_name, Table_mapping, Co
         #   on key_join
         # where b.process_name is null
         ########################################
-        script = """
-                    select a.*\nfrom {input_view} a\nleft join {base_table} b\n\ton {key_join}\nwhere b.process_name is null;                   
-                    """
+        script = """select a.*\nfrom {input_view} a\nleft join {base_table} b\n\ton {key_join}\nwhere b.process_name is null;"""
         # 1- get all
-        Table_mapping_df = Table_mapping[Table_mapping['Source'] == source_name][['Target table name', 'Mapping name', 'Main source']]
+        process_type = "TXF"
+        Table_mapping_df = Table_mapping[(Table_mapping['Source'] == source_name)
+                                         & (Table_mapping['Layer'] == 'CORE')][['Target table name', 'Mapping name', 'Layer']]
         Table_mapping_df = Table_mapping_df.sort_values(['Target table name', 'Mapping name'])
         for Table_mapping_df_index, Table_mapping_df_row in Table_mapping_df.iterrows():
+
+            layer = Table_mapping_df_row['Layer']
             TARGET_TABLE_NAME = Table_mapping_df_row['Target table name']
             TABLE_MAPPING_NAME = Table_mapping_df_row['Mapping name']
-            # SOURCE_TABLE = Table_mapping_df_row['Main source']
-            on_clasue = "a.x=a.x"
 
-            script_ = script.format(input_view=TABLE_MAPPING_NAME, base_table=TARGET_TABLE_NAME, key_join=on_clasue)
+            inp_view = cf.INPUT_VIEW_DB + "." + process_type + "_" + layer + "_" + TABLE_MAPPING_NAME + "_IN"
+            core_table = cf.core_table + "." + TARGET_TABLE_NAME
+
+            key_columns = Core_tables[(Core_tables['Table name'] == TARGET_TABLE_NAME) &
+                                      (Core_tables['PK'] == "Y")]['Column name'].tolist()
+
+            complete_on_clause = ""
+            for index, i in enumerate(key_columns):
+                on_clause = " a.{}=b.{} "
+                if index == 0:
+                    and_ = ""
+                else:
+                    and_ = "\n\tand"
+
+                complete_on_clause = complete_on_clause + and_ + on_clause.format(i, i)
+
+            script_ = script.format(input_view=inp_view, base_table=core_table, key_join=complete_on_clause)
 
             f.write(script_.strip()+"\n\n")
 

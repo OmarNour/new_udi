@@ -37,9 +37,9 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
             from_clause = "FROM " + cf.v_stg + "." + stg_table_name + " t"
             STG_table_columns = funcs.get_stg_table_columns(STG_tables, None, stg_table_name, True)
 
-            bkeys_left_join = ""
+            bkeys_query = ""
             bkeys_left_join_count = 0
-            bmap_left_join = ""
+            bmap_query = ""
             bmap_left_join_count = 0
             normal_columns = ""
             bkey_columns = ""
@@ -79,11 +79,14 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
                             bkey_domain_id = str(int(BKEY_row['Key domain ID'].values[0]))
                             bkeys_left_join_count = bkeys_left_join_count + 1
                             bk_alias = " bk" + str(bkeys_left_join_count)
-                            comma_Column_name = comma + bk_alias + ".EDW_Key AS " + alias
+
+                            bkeys_query = "( Select " + bk_alias + ".EDW_Key\n"
+                            bkeys_query = bkeys_query + "\tFrom " + cf.UTLFW_v + "." + bkey_physical_table + bk_alias + "\n"
+                            bkeys_query = bkeys_query + "\tWhere " + bk_alias + ".Source_Key = " + trimed_Natural_key + "\n"
+                            bkeys_query = bkeys_query + "\tand " + bk_alias + ".Domain_ID = " + bkey_domain_id + ")"
+
+                            comma_Column_name = comma + bkeys_query + " AS " + alias
                             bkey_columns = bkey_columns + comma_Column_name + "\n"
-                            bkeys_left_join = bkeys_left_join + "\nLEFT JOIN " + cf.UTLFW_v + "." + bkey_physical_table + bk_alias + "\n"
-                            bkeys_left_join = bkeys_left_join + "\tON " + bk_alias + ".Source_Key = " + trimed_Natural_key + "\n"
-                            bkeys_left_join = bkeys_left_join + "\tand " + bk_alias + ".Domain_ID = " + bkey_domain_id
 
                     Code_domain_name = STG_table_columns_row["Code domain name"]
                     if Code_domain_name != "":
@@ -93,16 +96,19 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
                             Code_domain_ID = str(int(BMAP_row["Code domain ID"].values[0]))
                             bmap_left_join_count = bmap_left_join_count + 1
                             bmap_alias = " bm" + str(bmap_left_join_count)
-                            comma_Column_name = comma + bmap_alias + ".EDW_Code AS " + alias
+
+                            bmap_query = "( Select " + bmap_alias + ".EDW_Code\n"
+                            bmap_query = bmap_query + "\tFrom " + cf.UTLFW_v + "." + bmap_physical_table + bmap_alias + "\n"
+                            bmap_query = bmap_query + "\tWhere " + bmap_alias + ".Source_Code = " + trimed_Natural_key + "\n"
+                            bmap_query = bmap_query + "\tand " + bmap_alias + ".Code_Set_id = " + Code_set_ID + "\n"
+                            bmap_query = bmap_query + "\tand " + bmap_alias + ".Domain_ID = " + Code_domain_ID + ")"
+
+                            comma_Column_name = comma + bmap_query + " AS " + alias
                             bmap_columns = bmap_columns + comma_Column_name + "\n"
-                            bmap_left_join = bmap_left_join + "\nLEFT JOIN " + cf.UTLFW_v + "." + bmap_physical_table + bmap_alias + "\n"
-                            bmap_left_join = bmap_left_join + "\tON " + bmap_alias + ".Source_Code = " + trimed_Natural_key + "\n"
-                            bmap_left_join = bmap_left_join + "\tand " + bmap_alias + ".Code_Set_id = " + Code_set_ID + "\n"
-                            bmap_left_join = bmap_left_join + "\tand " + bmap_alias + ".Domain_ID = " + Code_domain_ID
 
             modification_type = ",t.modification_type\n" if Loading_Type == "OFFLINE_CDC" else ""
             normal_columns = normal_columns + modification_type
-            create_view_script = create_view + normal_columns + bkey_columns + bmap_columns + from_clause + bkeys_left_join + bmap_left_join + ";\n"
+            create_view_script = create_view + normal_columns + bkey_columns + bmap_columns + from_clause + ";\n"
             f.write(create_view_script+"\n")
     except:
         funcs.TemplateLogError(cf.output_path, source_output_path, file_name, traceback.format_exc()).log_error()

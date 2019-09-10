@@ -53,7 +53,7 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
                 alias = Column_name
                 Column_name = "t." + Column_name
 
-                for i in Natural_key_list:
+                for i in list(set(Natural_key_list)):
                     i = i.replace(" ", "")
                     if alias == i or "COALESCE(" + alias + ",'')" == i:
                         if "COALESCE" in i:

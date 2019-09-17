@@ -31,7 +31,7 @@ def d200(cf, source_output_path, STG_tables, Loading_Type):
                 not_null = " not null " if STG_table_columns_row['Mandatory'].upper() == 'Y' or STG_table_columns_row['PK'].upper() == 'Y' else " "
 
                 create_stg_table = create_stg_table + comma_Column_name + " " + Data_type + character_set + not_null + "\n"
-                create_wrk_table = create_wrk_table + comma_Column_name + " " + Data_type + character_set + not_null + "\n"
+                create_wrk_table = create_wrk_table + comma_Column_name + " " + Data_type + character_set + "\n"
 
                 if STG_table_columns_row['PK'].upper() == 'Y':
                     pi_columns = pi_columns + ',' + Column_name if pi_columns != "" else Column_name

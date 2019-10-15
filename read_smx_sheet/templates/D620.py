@@ -21,7 +21,12 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
             inp_view_header = 'REPLACE VIEW ' + cf.INPUT_VIEW_DB + '.' + process_name + '_IN AS LOCK ROW FOR ACCESS'
             target_table = str(table_maping_row['Target table name'])
             apply_type = table_maping_row['Historization algorithm']
+
             main_src = table_maping_row['Main source']
+            main_src_alias = table_maping_row['Main source alias']
+
+            if main_src == main_src_alias:
+                main_src = cf.SI_VIEW + '.' + main_src
             # core_tables_list= pd.unique(list(Core_tables['Table name']))
             core_tables_list= TransformDDL.get_core_tables_list(Core_tables)
 
@@ -47,15 +52,15 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
             if Loading_Type == 'OFFLINE':
                 modification_type = "'U' AS MODIFICATION_TYPE"
             else:
-                modification_type = main_src + '.MODIFICATION_TYPE'
+                modification_type = main_src_alias + '.MODIFICATION_TYPE'
 
             inp_view_select_clause=inp_view_select_clause+'\n'+ map_grp+'\n'+start_date+ '\n'+end_date+ '\n'+modification_type+'\n'
 
             if table_maping_row['Join'] == "":
-                inp_view_from_clause = 'FROM ' + cf.SI_VIEW + '.' + table_maping_row['Main source'] + ' ' + table_maping_row['Main source']
+                inp_view_from_clause = 'FROM ' + main_src + ' ' + main_src_alias
             elif table_maping_row['Join'] != "":
                 if (table_maping_row['Join'].find("FROM".strip()) == -1): #no subquery in join clause
-                    inp_view_from_clause = 'FROM ' + cf.SI_VIEW + '.' + table_maping_row['Main source'] + ' ' +table_maping_row['Main source']
+                    inp_view_from_clause = 'FROM ' + cf.SI_VIEW + '.' + main_src + ' ' + main_src_alias
                     inp_view_from_clause = inp_view_from_clause+'\n'+table_maping_row['Join']
                     join = 'JOIN '+cf.SI_VIEW+'.'
                     inp_view_from_clause = inp_view_from_clause.replace('JOIN',join)

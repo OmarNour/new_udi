@@ -60,10 +60,10 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
                 inp_view_from_clause = 'FROM ' + main_src + ' ' + main_src_alias
             elif table_maping_row['Join'] != "":
                 if (table_maping_row['Join'].find("FROM".strip()) == -1): #no subquery in join clause
-                    inp_view_from_clause = 'FROM ' + cf.SI_VIEW + '.' + main_src + ' ' + main_src_alias
+                    inp_view_from_clause = 'FROM ' + main_src + ' ' + main_src_alias
                     inp_view_from_clause = inp_view_from_clause+'\n'+table_maping_row['Join']
                     join = 'JOIN '+cf.SI_VIEW+'.'
-                    inp_view_from_clause = inp_view_from_clause.replace('JOIN',join)
+                    inp_view_from_clause = inp_view_from_clause.replace('JOIN ',join)
                 else:
                     sub_query_flag=1
                     join_clause=table_maping_row['Join']

@@ -17,6 +17,7 @@ def d003(cf, source_output_path,BMAP_values, BMAP):
         for bmap_index, bmap_row in BMAP_values.iterrows():
             domain_id = ""
             edw_code = ""
+            source_code = str(bmap_row["Source code"]).strip()
             if bmap_row["Code domain ID"] != '':
                 domain_id = int(bmap_row["Code domain ID"])#int( str(bmap_row["Code domain ID"]).strip())
                 domain_id = str(domain_id)
@@ -27,7 +28,7 @@ def d003(cf, source_output_path,BMAP_values, BMAP):
                  edw_code = str(edw_code)
 
             process_name = ",'" + TransformDDL.get_bmap_physical_tbl_name(BMAP, bmap_row["Code set name"]) + "'"
-            insert_vals = "'" + str(bmap_row["Source code"]).strip()+ "'\n" + ",'"+ domain_id + "'\n"
+            insert_vals = "'" + source_code + "'\n" + ",'"+ domain_id + "'\n"
             insert_vals += ",'" + code_set_id+"'\n" + ",'"+ edw_code + "'\n"
             insert_vals += ",'"+ str(bmap_row["Description"]).strip() + "'\n" + ",CURRENT_DATE \n ,DATE  '2999-12-31' \n ,0 \n ,0 \n"
             insert_vals += process_name +"\n,0\n ,NULL \n ,NULL \n);"
@@ -35,7 +36,7 @@ def d003(cf, source_output_path,BMAP_values, BMAP):
             insert_st= insert_st_header + insert_vals
 
             del_st = "DELETE FROM " + cf.UTLFW_t + ".BMAP_STANDARD_MAP \n WHERE Domain_Id = '" + domain_id + "'\n"
-            del_st += "AND EDW_Code = '" + edw_code + "' \n AND Code_Set_Id = '" + code_set_id + "';"
+            del_st += "AND Source_Code = '" + source_code + "' \n AND Code_Set_Id = '" + code_set_id + "';"
             f.write(del_st)
             f.write("\n")
             f.write(insert_st)

@@ -32,10 +32,15 @@ def d002(cf, source_output_path, Core_tables, Table_mapping):
             # history_column_vals = table_maping_row ['Historization columns']
             # history_column_list=pd.unique(list(history_column_vals)).split(',')
             history_column_list = table_maping_row ['Historization columns'].split(',')
+            history_column_list = [x.strip() for x in history_column_list]
+
             history_key_list = TransformDDL.get_core_tbl_hist_keys_list(Core_tables, trgt_tbl, history_column_list)
-            del_st = " DELETE FROM " + history_tbl + " WHERE PROCESS_NAME = '"+ process_name +"'; \n"
+            history_key_list = [x.strip() for x in history_key_list]
+
+            del_st = " DELETE FROM " + history_tbl + " WHERE PROCESS_NAME = '" + process_name + "';\n"
             f.write(del_st)
             f.write("--History_keys \n")
+
             for hist_key in history_key_list:
                 hist_key_insert_st = process_name + "','" + process_name + "','" + trgt_tbl + "','" + tbl_mapping_name + "','" + start_date_column
                 hist_key_insert_st += "','" + end_date_column + "'," + "null,"

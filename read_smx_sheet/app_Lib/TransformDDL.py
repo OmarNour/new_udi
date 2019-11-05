@@ -192,11 +192,11 @@ def get_core_tbl_hist_keys_list (Core_tables, tbl_name , history_column_list):
         # primary_keys = Core_tables[(Core_tables['Table name'] == tbl_name) & (Core_tables['PK'] == "Y")]
         # hist_keys = Core_tables[ (Core_tables['Table name'] == tbl_name) & (Core_tables['Historization key'] == "Y")]
         hist_col_list = history_column_list
-        hist_keys = Core_tables[(Core_tables['Table name'] == tbl_name) & (Core_tables['PK'] == "Y") & (Core_tables['Historization key']!= "S") & (Core_tables['Historization key']!= "E")]
+        hist_keys = Core_tables[(Core_tables['Table name'] == tbl_name) & (Core_tables['PK'] == "Y") & (Core_tables['Historization key'] != "S") & (Core_tables['Historization key']!= "E")]
         hist_keys_list = pd.unique(list(hist_keys['Column name']))
-        hist_keys_list = np.setdiff1d(hist_keys_list, hist_col_list )
+        hist_keys_list = np.setdiff1d(hist_keys_list, hist_col_list)
 
-        if (len(hist_keys_list)==0):
+        if len(hist_keys_list)==0:
             hist_keys_list={"undefined"}
 
      except Exception as error:

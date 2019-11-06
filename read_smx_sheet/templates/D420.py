@@ -13,19 +13,19 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
         bmap_physical_table = "BMAP_STANDARD_MAP"
 
         for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
-            stg_table_name = stg_tables_df_row['Table name']
+            stg_table_name = stg_tables_df_row['Table name'].upper()
 
-            stg_Natural_key_df = STG_tables.loc[(STG_tables['Table name'] == stg_table_name)
+            stg_Natural_key_df = STG_tables.loc[(STG_tables['Table name'].str.upper() == stg_table_name)
                                                 & (STG_tables['Natural key'] != "")]
             Natural_key_list = []
             for stg_Natural_key_df_index, stg_Natural_key_df_row in stg_Natural_key_df.iterrows():
-                Natural_key_split = stg_Natural_key_df_row['Natural key'].split(separator)
+                Natural_key_split = str(stg_Natural_key_df_row['Natural key']).split(separator)
                 for i in Natural_key_split:
                     Natural_key_list.append(i.upper())
 
             # Natural_key_list_str = funcs.list_to_string(Natural_key_list, ',').upper()
 
-            stg_table_has_pk = True if len(STG_tables.loc[(STG_tables['Table name'] == stg_table_name)
+            stg_table_has_pk = True if len(STG_tables.loc[(STG_tables['Table name'].str.upper() == stg_table_name)
                                                           & (STG_tables['PK'].str.upper() == 'Y')].index) > 0 else False
 
             if not stg_table_has_pk:
@@ -48,7 +48,7 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
                 comma = ',' if STG_table_columns_index > 0 else seq_pk_col
 
                 Column_name = STG_table_columns_row['Column name'].upper()
-                Natural_key = STG_table_columns_row['Natural key'].upper()
+                Natural_key = str(STG_table_columns_row['Natural key']).upper()
 
                 alias = Column_name
                 Column_name = "t." + Column_name
@@ -71,7 +71,7 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
                         trim_Natural_key.append("TRIM(Trailing '.' from TRIM(" + i.strip() + "))")
                     trimed_Natural_key = funcs.list_to_string(trim_Natural_key, separator)
 
-                    Key_domain_name = STG_table_columns_row['Key domain name']
+                    Key_domain_name = STG_table_columns_row['Key domain name'].upper()
                     if Key_domain_name != "":
                         BKEY_row = BKEY.loc[(BKEY['Key domain name'].str.upper() == Key_domain_name)]
                         if len(BKEY_row.index) > 0:
@@ -88,7 +88,7 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
                             comma_Column_name = comma + bkeys_query + " AS " + alias
                             bkey_columns = bkey_columns + comma_Column_name + "\n"
 
-                    Code_domain_name = STG_table_columns_row["Code domain name"]
+                    Code_domain_name = STG_table_columns_row["Code domain name"].upper()
                     if Code_domain_name != "":
                         BMAP_row = BMAP.loc[(BMAP["Code domain name"].str.upper() == Code_domain_name)]
                         if len(BMAP_row.index) > 0:

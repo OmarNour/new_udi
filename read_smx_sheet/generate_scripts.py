@@ -4,7 +4,7 @@ sys.path.append(os.getcwd())
 from read_smx_sheet.app_Lib import manage_directories as md, functions as funcs
 from dask import compute, delayed, config
 from dask.diagnostics import ProgressBar
-from read_smx_sheet.templates import D110, D300, D320, D200, D330, D400, D610, D640, testing_script_01, testing_script_02
+from read_smx_sheet.templates import D110, D300, D320, D200, D330, D400, D610, D640, testing_script_01, testing_script_02 , PROCESS_CHECK_TEST_SHEET
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
 from read_smx_sheet.parameters import parameters as pm
 import traceback
@@ -56,6 +56,7 @@ class ConfigFile:
         self.UTLFW_t = self.config_file_values["UTLFW_t"]
         self.TMP_DB = self.config_file_values["TMP_DB"]
         self.APPLY_DB = self.config_file_values["APPLY_DB"]
+        self.process_check_DB = self.config_file_values["process_check_DB"]
         self.SI_VIEW = self.config_file_values["SI_VIEW"]
 
         self.online_source_t = self.config_file_values["online_source_t"]
@@ -155,8 +156,10 @@ class GenerateScripts:
                                 STG_tables = delayed(funcs.rename_sheet_reserved_word)(STG_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
 
                                 source_output_path = home_output_path + "/" + Loading_Type + "/" + source_name
+                                output_path_testing = os.path.join(source_output_path, "TestCases_scripts")
 
                                 self.parallel_create_output_source_path.append(delayed(md.create_folder)(source_output_path))
+                                self.parallel_create_output_source_path.append(delayed(md.create_folder)(output_path_testing))
 
                                 self.parallel_templates.append(delayed(D000.d000)(self.cf, source_output_path, source_name, core_Table_mapping, STG_tables, BKEY))
                                 self.parallel_templates.append(delayed(D001.d001)(self.cf, source_output_path, source_name, STG_tables))
@@ -186,6 +189,8 @@ class GenerateScripts:
                                 self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, core_Table_mapping, Column_mapping, Core_tables, Loading_Type))
                                 self.parallel_templates.append(delayed(D630.d630)(self.cf, source_output_path, core_Table_mapping))
                                 self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, core_Table_mapping))
+
+                                self.parallel_templates.append(delayed(PROCESS_CHECK_TEST_SHEET.process_check)(self.cf, output_path_testing, source_name, core_Table_mapping))
 
                                 self.parallel_templates.append(delayed(testing_script_01.source_testing_script)(self.cf, source_output_path, source_name, core_Table_mapping, Column_mapping, STG_tables, BKEY))
                                 self.parallel_templates.append(delayed(testing_script_02.source_testing_script)(self.cf, source_output_path, source_name, Table_mapping, Core_tables))

@@ -315,6 +315,7 @@ def get_config_file_values(config_file_path=None):
 
         param_dic['TMP_DB'] = db_prefix + "T_TMP"
         param_dic['APPLY_DB'] = db_prefix + "P_PP"
+        param_dic['process_check_DB']=db_prefix+"P=T_BASE"
 
         param_dic['SI_DB'] = db_prefix + "T_SRCI"
         param_dic['SI_VIEW'] = db_prefix + "V_SRCI"

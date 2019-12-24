@@ -24,7 +24,7 @@ class FrontEnd:
         self.msg_no_config_file = "No Config File Found!"
         self.color_msg_no_config_file = "red"
         self.msg_ready = "Ready"
-        self.color_msg_ready = "green"
+        self.color_msg_ready = "yellow"
         self.msg_generating = "In Progress... "
         self.color_msg_generating = "blue"
         self.msg_done = "Done, Elapsed Time: "

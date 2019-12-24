@@ -25,7 +25,7 @@ class FrontEnd:
         self.color_msg_no_config_file = "red"
         self.msg_ready = "Ready"
         self.color_msg_ready = "green"
-        self.msg_generating = "In Progress... "
+        self.msg_generating = "In ProgressZ... "
         self.color_msg_generating = "blue"
         self.msg_done = "Done, Elapsed Time: "
         self.color_msg_done = "green"

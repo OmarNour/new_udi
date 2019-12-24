@@ -156,8 +156,10 @@ class GenerateScripts:
                                 STG_tables = delayed(funcs.rename_sheet_reserved_word)(STG_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
 
                                 source_output_path = home_output_path + "/" + Loading_Type + "/" + source_name
+                                output_path_testing = os.path.join(source_output_path, "TestCases_scripts")
 
                                 self.parallel_create_output_source_path.append(delayed(md.create_folder)(source_output_path))
+                                self.parallel_create_output_source_path.append(delayed(md.create_folder)(output_path_testing))
 
                                 self.parallel_templates.append(delayed(D000.d000)(self.cf, source_output_path, source_name, core_Table_mapping, STG_tables, BKEY))
                                 self.parallel_templates.append(delayed(D001.d001)(self.cf, source_output_path, source_name, STG_tables))
@@ -187,7 +189,8 @@ class GenerateScripts:
                                 self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, core_Table_mapping, Column_mapping, Core_tables, Loading_Type))
                                 self.parallel_templates.append(delayed(D630.d630)(self.cf, source_output_path, core_Table_mapping))
                                 self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, core_Table_mapping))
-                                self.parallel_templates.append(delayed(PROCESS_CHECK_TEST_SHEET.process_check)(self.cf, source_output_path, source_name, core_Table_mapping))
+
+                                self.parallel_templates.append(delayed(PROCESS_CHECK_TEST_SHEET.process_check)(self.cf, output_path_testing, source_name, core_Table_mapping))
 
                                 self.parallel_templates.append(delayed(testing_script_01.source_testing_script)(self.cf, source_output_path, source_name, core_Table_mapping, Column_mapping, STG_tables, BKEY))
                                 self.parallel_templates.append(delayed(testing_script_02.source_testing_script)(self.cf, source_output_path, source_name, Table_mapping, Core_tables))

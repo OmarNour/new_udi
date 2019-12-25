@@ -27,7 +27,7 @@ def d210(cf, source_output_path, STG_tables, Loading_Type):
 
                 create_stg_view = create_stg_view + comma_Column_name + "\n"
 
-            if MODIFICATION_TYPE_found == 0 and Loading_Type == "OFFLINE_CDC":
+            if MODIFICATION_TYPE_found == 0:
                 MODIFICATION_TYPE = ",MODIFICATION_TYPE\n"
             else:
                 MODIFICATION_TYPE = ""

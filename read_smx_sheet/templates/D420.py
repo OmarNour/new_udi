@@ -6,6 +6,8 @@ import traceback
 def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
     file_name = funcs.get_file_name(__file__)
     f = funcs.WriteFile(source_output_path, file_name, "sql")
+
+    MODIFICATION_TYPE_found = 0
     try:
         separator = pm.stg_cols_separator
         stg_tables_df = funcs.get_stg_tables(STG_tables)
@@ -14,7 +16,9 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
 
         for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
             stg_table_name = stg_tables_df_row['Table name'].upper()
-
+            Column_name = stg_tables_df_row['Column name']
+            if Column_name == "MODIFICATION_TYPE":
+                MODIFICATION_TYPE_found = 1
             stg_Natural_key_df = STG_tables.loc[(STG_tables['Table name'].str.upper() == stg_table_name)
                                                 & (STG_tables['Natural key'] != "")]
             Natural_key_list = []
@@ -106,7 +110,11 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
                             comma_Column_name = comma + bmap_query + " AS " + alias
                             bmap_columns = bmap_columns + comma_Column_name + "\n"
 
-            modification_type = ",t.modification_type\n" if Loading_Type == "OFFLINE_CDC" else ""
+            if MODIFICATION_TYPE_found == 0:
+                modification_type = ",t.modification_type\n"
+            else:
+                modification_type = ""
+
             normal_columns = normal_columns + modification_type
             create_view_script = create_view + normal_columns + bkey_columns + bmap_columns + from_clause + ";\n"
             f.write(create_view_script+"\n")

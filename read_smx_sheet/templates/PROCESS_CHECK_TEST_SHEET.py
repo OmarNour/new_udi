@@ -14,10 +14,9 @@ def process_check(cf, source_output_path, source_name, Table_mapping):
             layer = str(table_maping_row['Layer'])
             process_name = str(table_maping_row['Mapping name'])
 
-            target_table_name = str(table_maping_row['Target table name'])
             tbl_name = table_maping_row['Target table name']
 
-            process_check_test_case_exp = "SELECT * FROM " + cf.process_check_DB + "." + tbl_name + " WHERE PROCESS_NAME = 'TXF_" + layer + "_" + process_name + "' ;\n \n"
+            process_check_test_case_exp = "SELECT * FROM " + cf.base_DB + "." + tbl_name + " WHERE PROCESS_NAME = 'TXF_" + layer + "_" + process_name + "' ;\n \n"
             process_check_test_case_exp = process_name_line + "\n" + process_check_test_case_exp
             f.write(process_check_test_case_exp)
             count = count + 1

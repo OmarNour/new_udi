@@ -3,7 +3,6 @@ parquet_db_name = "smx_data"
 sys_argv_separator = "|#|"
 stg_cols_separator = "||'_'||"
 
-
 smx_ext = "xlsx"
 System_sht = "System"
 Supplements_sht = "Supplements"

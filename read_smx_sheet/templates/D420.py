@@ -16,9 +16,11 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
 
         for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
             stg_table_name = stg_tables_df_row['Table name'].upper()
-            Column_name = stg_tables_df_row['Column name']
-            if Column_name == "MODIFICATION_TYPE":
-                MODIFICATION_TYPE_found = 1
+       #     print(stg_tables_df_row, ">>>>>>>>>>>>>>>>>>>>>>>>>")
+       #     Column_name = stg_tables_df_row['Column name']
+
+        #    if Column_name == "MODIFICATION_TYPE":
+        #        MODIFICATION_TYPE_found = 1
             stg_Natural_key_df = STG_tables.loc[(STG_tables['Table name'].str.upper() == stg_table_name)
                                                 & (STG_tables['Natural key'] != "")]
             Natural_key_list = []
@@ -53,6 +55,9 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
 
                 Column_name = STG_table_columns_row['Column name'].upper()
                 Natural_key = str(STG_table_columns_row['Natural key']).upper()
+
+                if Column_name == "MODIFICATION_TYPE":
+                     MODIFICATION_TYPE_found = 1
 
                 alias = Column_name
                 Column_name = "t." + Column_name

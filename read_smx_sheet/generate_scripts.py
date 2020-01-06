@@ -5,7 +5,7 @@ from read_smx_sheet.app_Lib import manage_directories as md, functions as funcs
 from dask import compute, delayed, config
 from dask.diagnostics import ProgressBar
 from read_smx_sheet.templates import D110, D300, D320, D200, D330, D400, D610, D640, testing_script_01, testing_script_02
-from read_smx_sheet.templates import PROCESS_CHECK_TEST_SHEET , CSO_TEST_SHEET
+from read_smx_sheet.templates import PROCESS_CHECK_TEST_SHEET , CSO_TEST_SHEET,NULLS_TEST_SHEET
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
 from read_smx_sheet.parameters import parameters as pm
 import traceback
@@ -198,13 +198,14 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(D630.d630)(self.cf, source_output_path, core_Table_mapping))
                                     self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, core_Table_mapping))
                                     self.parallel_templates.append(delayed(testing_script_01.source_testing_script)(self.cf, source_output_path, source_name, core_Table_mapping, Column_mapping, STG_tables, BKEY))
-                                    self.parallel_templates.append(delayed(testing_script_02.source_testing_script)(self.cf, source_output_path, source_name, Table_mapping, Core_tables))
+                                    self.parallel_templates.append(delayed(testing_script_02.source_testing_script)(self.cf, source_output_path, source_name, core_Table_mapping, Core_tables))
 
                                 #TESTING SCRIPTS
                                 if self.scripts_flag=='All' or self.scripts_flag=='Testing':
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(output_path_testing))
                                     self.parallel_templates.append(delayed(PROCESS_CHECK_TEST_SHEET.process_check)(self.cf, output_path_testing,source_name, core_Table_mapping))
-                                    self.parallel_templates.append(delayed(CSO_TEST_SHEET.cso_check)(self.cf, output_path_testing, source_name,Column_mapping))
+                                    self.parallel_templates.append(delayed(CSO_TEST_SHEET.cso_check)(self.cf, output_path_testing,source_name,Column_mapping))
+                                    self.parallel_templates.append(delayed(NULLS_TEST_SHEET.nulls_check)(self.cf, output_path_testing, core_Table_mapping, Core_tables))
 
 
                         except Exception as e_source:

@@ -48,7 +48,7 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
             map_grp = ' CAST(' +funcs.single_quotes(table_maping_row['Mapping group'])+' AS VARCHAR(100)) AS  MAP_GROUP ,'
             start_date = '(SELECT Business_Date FROM ' + cf.GCFR_V + '.GCFR_Process_Id'+'\n'+'   WHERE Process_Name = ' + "'" + process_name + "'"+'\n'+') AS Start_Date,'
             end_date='DATE '+"'9999-12-31'"+' AS End_Date,'
-
+            modification_type = main_src_alias + '.MODIFICATION_TYPE'
             inp_view_select_clause=inp_view_select_clause+'\n'+ map_grp+'\n'+start_date+ '\n'+end_date+ '\n'+modification_type+'\n'
 
             if table_maping_row['Join'] == "":

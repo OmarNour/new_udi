@@ -3,7 +3,6 @@ parquet_db_name = "smx_data"
 sys_argv_separator = "|#|"
 stg_cols_separator = "||'_'||"
 
-
 smx_ext = "xlsx"
 System_sht = "System"
 Supplements_sht = "Supplements"
@@ -17,5 +16,5 @@ Core_tables_sht = "Core tables"
 sheets = [System_sht, Supplements_sht, Column_mapping_sht, BMAP_values_sht, BMAP_sht, BKEY_sht, STG_tables_sht, Table_mapping_sht, Core_tables_sht]
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #2.10.64"
+ver_no = "| Build #2.10.66"
 # ################################################################################################

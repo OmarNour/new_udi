@@ -107,10 +107,10 @@ def get_stg_table_nonNK_columns(STG_tables, source_name, Table_name, with_sk_col
 def get_stg_table_columns(STG_tables, source_name, Table_name, with_sk_columns=False):
     if source_name:
         STG_tables_df = STG_tables.loc[(STG_tables['Source system name'] == source_name)
-                                        & (STG_tables['Table name'] == Table_name)
+                                        & (STG_tables['Table name'].str.upper() == Table_name.upper())
                                        ].reset_index()
     else:
-        STG_tables_df = STG_tables.loc[STG_tables['Table name'] == Table_name].reset_index()
+        STG_tables_df = STG_tables.loc[STG_tables['Table name'].str.upper() == Table_name.upper()].reset_index()
 
     if not with_sk_columns:
         STG_tables_df = STG_tables_df.loc[(STG_tables_df['Key set name'] == '')

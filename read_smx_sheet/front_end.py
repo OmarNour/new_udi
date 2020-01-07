@@ -116,6 +116,14 @@ class FrontEnd:
         self.entry_db_prefix = Entry(frame_config_file_values, textvariable=self.text_db_prefix, width=frame_config_file_values_entry_width)
         self.entry_db_prefix.grid(row=3, column=1, sticky="w", columnspan=1)
 
+        scripts_generation_label = Label(frame_config_file_values, text="Generating scripts")
+        scripts_generation_label.grid(row=4, column=0, sticky='e')
+
+        self.text_scripts_generation = StringVar()
+        self.entry_scripts_generation = Entry(frame_config_file_values, textvariable=self.text_scripts_generation,width=frame_config_file_values_entry_width)
+        self.entry_scripts_generation.grid(row=4, column=1, sticky="w", columnspan=1)
+
+
         self.populate_config_file_values()
         self.config_file_entry_txt.trace("w", self.refresh_config_file_values)
 
@@ -143,8 +151,14 @@ class FrontEnd:
             source_names = self.config_file_values["source_names"]
             self.source_names = "All" if source_names is None else source_names
             self.db_prefix = self.config_file_values["db_prefix"]
+            self.scripts_flag = "All"
             self.generate_button.config(state=NORMAL)
             self.change_status_label(self.msg_ready, self.color_msg_ready)
+            try:
+                scripts_flag = self.config_file_values["scripts_flag"]
+                self.scripts_flag = "All" if scripts_flag is None or scripts_flag == "" else scripts_flag
+            except:
+                self.scripts_flag = "All"
         except:
             self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
             self.generate_button.config(state=DISABLED)
@@ -177,6 +191,11 @@ class FrontEnd:
         self.entry_db_prefix.delete(0, END)
         self.entry_db_prefix.insert(END, self.db_prefix)
         self.entry_db_prefix.config(state=DISABLED)
+
+        self.entry_scripts_generation.config(state=NORMAL)
+        self.entry_scripts_generation.delete(0, END)
+        self.entry_scripts_generation.insert(END, self.scripts_flag)
+        self.entry_scripts_generation.config(state=DISABLED)
 
     def browsefunc(self):
         current_file = self.config_file_entry_txt.get()

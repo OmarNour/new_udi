@@ -166,6 +166,7 @@ class FrontEnd:
             self.output_path = ""
             self.source_names = ""
             self.db_prefix = ""
+            self.scripts_flag = "All"
 
     def refresh_config_file_values(self, *args):
         self.get_config_file_values()

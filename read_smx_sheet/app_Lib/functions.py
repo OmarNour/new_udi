@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 import pyarrow as pa
-# from pyarrow.formatting import *
+from pyarrow.formatting import *
 import dask.dataframe as dd
 from read_smx_sheet.app_Lib import manage_directories as md
 from read_smx_sheet.parameters import parameters as pm

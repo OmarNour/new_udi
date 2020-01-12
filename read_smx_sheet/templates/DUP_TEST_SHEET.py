@@ -13,8 +13,9 @@ def duplicates_check(cf, source_output_path, table_mapping, core_tables):
             count = count+1
             core_table_pks = TransformDDL.get_trgt_pk(core_tables, table_name)
             dup_line = "---DUP_Test_Case_" + str(count) + "---"+'\n'
-            dup_test_case_exp = 'SEL ' + core_table_pks + ' FROM ' + cf.base_DB + '.' + table_name + ' GROUP BY '+ core_table_pks + ' HAVING COUNT(*)>1;'+'\n'+'\n'
-            f.write(dup_line+dup_test_case_exp)
+            dup_test_case_exp_line1 = 'SEL ' + core_table_pks + ' FROM ' + cf.base_DB + '.'
+            dup_test_case_exp_line2 = table_name + ' GROUP BY '+ core_table_pks + ' HAVING COUNT(*)>1;'+'\n'+'\n'
+            f.write(dup_line+dup_test_case_exp_line1+dup_test_case_exp_line2)
 
     except:
         funcs.TemplateLogError(cf.output_path, source_output_path, file_name, traceback.format_exc()).log_error()

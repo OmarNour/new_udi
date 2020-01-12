@@ -18,6 +18,10 @@ history_tbl="HISTORY"
 
 db_prefix="GPROD1"
 
+## for all scripts: scripts_flag=""
+## for generating certain scripts add flag : scripts_flag="Testing",scripts_flag="UDI"
+scripts_flag=""
+
 gcfr_ctl_Id=1
 gcfr_stream_key=1
 gcfr_system_name="Economic"

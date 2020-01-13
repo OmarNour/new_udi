@@ -348,6 +348,12 @@ def server_info():
     return (cpu_per,mem_per)
 
 
+def get_model_col(df, table_name):
+    core_tables_IDS = df[df['Column name'].str.endswith(str('_ID'))]
+    for core_tables_index,core_tables_row in core_tables_IDS.iterrows():
+        if core_tables_row['Table name'] == table_name:
+            return core_tables_row['Column name']
+
 class WriteFile:
     def __init__(self, file_path, file_name, ext, f_mode="w+", new_line=False):
         self.new_line = new_line

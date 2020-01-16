@@ -5,11 +5,13 @@ from read_smx_sheet.app_Lib import manage_directories as md, functions as funcs
 from dask import compute, delayed, config
 from dask.diagnostics import ProgressBar
 from read_smx_sheet.templates import D110, D300, D320, D200, D330, D400, D610, D640, testing_script_01, testing_script_02
-from read_smx_sheet.templates import PROCESS_CHECK_TEST_SHEET , CSO_TEST_SHEET,NULLS_TEST_SHEET
+from read_smx_sheet.templates import PROCESS_CHECK_TEST_SHEET , CSO_TEST_SHEET,NULLS_TEST_SHEET,DUP_TEST_SHEET,DATA_SRC_TEST_SHEET
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
 from read_smx_sheet.parameters import parameters as pm
 import traceback
 import datetime as dt
+import shutil
+
 
 
 class LogFile(funcs.WriteFile):
@@ -79,6 +81,8 @@ class GenerateScripts:
         self.error_message = ""
         self.parallel_remove_output_home_path = []
         self.parallel_create_output_home_path = []
+        self.parallel_create_smx_copy_path = []
+        self.parallel_used_smx_copy = []
         self.parallel_create_output_source_path = []
         self.parallel_templates = []
         self.count_sources = 0
@@ -94,7 +98,10 @@ class GenerateScripts:
         self.Column_mapping_sht = pm.Column_mapping_sht
         self.System_sht = pm.System_sht
         self.Supplements_sht = pm.Supplements_sht
-        self.scripts_flag = "All" if self.cf.scripts_flag == '' else self.cf.scripts_flag
+        if self.cf.scripts_flag == 'Testing' or self.cf.scripts_flag == 'UDI':
+            self.scripts_flag = self.cf.scripts_flag
+        else:
+            self.scripts_flag = 'All'
 
     def generate_scripts(self):
         self.log_file.write("Reading from: \t" + self.cf.smx_path)
@@ -119,6 +126,12 @@ class GenerateScripts:
 
                     # self.parallel_remove_output_home_path.append(delayed(md.remove_folder)(home_output_path))
                     self.parallel_create_output_home_path.append(delayed(md.create_folder)(home_output_path))
+
+                    # COPY SMX USED INTO PATH OF ITS UDI SCRIPTS
+                    smx_file_path_destination = os.path.join(home_output_path, "USED_SMX_FILE")
+                    self.parallel_create_smx_copy_path.append(delayed(md.create_folder)(smx_file_path_destination))
+                    smx_file_path_destination += '/' + smx_file_name + '.xlsx'
+                    self.parallel_used_smx_copy.append(delayed(shutil.copy)(smx_file_path, smx_file_path_destination))
 
                     self.parallel_templates.append(delayed(gcfr.gcfr)(self.cf, home_output_path))
                     ##################################### end of read_smx_folder ################################
@@ -163,12 +176,14 @@ class GenerateScripts:
                                 STG_tables = delayed(funcs.rename_sheet_reserved_word)(STG_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
 
 
-                                source_output_path = home_output_path + "/" + Loading_Type + "/" + source_name
-                                output_path_testing = os.path.join(source_output_path, "TestCases_scripts")
-                                self.parallel_create_output_source_path.append(delayed(md.create_folder)(source_output_path))
+                                main_output_path = home_output_path + "/" + Loading_Type + "/" + source_name
+                                source_output_path = os.path.join(main_output_path, "UDI")
+                                output_path_testing = os.path.join(main_output_path, "TestCases_scripts")
+                                self.parallel_create_output_source_path.append(delayed(md.create_folder)(main_output_path))
 
                                 #UDI SCRIPTS
                                 if self.scripts_flag=='All' or self.scripts_flag=='UDI':
+                                    self.parallel_create_output_source_path.append(delayed(md.create_folder)(source_output_path))
                                     self.parallel_templates.append(delayed(D000.d000)(self.cf, source_output_path, source_name, core_Table_mapping, STG_tables, BKEY))
                                     self.parallel_templates.append(delayed(D001.d001)(self.cf, source_output_path, source_name, STG_tables))
                                     self.parallel_templates.append(delayed(D002.d002)(self.cf, source_output_path, Core_tables, core_Table_mapping))
@@ -197,16 +212,17 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, core_Table_mapping, Column_mapping, Core_tables, Loading_Type))
                                     self.parallel_templates.append(delayed(D630.d630)(self.cf, source_output_path, core_Table_mapping))
                                     self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, core_Table_mapping))
-                                    self.parallel_templates.append(delayed(testing_script_01.source_testing_script)(self.cf, source_output_path, source_name, core_Table_mapping, Column_mapping, STG_tables, BKEY))
-                                    self.parallel_templates.append(delayed(testing_script_02.source_testing_script)(self.cf, source_output_path, source_name, core_Table_mapping, Core_tables))
 
                                 #TESTING SCRIPTS
                                 if self.scripts_flag=='All' or self.scripts_flag=='Testing':
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(output_path_testing))
+                                    self.parallel_templates.append(delayed(testing_script_01.source_testing_script)(self.cf, output_path_testing,source_name,core_Table_mapping,Column_mapping, STG_tables,BKEY))
+                                    self.parallel_templates.append(delayed(testing_script_02.source_testing_script)(self.cf, output_path_testing,source_name,core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(PROCESS_CHECK_TEST_SHEET.process_check)(self.cf, output_path_testing,source_name, core_Table_mapping))
                                     self.parallel_templates.append(delayed(CSO_TEST_SHEET.cso_check)(self.cf, output_path_testing,source_name,Column_mapping))
                                     self.parallel_templates.append(delayed(NULLS_TEST_SHEET.nulls_check)(self.cf, output_path_testing, core_Table_mapping, Core_tables))
-
+                                    self.parallel_templates.append(delayed(DUP_TEST_SHEET.duplicates_check)(self.cf, output_path_testing,core_Table_mapping,Core_tables))
+                                    self.parallel_templates.append(delayed(DATA_SRC_TEST_SHEET.data_src_check)(self.cf, output_path_testing,source_name,Column_mapping))
 
                         except Exception as e_source:
                             # print(error)
@@ -234,6 +250,8 @@ class GenerateScripts:
             with config.set(scheduler=scheduler_value):
                 # compute(*self.parallel_remove_output_home_path)
                 compute(*self.parallel_create_output_home_path)
+                compute(*self.parallel_create_smx_copy_path)
+                compute(*self.parallel_used_smx_copy)
                 compute(*self.parallel_create_output_source_path)
 
                 with ProgressBar():

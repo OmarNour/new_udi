@@ -141,6 +141,20 @@ def get_src_core_tbls(Table_mapping):
     core_tables_list = pd.unique(core_tables_list)
     return core_tables_list
 
+
+def get_src_lkp_tbls(table_mapping, core_tables):
+    lookup_tables_src = list()
+    core_tables_look_ups = core_tables[core_tables['Is lookup'] == 'Y']
+    core_tables_look_ups = core_tables_look_ups[core_tables_look_ups['Column name'].str.endswith(str('_CD'))]
+    core_tables_list = get_src_core_tbls(table_mapping)
+    for table_name in core_tables_list:
+        for core_table_index, core_table_row in core_tables[(core_tables['Table name'] == table_name)].iterrows():
+            for core_tables_look_ups_index, core_tables_look_ups_row in core_tables_look_ups.iterrows():
+                if core_tables_look_ups_row['Column name'] == core_table_row['Column name']:
+                    lookup_tables_src.append(str(core_tables_look_ups_row['Table name']))
+    return pd.unique(lookup_tables_src)
+
+
 def get_src_tbl_mappings (source_name, Table_mapping):
     src_mappings_df=Table_mapping[Table_mapping['Source']  == source_name]
     return src_mappings_df

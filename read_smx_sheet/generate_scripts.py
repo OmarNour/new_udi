@@ -240,6 +240,7 @@ class GenerateScripts:
         except Exception as e1:
             # print(error)
             # traceback.print_exc()
+            self.elapsed_time = dt.datetime.now() - self.start_time
             funcs.SMXFilesLogError(self.cf.output_path, None, None, traceback.format_exc()).log_error()
 
         if len(self.parallel_templates) > 0:

@@ -9,6 +9,8 @@ from read_smx_sheet.templates import testing_script_01, testing_script_02
 from read_smx_sheet.templates import PROCESS_CHECK_TEST_SHEET, CSO_TEST_SHEET, NULLS_TEST_SHEET, DUP_TEST_SHEET
 from read_smx_sheet.templates import BMAP_DUP_CD_TEST_SHEET,BMAP_DUP_DESC_TEST_SHEET,BMAP_NULL_TEST_SHEET
 from read_smx_sheet.templates import DATA_SRC_TEST_SHEET, BMAP_CHECK_TEST_SHEET , BMAP_UNMATCHED_TEST_SHEET
+from read_smx_sheet.templates import HIST_STRT_END_NULL_TEST_SHEET, HIST_DUP_TEST_SHEET ,HIST_STRT_GRT_END_TEST_SHEET,HIST_TIME_GAP_TEST_SHEET
+from read_smx_sheet.templates import HIST_STRT_NULL_TEST_SHEET
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
 from read_smx_sheet.parameters import parameters as pm
 import traceback
@@ -181,7 +183,17 @@ class GenerateScripts:
 
                                 main_output_path = home_output_path + "/" + Loading_Type + "/" + source_name
                                 source_output_path = os.path.join(main_output_path, "UDI")
+
                                 output_path_testing = os.path.join(main_output_path, "TestCases_scripts")
+                                process_check_output_path_testing = os.path.join(output_path_testing, "PROCESS_CHECK_Cases_scripts")
+                                cso_output_path_testing = os.path.join(output_path_testing, "CSO_Cases_scripts")
+                                nulls_output_path_testing = os.path.join(output_path_testing, "NULLS_Cases_scripts")
+                                duplicate_output_path_testing = os.path.join(output_path_testing, "DUPLICATE_Cases_scripts")
+                                data_src_output_path_testing = os.path.join(output_path_testing, "DATA_SRC_Cases_scripts")
+                                bmaps_output_path_testing = os.path.join(output_path_testing, "BMAPS_Cases_scripts")
+                                history_output_path_testing = os.path.join(output_path_testing, "HISTORY_Cases_scripts")
+                                ri_output_path_testing = os.path.join(output_path_testing, "RI_Cases_scripts")
+
                                 self.parallel_create_output_source_path.append(delayed(md.create_folder)(main_output_path))
 
                                 #UDI SCRIPTS
@@ -218,19 +230,34 @@ class GenerateScripts:
 
                                 #TESTING SCRIPTS
                                 if self.scripts_flag=='All' or self.scripts_flag=='Testing':
+                                    #CREATING  PATHS FOR THE OUTPUT SCRIPTS
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(output_path_testing))
+                                    self.parallel_create_output_source_path.append(delayed(md.create_folder)(process_check_output_path_testing))
+                                    self.parallel_create_output_source_path.append(delayed(md.create_folder)(cso_output_path_testing))
+                                    self.parallel_create_output_source_path.append(delayed(md.create_folder)(nulls_output_path_testing))
+                                    self.parallel_create_output_source_path.append(delayed(md.create_folder)(duplicate_output_path_testing))
+                                    self.parallel_create_output_source_path.append(delayed(md.create_folder)(data_src_output_path_testing))
+                                    self.parallel_create_output_source_path.append(delayed(md.create_folder)(bmaps_output_path_testing))
+                                    self.parallel_create_output_source_path.append(delayed(md.create_folder)(history_output_path_testing))
+                                    self.parallel_create_output_source_path.append(delayed(md.create_folder)(ri_output_path_testing))
+
                                     self.parallel_templates.append(delayed(testing_script_01.source_testing_script)(self.cf, output_path_testing,source_name,core_Table_mapping,Column_mapping, STG_tables,BKEY))
                                     self.parallel_templates.append(delayed(testing_script_02.source_testing_script)(self.cf, output_path_testing,source_name,core_Table_mapping, Core_tables))
-                                    self.parallel_templates.append(delayed(PROCESS_CHECK_TEST_SHEET.process_check)(self.cf, output_path_testing,source_name, core_Table_mapping))
-                                    self.parallel_templates.append(delayed(CSO_TEST_SHEET.cso_check)(self.cf, output_path_testing,source_name,Column_mapping))
-                                    self.parallel_templates.append(delayed(NULLS_TEST_SHEET.nulls_check)(self.cf, output_path_testing, core_Table_mapping, Core_tables))
-                                    self.parallel_templates.append(delayed(DUP_TEST_SHEET.duplicates_check)(self.cf, output_path_testing,core_Table_mapping,Core_tables))
-                                    self.parallel_templates.append(delayed(DATA_SRC_TEST_SHEET.data_src_check)(self.cf, output_path_testing,source_name,Column_mapping))
-                                    self.parallel_templates.append(delayed(BMAP_CHECK_TEST_SHEET.bmap_check)(self.cf, output_path_testing,source_name,core_Table_mapping,Core_tables))
-                                    self.parallel_templates.append(delayed(BMAP_DUP_CD_TEST_SHEET.bmap_dup_check)(self.cf, output_path_testing, core_Table_mapping, Core_tables))
-                                    self.parallel_templates.append(delayed(BMAP_DUP_DESC_TEST_SHEET.bmap_dup_desc_check)(self.cf, output_path_testing,core_Table_mapping,Core_tables))
-                                    self.parallel_templates.append(delayed(BMAP_NULL_TEST_SHEET.bmap_null_check)(self.cf, output_path_testing,core_Table_mapping,Core_tables))
-                                    self.parallel_templates.append(delayed(BMAP_UNMATCHED_TEST_SHEET.bmap_unmatched_values_check)(self.cf, output_path_testing,core_Table_mapping,Core_tables,BMAP))
+                                    self.parallel_templates.append(delayed(PROCESS_CHECK_TEST_SHEET.process_check)(self.cf, process_check_output_path_testing,source_name, core_Table_mapping))
+                                    self.parallel_templates.append(delayed(CSO_TEST_SHEET.cso_check)(self.cf, cso_output_path_testing,source_name,Column_mapping))
+                                    self.parallel_templates.append(delayed(NULLS_TEST_SHEET.nulls_check)(self.cf, nulls_output_path_testing, core_Table_mapping, Core_tables))
+                                    self.parallel_templates.append(delayed(DUP_TEST_SHEET.duplicates_check)(self.cf, duplicate_output_path_testing,core_Table_mapping,Core_tables))
+                                    self.parallel_templates.append(delayed(DATA_SRC_TEST_SHEET.data_src_check)(self.cf, data_src_output_path_testing,source_name,Column_mapping))
+                                    self.parallel_templates.append(delayed(BMAP_CHECK_TEST_SHEET.bmap_check)(self.cf, bmaps_output_path_testing,source_name,core_Table_mapping,Core_tables))
+                                    self.parallel_templates.append(delayed(BMAP_DUP_CD_TEST_SHEET.bmap_dup_check)(self.cf, bmaps_output_path_testing, core_Table_mapping, Core_tables))
+                                    self.parallel_templates.append(delayed(BMAP_DUP_DESC_TEST_SHEET.bmap_dup_desc_check)(self.cf, bmaps_output_path_testing,core_Table_mapping,Core_tables))
+                                    self.parallel_templates.append(delayed(BMAP_NULL_TEST_SHEET.bmap_null_check)(self.cf, bmaps_output_path_testing,core_Table_mapping,Core_tables))
+                                    self.parallel_templates.append(delayed(BMAP_UNMATCHED_TEST_SHEET.bmap_unmatched_values_check)(self.cf, bmaps_output_path_testing,core_Table_mapping,Core_tables,BMAP))
+                                    self.parallel_templates.append(delayed(HIST_STRT_END_NULL_TEST_SHEET.hist_start_end_null_check)(self.cf, history_output_path_testing, core_Table_mapping, Core_tables))
+                                    self.parallel_templates.append(delayed(HIST_DUP_TEST_SHEET.hist_dup_check)(self.cf, history_output_path_testing, core_Table_mapping, Core_tables))
+                                    self.parallel_templates.append(delayed(HIST_STRT_GRT_END_TEST_SHEET.hist_start_end_null_check)(self.cf, history_output_path_testing, core_Table_mapping, Core_tables))
+                                    self.parallel_templates.append(delayed(HIST_TIME_GAP_TEST_SHEET.hist_timegap_check)(self.cf, history_output_path_testing, core_Table_mapping, Core_tables))
+                                    self.parallel_templates.append(delayed(HIST_STRT_NULL_TEST_SHEET.hist_start_null_check)(self.cf, history_output_path_testing, core_Table_mapping, Core_tables))
 
                         except Exception as e_source:
                             # print(error)

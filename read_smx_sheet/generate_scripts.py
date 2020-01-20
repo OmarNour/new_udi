@@ -103,10 +103,6 @@ class GenerateScripts:
         self.Column_mapping_sht = pm.Column_mapping_sht
         self.System_sht = pm.System_sht
         self.Supplements_sht = pm.Supplements_sht
-        if self.cf.scripts_flag == 'Testing' or self.cf.scripts_flag == 'UDI':
-            self.scripts_flag = self.cf.scripts_flag
-        else:
-            self.scripts_flag = 'All'
 
     def generate_scripts(self):
         self.log_file.write("Reading from: \t" + self.cf.smx_path)

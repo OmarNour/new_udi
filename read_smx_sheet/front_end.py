@@ -85,6 +85,9 @@ class FrontEnd:
         frame_config_file_values = Frame(frame_row1, borderwidth="2", relief="ridge")
         frame_config_file_values.grid(column=0, row=0, sticky="w")
 
+        frame_checkboxes_values = Frame(frame_config_file_values, relief="ridge")
+        frame_checkboxes_values.grid(column=1, row=4, sticky="W")
+
         self.get_config_file_values()
         frame_config_file_values_entry_width = 84
 
@@ -117,12 +120,20 @@ class FrontEnd:
         self.entry_db_prefix.grid(row=3, column=1, sticky="w", columnspan=1)
 
         scripts_generation_label = Label(frame_config_file_values, text="Generating scripts")
-        scripts_generation_label.grid(row=4, column=0, sticky='e')
+        scripts_generation_label.grid(row=4, column=0, sticky='e',columnspan=1)
+        self.scripts_flag = "All"
 
-        self.text_scripts_generation = StringVar()
-        self.entry_scripts_generation = Entry(frame_config_file_values, textvariable=self.text_scripts_generation,width=frame_config_file_values_entry_width)
-        self.entry_scripts_generation.grid(row=4, column=1, sticky="w", columnspan=1)
+        self.UDI_scripts_generation_value = IntVar()
+        self.Testing_scripts_generation_value = IntVar()
 
+        self.UDI_scripts_generation = Checkbutton(frame_checkboxes_values,text="UDI", variable=self.UDI_scripts_generation_value,onvalue=1,offvalue=0,command=self.toggle_scripts_flag,width='20')
+        self.UDI_scripts_generation.grid(row=0, column=0, sticky='w', columnspan=1)
+
+        self.Testing_scripts_generation = Checkbutton(frame_checkboxes_values,text="Testing",variable=self.Testing_scripts_generation_value,onvalue=1,offvalue=0,command=self.toggle_scripts_flag,width='20')
+        self.Testing_scripts_generation.grid(row=0, column=1, sticky='w', columnspan=1)
+
+        self.UDI_scripts_generation.select()
+        self.Testing_scripts_generation.select()
 
         self.populate_config_file_values()
         self.config_file_entry_txt.trace("w", self.refresh_config_file_values)
@@ -131,6 +142,19 @@ class FrontEnd:
         thread0.start()
 
         self.root.mainloop()
+
+    def toggle_scripts_flag(self):
+        testing_scripts_flag = self.Testing_scripts_generation_value.get()
+        UDI_scripts_flag = self.UDI_scripts_generation_value.get()
+        if UDI_scripts_flag == 1 and testing_scripts_flag != 1:
+            self.scripts_flag = "UDI"
+            self.enable_disable_fields(NORMAL)
+        elif UDI_scripts_flag != 1 and testing_scripts_flag == 1:
+            self.scripts_flag = "Testing"
+            self.enable_disable_fields(NORMAL)
+        elif UDI_scripts_flag != 1 and testing_scripts_flag != 1:
+            self.enable_disable_fields(DISABLED)
+
 
     def change_status_label(self, msg, color):
         self.status_label_text.set(msg)
@@ -151,14 +175,9 @@ class FrontEnd:
             source_names = self.config_file_values["source_names"]
             self.source_names = "All" if source_names is None else source_names
             self.db_prefix = self.config_file_values["db_prefix"]
-            self.scripts_flag = "All"
             self.generate_button.config(state=NORMAL)
             self.change_status_label(self.msg_ready, self.color_msg_ready)
-            try:
-                scripts_flag = self.config_file_values["scripts_flag"]
-                self.scripts_flag = "All" if scripts_flag is None or scripts_flag == "" else scripts_flag
-            except:
-                self.scripts_flag = "All"
+
         except:
             self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
             self.generate_button.config(state=DISABLED)
@@ -166,7 +185,15 @@ class FrontEnd:
             self.output_path = ""
             self.source_names = ""
             self.db_prefix = ""
-            self.scripts_flag = "All"
+
+    def get_scripts_to_generate_flag(self):
+        self.scripts_flag = "All"
+        testing_scripts_flag = self.Testing_scripts_generation_value.get()
+        UDI_scripts_flag = self.UDI_scripts_generation_value.get()
+        if UDI_scripts_flag == 1 and testing_scripts_flag != 1:
+            self.scripts_flag = "UDI"
+        elif UDI_scripts_flag != 1 and testing_scripts_flag == 1:
+            self.scripts_flag = "Testing"
 
     def refresh_config_file_values(self, *args):
         self.get_config_file_values()
@@ -192,11 +219,6 @@ class FrontEnd:
         self.entry_db_prefix.delete(0, END)
         self.entry_db_prefix.insert(END, self.db_prefix)
         self.entry_db_prefix.config(state=DISABLED)
-
-        self.entry_scripts_generation.config(state=NORMAL)
-        self.entry_scripts_generation.delete(0, END)
-        self.entry_scripts_generation.insert(END, self.scripts_flag)
-        self.entry_scripts_generation.config(state=DISABLED)
 
     def browsefunc(self):
         current_file = self.config_file_entry_txt.get()
@@ -259,6 +281,7 @@ class FrontEnd:
 
         self.refresh_config_file_values()
         self.g = gs.GenerateScripts(None, self.config_file_values)
+        self.g.scripts_flag = self.scripts_flag
 
         thread1 = GenerateScriptsThread(1, "Thread-1", self)
         thread1.start()

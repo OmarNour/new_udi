@@ -121,13 +121,15 @@ class FrontEnd:
 
         scripts_generation_label = Label(frame_config_file_values, text="Generating scripts")
         scripts_generation_label.grid(row=4, column=0, sticky='e',columnspan=1)
+        self.scripts_flag = "All"
 
         self.UDI_scripts_generation_value = IntVar()
-        self.UDI_scripts_generation = Checkbutton(frame_checkboxes_values,text="UDI", variable=self.UDI_scripts_generation_value,onvalue=1,offvalue=0,width='20')
+        self.Testing_scripts_generation_value = IntVar()
+
+        self.UDI_scripts_generation = Checkbutton(frame_checkboxes_values,text="UDI", variable=self.UDI_scripts_generation_value,onvalue=1,offvalue=0,command=self.toggle_scripts_flag,width='20')
         self.UDI_scripts_generation.grid(row=0, column=0, sticky='w', columnspan=1)
 
-        self.Testing_scripts_generation_value = IntVar()
-        self.Testing_scripts_generation = Checkbutton(frame_checkboxes_values,text="Testing",variable=self.Testing_scripts_generation_value,onvalue=1,offvalue=0,width='20')
+        self.Testing_scripts_generation = Checkbutton(frame_checkboxes_values,text="Testing",variable=self.Testing_scripts_generation_value,onvalue=1,offvalue=0,command=self.toggle_scripts_flag,width='20')
         self.Testing_scripts_generation.grid(row=0, column=1, sticky='w', columnspan=1)
 
         self.UDI_scripts_generation.select()
@@ -140,6 +142,19 @@ class FrontEnd:
         thread0.start()
 
         self.root.mainloop()
+
+    def toggle_scripts_flag(self):
+        testing_scripts_flag = self.Testing_scripts_generation_value.get()
+        UDI_scripts_flag = self.UDI_scripts_generation_value.get()
+        if UDI_scripts_flag == 1 and testing_scripts_flag != 1:
+            self.scripts_flag = "UDI"
+            self.enable_disable_fields(NORMAL)
+        elif UDI_scripts_flag != 1 and testing_scripts_flag == 1:
+            self.scripts_flag = "Testing"
+            self.enable_disable_fields(NORMAL)
+        elif UDI_scripts_flag != 1 and testing_scripts_flag != 1:
+            self.enable_disable_fields(DISABLED)
+
 
     def change_status_label(self, msg, color):
         self.status_label_text.set(msg)
@@ -182,7 +197,6 @@ class FrontEnd:
 
     def refresh_config_file_values(self, *args):
         self.get_config_file_values()
-        self.get_scripts_to_generate_flag()
         self.populate_config_file_values()
 
     def populate_config_file_values(self):

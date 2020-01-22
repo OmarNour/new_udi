@@ -3,9 +3,9 @@ import sys
 sys.path.append(os.getcwd())
 import numpy as np
 import pandas as pd
-import pyarrow.parquet as pq
-import pyarrow as pa
-from pyarrow.formatting import *
+#import pyarrow.parquet as pq
+#import pyarrow as pa
+#from pyarrow.formatting import *
 import dask.dataframe as dd
 from read_smx_sheet.app_Lib import manage_directories as md
 from read_smx_sheet.parameters import parameters as pm
@@ -347,6 +347,12 @@ def server_info():
 
     return (cpu_per,mem_per)
 
+
+def get_model_col(df, table_name):
+    core_tables_IDS = df[df['Column name'].str.endswith(str('_ID'))]
+    for core_tables_index,core_tables_row in core_tables_IDS.iterrows():
+        if core_tables_row['Table name'] == table_name:
+            return core_tables_row['Column name']
 
 class WriteFile:
     def __init__(self, file_path, file_name, ext, f_mode="w+", new_line=False):

@@ -10,8 +10,37 @@ def d320(cf, source_output_path, STG_tables, BKEY):
         separator = pm.stg_cols_separator
         stg_tables_df = STG_tables.loc[(STG_tables['Key domain name'] != "")
                                         & (STG_tables['Natural key'] != "")]
-
+        trimmed_Natural_key = []
+        normal_columns = ""
         for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
+            stg_table_name = stg_tables_df_row['Table name'].upper()
+            Column_name = stg_tables_df_row['Column name'].upper()
+            stg_Natural_key_df = STG_tables.loc[(STG_tables['Table name'].str.upper() == stg_table_name)
+                                                & (STG_tables['Natural key'] != "")]
+            Natural_key_list = []
+            for stg_Natural_key_df_index, stg_Natural_key_df_row in stg_Natural_key_df.iterrows():
+                Natural_key_split = str(stg_Natural_key_df_row['Natural key']).split(separator)
+                for i in Natural_key_split:
+                    Natural_key_list.append(i.upper())
+
+                Natural_key = str(stg_tables_df_row['Natural key']).upper()
+
+                for i in list(set(Natural_key_list)):
+                    i = i.replace(" ", "")
+                    if "COALESCE" in i:
+                        Column_name = "COALESCE(" + Column_name + ",'')"
+                    Column_name = "TRIM(Trailing '.' from TRIM(" + Column_name + ")) "
+
+                if Natural_key == "":
+                    comma_Column_name = ',' + Column_name
+                    normal_columns = normal_columns + comma_Column_name + "\n"
+                else:
+                    trim_Natural_key = []
+                    split_Natural_key = Natural_key.replace(" ", "").split(separator)
+                    for i in split_Natural_key:
+                        trim_Natural_key.append("TRIM(Trailing '.' from TRIM(" + i.strip() + "))")
+                    trimmed_Natural_key = funcs.list_to_string(trim_Natural_key, separator)
+
             key_domain_name = stg_tables_df_row['Key domain name']
             stg_table_name = stg_tables_df_row['Table name']
             stg_Column_name = stg_tables_df_row['Column name']
@@ -40,7 +69,7 @@ def d320(cf, source_output_path, STG_tables, BKEY):
             Key_domain_ID = str(int(bkey_df['Key domain ID'].values[0]))
 
             script = "REPLACE VIEW " + cf.INPUT_VIEW_DB + ".BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "_IN AS LOCK ROW FOR ACCESS\n"
-            script = script + "SELECT " + Source_Key + " AS Source_Key\n"
+            script = script + "SELECT " + trimmed_Natural_key + " AS Source_Key\n"
             script = script + "FROM " + cf.v_stg + "." + stg_table_name + "\n"
             script = script + Bkey_filter + Source_Key_cond + "\n"
             script = script + "GROUP BY 1;" + "\n"

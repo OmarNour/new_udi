@@ -8,15 +8,24 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
     f.write("delete from " + cf.GCFR_t + "." + cf.etl_process_table + " where SOURCE_NAME = '" + source_name + "';\n\n")
     try:
         for table_maping_index, table_maping_row in Table_mapping.iterrows():
+            matching_flag = funcs.xstr(table_maping_row['Matching Included'])
             prcess_type = "TXF"
             layer = str(table_maping_row['Layer'])
+            matching_flag = funcs.xstr(table_maping_row['Matching Included'])
             process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name'])
             target_table = str(table_maping_row['Target table name'])
             Historization_algorithm = str(table_maping_row['Historization algorithm'])
-
-            f.write("insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID)\n")
-            f.write("VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL)" + ";\n")
+            active_flag = "1"
+            f.write("insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID, active)\n")
+            f.write("VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL,"+active_flag+")" + ";\n")
             f.write("\n")
+
+            if str(matching_flag) == "1":
+                process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name']) + "_Matching"
+                active_flag = "0"
+                f.write("insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID, active)\n")
+                f.write("VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL,"+active_flag+")" + ";\n")
+                f.write("\n")
 
         for STG_tables_index, STG_tables_row in STG_tables.loc[STG_tables['Key set name'] != ""].iterrows():
             Key_set_name = STG_tables_row['Key set name']

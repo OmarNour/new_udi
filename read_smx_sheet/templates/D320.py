@@ -46,8 +46,9 @@ def d320(cf, source_output_path, STG_tables, BKEY):
             stg_Column_name = stg_tables_df_row['Column name']
 
             Bkey_filter = str(stg_tables_df_row['Bkey filter']).upper()
-            Bkey_filter = "WHERE " + Bkey_filter if Bkey_filter != "" and "JOIN" not in Bkey_filter else Bkey_filter
+            Bkey_filter = "WHERE " + Bkey_filter if Bkey_filter != "" else Bkey_filter
             Bkey_filter = Bkey_filter + "\n" if Bkey_filter != "" else Bkey_filter
+            Bkey_join = str(stg_tables_df_row['Bkey_join']).upper()
 
             Natural_key_list = stg_tables_df_row['Natural key'].split(separator)
             trim_Trailing_Natural_key_list = []
@@ -71,6 +72,7 @@ def d320(cf, source_output_path, STG_tables, BKEY):
             script = "REPLACE VIEW " + cf.INPUT_VIEW_DB + ".BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "_IN AS LOCK ROW FOR ACCESS\n"
             script = script + "SELECT " + trimmed_Natural_key + " AS Source_Key\n"
             script = script + "FROM " + cf.v_stg + "." + stg_table_name + "\n"
+            script = script + Bkey_join + "\n"
             script = script + Bkey_filter + Source_Key_cond + "\n"
             script = script + "GROUP BY 1;" + "\n"
 

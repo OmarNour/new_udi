@@ -48,7 +48,7 @@ def d320(cf, source_output_path, STG_tables, BKEY):
             stg_Column_name = stg_tables_df_row['Column name']
 
             Bkey_filter = str(stg_tables_df_row['Bkey filter']).upper()
-            Bkey_filter = "WHERE " + Bkey_filter if Bkey_filter != "" else Bkey_filter
+            Bkey_filter = "WHERE " + Bkey_filter if Bkey_filter != "" and "JOIN" not in Bkey_filter else Bkey_filter
             Bkey_filter = Bkey_filter + "\n" if Bkey_filter != "" else Bkey_filter
             Bkey_join = str(stg_tables_df_row['Bkey Join']).upper()
             if Bkey_join != "":

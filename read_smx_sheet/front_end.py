@@ -256,6 +256,8 @@ class FrontEnd:
                 self.enable_disable_fields(DISABLED)
                 self.g.generate_scripts()
                 self.enable_disable_fields(NORMAL)
+                self.UDI_scripts_generation.config(state=NORMAL)
+                self.Testing_scripts_generation.config(state=NORMAL)
                 print("Total Elapsed time: ", self.g.elapsed_time, "\n")
             except Exception as error:
                 try:
@@ -265,6 +267,8 @@ class FrontEnd:
                 self.change_status_label(error_messager, self.color_error_messager)
                 self.generate_button.config(state=NORMAL)
                 self.config_file_entry.config(state=NORMAL)
+                self.UDI_scripts_generation.config(state=NORMAL)
+                self.Testing_scripts_generation.config(state=NORMAL)
                 traceback.print_exc()
         except:
             self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
@@ -282,6 +286,9 @@ class FrontEnd:
         self.refresh_config_file_values()
         self.g = gs.GenerateScripts(None, self.config_file_values)
         self.g.scripts_flag = self.scripts_flag
+
+        self.UDI_scripts_generation.config(state=DISABLED)
+        self.Testing_scripts_generation.config(state=DISABLED)
 
         thread1 = GenerateScriptsThread(1, "Thread-1", self)
         thread1.start()

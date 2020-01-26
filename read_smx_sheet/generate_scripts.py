@@ -1,5 +1,4 @@
-import os
-import sys
+import os, sys, subprocess
 sys.path.append(os.getcwd())
 from read_smx_sheet.app_Lib import manage_directories as md, functions as funcs
 from dask import compute, delayed, config
@@ -295,7 +294,11 @@ class GenerateScripts:
                     self.elapsed_time = dt.datetime.now() - self.start_time
                     self.log_file.write("Elapsed Time: " + str(self.elapsed_time))
             self.error_message = ""
-            os.startfile(self.cf.output_path)
+            if sys.platform == "win32":
+                os.startfile(self.cf.output_path)
+            else:
+                opener = "open" if sys.platform == "darwin" else "xdg-open"
+                subprocess.call([opener, self.cf.output_path])
         else:
             self.error_message = "No SMX Files Found!"
 

@@ -26,7 +26,7 @@ def bmap_check(cf, source_output_path, source_name, table_mapping, core_tables):
                         call_line2 = ","+cf.base_DB+ "." + target_model_table + "."+target_model_column +'\n'
                         call_line3 = " FROM " + cf.base_DB + "." + target_model_table + " LEFT JOIN " + cf.base_DB+ "." + lookup_table_name + '\n'
                         call_line4 = " ON " + cf.base_DB + "." + target_model_table + "."+target_column_key + '=' + cf.base_DB+ "." + lookup_table_name + "."+target_column_key + '\n'
-                        call_line5 = " WHERE " + cf.base_DB+ "." + lookup_table_name + "."+target_column_key + ";\n\n\n"
+                        call_line5 = " WHERE " + cf.base_DB+ "." + lookup_table_name + "."+target_column_key + " IS NULL;\n\n\n"
                         bmap_check_name_line = "---bmap_check_Test_Case_" + str(count) + "---"
 
                         call_exp = bmap_check_name_line + "\n" + call_line1 + call_line2 + call_line3 + call_line4 + call_line5

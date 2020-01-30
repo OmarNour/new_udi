@@ -17,7 +17,7 @@ def hist_dup_check(cf, source_output_path, table_mapping, core_tables):
                 start_date = TransformDDL.get_core_tbl_sart_date_column(core_tables, target_table)
                 end_date = TransformDDL.get_core_tbl_end_date_column(core_tables, target_table)
                 hist_col = table_mapping_row['Historization columns']
-                call_line1 = "SELECT "+hist_keys+','+hist_col+','+start_date+','+','+end_date
+                call_line1 = "SELECT "+hist_keys+','+hist_col+','+start_date+','+end_date
                 call_line2 = "FROM "+cf.base_DB+'.'+target_table+" WHERE "
                 call_line3 = "PROCESS_NAME = 'TXF_CORE_"+process_name+"' "
                 call_line4 = "GROUP BY "+hist_keys+','+hist_col+','+start_date+','+end_date

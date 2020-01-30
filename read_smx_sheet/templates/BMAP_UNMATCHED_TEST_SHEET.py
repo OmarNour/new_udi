@@ -22,7 +22,7 @@ def bmap_unmatched_values_check(cf, source_output_path, table_mapping, core_tabl
                         CD_SET_ID_val = str(bmap_table_row['Code set ID'])
             bmap_check_name_line = "---bmap_null_check_Test_Case_" + str(count) + "---"
             call_line1 = "SEL COALESCE(EDW_CODE,'NOT IN BMAP TABLE BUT IN BASE TABLE')AS EDW_CODE,\n"
-            call_line2 = "SEL COALESCE(" + CD_column +",'NOT IN BASE TABLE BUT IN BMAP TABLE')AS BASE_CODE\n"
+            call_line2 = "COALESCE(" + CD_column +",'NOT IN BASE TABLE BUT IN BMAP TABLE')AS BASE_CODE\n"
             call_line3 = " FROM GPROD1V_UTLFW.BMAP_STANDARD_MAP FULL OUTER JOIN "+cf.base_DB+'.'+table_name+'\n'
             call_line4 = "ON GPROD1V_UTLFW.BMAP_STANDARD_MAP.EDW_CODE = "+cf.base_DB+'.'+table_name+'.'+CD_column+'\n'
             call_line5 = "WHERE EDW_CODE IS NULL OR "+CD_column+" IS NULL AND CODE_SET_ID = "+CD_SET_ID_val+'\n\n\n'

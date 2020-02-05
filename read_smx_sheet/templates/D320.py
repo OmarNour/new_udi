@@ -38,9 +38,9 @@ def d320(cf, source_output_path, STG_tables, BKEY):
                     normal_columns = normal_columns + comma_Column_name + "\n"
                 else:
                     trim_Natural_key = []
-                    split_Natural_key = Natural_key.replace(" ", "").split(separator)
+                    split_Natural_key = Natural_key.split(separator)
                     for i in split_Natural_key:
-                        trim_Natural_key.append("TRIM(Trailing '.' from TRIM(" + i.strip() + "))")
+                        trim_Natural_key.append("TRIM(Trailing '.' from TRIM(" + i + "))")
                     trimmed_Natural_key = funcs.list_to_string(trim_Natural_key, separator)
 
             key_domain_name = stg_tables_df_row['Key domain name']

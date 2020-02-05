@@ -3,7 +3,7 @@ from read_smx_sheet.app_Lib import functions as funcs
 import traceback
 
 
-def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
+def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type,cso_stg_view):
     file_name = funcs.get_file_name(__file__)
     f = funcs.WriteFile(source_output_path, file_name, "sql")
 
@@ -50,6 +50,7 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
             normal_columns = ""
             bkey_columns = ""
             bmap_columns = ""
+            join_cso_statement = ""
             for STG_table_columns_index, STG_table_columns_row in STG_table_columns.iterrows():
                 comma = ',' if STG_table_columns_index > 0 else seq_pk_col
 
@@ -75,9 +76,9 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
 
                 else:
                     trim_Natural_key = []
-                    split_Natural_key = Natural_key.replace(" ", "").split(separator)
+                    split_Natural_key = Natural_key.split(separator)
                     for i in split_Natural_key:
-                        trim_Natural_key.append("TRIM(Trailing '.' from TRIM(" + i.strip() + "))")
+                        trim_Natural_key.append("TRIM(Trailing '.' from TRIM(" + i + "))")
                     trimed_Natural_key = funcs.list_to_string(trim_Natural_key, separator)
 
                     Key_domain_name = STG_table_columns_row['Key domain name'].upper()
@@ -86,11 +87,16 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
                         if len(BKEY_row.index) > 0:
                             bkey_physical_table = BKEY_row['Physical table'].values[0]
                             bkey_domain_id = str(int(BKEY_row['Key domain ID'].values[0]))
+                            if bkey_physical_table == 'BKEY_1_PRTY' and bkey_domain_id == '1':
+                                join_cso_statement = "\tJOIN " + cf.v_stg + '.' + cso_stg_view + " " + cso_stg_view + '\n'
+                                join_cso_statement = join_cso_statement + "\tON CAST(" + cso_stg_view + '.NATIONAL_ID AS VARCHAR(14)=CAST(SOURCE_KEY AS VARCHAR(14))'
                             bkeys_left_join_count = bkeys_left_join_count + 1
                             bk_alias = " bk" + str(bkeys_left_join_count)
 
                             bkeys_query = "( Select " + bk_alias + ".EDW_Key\n"
                             bkeys_query = bkeys_query + "\tFrom " + cf.UTLFW_v + "." + bkey_physical_table + bk_alias + "\n"
+                            if bkey_physical_table == 'BKEY_1_PRTY' and bkey_domain_id == '1':
+                                bkeys_query = bkeys_query + join_cso_statement + "\n"
                             bkeys_query = bkeys_query + "\tWhere " + bk_alias + ".Source_Key = " + trimed_Natural_key + "\n"
                             bkeys_query = bkeys_query + "\tand " + bk_alias + ".Domain_ID = " + bkey_domain_id + ")"
 

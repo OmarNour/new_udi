@@ -135,6 +135,13 @@ class FrontEnd:
         self.UDI_scripts_generation.select()
         self.Testing_scripts_generation.select()
 
+        scripts_generation_label = Label(frame_config_file_values, text="CSO stg view name")
+        scripts_generation_label.grid(row=5, column=0, sticky='e', columnspan=1)
+
+        self.cso_stg_view = StringVar(value='cso_new_person')
+        self.cso_stg_view = Entry(frame_config_file_values,textvariable=self.cso_stg_view, width=frame_config_file_values_entry_width)
+        self.cso_stg_view.grid(row=5, column=1, sticky="w", columnspan=1)
+
         self.populate_config_file_values()
         self.config_file_entry_txt.trace("w", self.refresh_config_file_values)
 
@@ -146,13 +153,16 @@ class FrontEnd:
     def toggle_scripts_flag(self):
         testing_scripts_flag = self.Testing_scripts_generation_value.get()
         UDI_scripts_flag = self.UDI_scripts_generation_value.get()
-        if UDI_scripts_flag == 1 and testing_scripts_flag != 1:
+        if UDI_scripts_flag == 1 and testing_scripts_flag == 1:
+            self.scripts_flag = "All"
+            self.enable_disable_fields(NORMAL)
+        if UDI_scripts_flag == 1 and testing_scripts_flag == 0:
             self.scripts_flag = "UDI"
             self.enable_disable_fields(NORMAL)
-        elif UDI_scripts_flag != 1 and testing_scripts_flag == 1:
+        elif UDI_scripts_flag ==0 and testing_scripts_flag == 1:
             self.scripts_flag = "Testing"
             self.enable_disable_fields(NORMAL)
-        elif UDI_scripts_flag != 1 and testing_scripts_flag != 1:
+        elif UDI_scripts_flag ==0 and testing_scripts_flag == 0:
             self.enable_disable_fields(DISABLED)
 
 
@@ -258,6 +268,7 @@ class FrontEnd:
                 self.enable_disable_fields(NORMAL)
                 self.UDI_scripts_generation.config(state=NORMAL)
                 self.Testing_scripts_generation.config(state=NORMAL)
+                self.cso_stg_view.config(state=NORMAL)
                 print("Total Elapsed time: ", self.g.elapsed_time, "\n")
             except Exception as error:
                 try:
@@ -269,6 +280,7 @@ class FrontEnd:
                 self.config_file_entry.config(state=NORMAL)
                 self.UDI_scripts_generation.config(state=NORMAL)
                 self.Testing_scripts_generation.config(state=NORMAL)
+                self.cso_stg_view.config(state=NORMAL)
                 traceback.print_exc()
         except:
             self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
@@ -282,13 +294,15 @@ class FrontEnd:
         self.root.protocol("WM_DELETE_WINDOW", self.destroyer())
 
     def start(self):
-
         self.refresh_config_file_values()
         self.g = gs.GenerateScripts(None, self.config_file_values)
         self.g.scripts_flag = self.scripts_flag
+        self.g.cso_stg_view = self.cso_stg_view.get()
 
         self.UDI_scripts_generation.config(state=DISABLED)
         self.Testing_scripts_generation.config(state=DISABLED)
+        self.cso_stg_view.config(state=DISABLED)
+
 
         thread1 = GenerateScriptsThread(1, "Thread-1", self)
         thread1.start()

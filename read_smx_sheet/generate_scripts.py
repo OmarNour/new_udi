@@ -64,6 +64,7 @@ class ConfigFile:
         self.TMP_DB = self.config_file_values["TMP_DB"]
         self.APPLY_DB = self.config_file_values["APPLY_DB"]
         self.base_DB = self.config_file_values["base_DB"]
+        self.base_view = self.config_file_values["v_base"]
         self.SI_VIEW = self.config_file_values["SI_VIEW"]
 
         self.online_source_t = self.config_file_values["online_source_t"]
@@ -241,7 +242,7 @@ class GenerateScripts:
 
                                     self.parallel_templates.append(delayed(testing_script_01.source_testing_script)(self.cf, output_path_testing,source_name,core_Table_mapping,Column_mapping, STG_tables,BKEY))
                                     self.parallel_templates.append(delayed(testing_script_02.source_testing_script)(self.cf, output_path_testing,source_name,core_Table_mapping, Core_tables))
-                                    self.parallel_templates.append(delayed(PROCESS_CHECK_TEST_SHEET.process_check)(self.cf, process_check_output_path_testing,source_name, core_Table_mapping))
+                                    self.parallel_templates.append(delayed(PROCESS_CHECK_TEST_SHEET.process_check)(self.cf, process_check_output_path_testing,source_name, core_Table_mapping,Core_tables))
                                     self.parallel_templates.append(delayed(CSO_TEST_SHEET.cso_check)(self.cf, cso_output_path_testing,source_name,core_Table_mapping,Column_mapping))
                                     self.parallel_templates.append(delayed(NULLS_TEST_SHEET.nulls_check)(self.cf, nulls_output_path_testing, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(DUP_TEST_SHEET.duplicates_check)(self.cf, duplicate_output_path_testing,core_Table_mapping,Core_tables))

@@ -306,6 +306,7 @@ def get_config_file_values(config_file_path=None):
         param_dic['T_STG'] = db_prefix + "T_STG"
         param_dic['t_WRK'] = db_prefix + "T_WRK"
         param_dic['v_stg'] = db_prefix + "V_STG"
+        param_dic['v_base'] = db_prefix + "V_BASE"
         param_dic['INPUT_VIEW_DB'] = db_prefix + "V_INP"
 
         param_dic['MACRO_DB'] = db_prefix + "M_GCFR"

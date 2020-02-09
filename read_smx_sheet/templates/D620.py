@@ -3,11 +3,12 @@ from read_smx_sheet.app_Lib import TransformDDL
 import traceback
 
 
-def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loading_Type):
+def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loading_Type,input_view_flag):
     file_name = funcs.get_file_name(__file__)
     f = funcs.WriteFile(source_output_path, file_name, "sql")
     try:
         notes= list()
+        view_name = ''
         for table_maping_index, table_maping_row in Table_mapping.iterrows():
 
             inp_view_from_clause = ''
@@ -18,7 +19,11 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
             src_layer=str(table_maping_row['Source layer'])
             process_name = process_type + "_" + layer + "_" + table_maping_name
 
-            inp_view_header = 'REPLACE VIEW ' + cf.INPUT_VIEW_DB + '.' + process_name + '_IN AS LOCK ROW FOR ACCESS'
+            if input_view_flag=='UDI':
+                view_name=' '
+            elif input_view_flag == 'TESTING':
+                view_name='_TESTING '
+            inp_view_header = 'REPLACE VIEW ' + cf.INPUT_VIEW_DB + '.' + process_name + '_IN'+view_name+'AS LOCK ROW FOR ACCESS'
             target_table = str(table_maping_row['Target table name'])
             apply_type = table_maping_row['Historization algorithm']
 

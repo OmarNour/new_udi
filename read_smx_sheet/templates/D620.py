@@ -5,6 +5,8 @@ import traceback
 
 def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loading_Type,input_view_flag):
     file_name = funcs.get_file_name(__file__)
+    if input_view_flag == 'TESTING':
+        file_name = 'testing_input_views'
     f = funcs.WriteFile(source_output_path, file_name, "sql")
     try:
         notes= list()

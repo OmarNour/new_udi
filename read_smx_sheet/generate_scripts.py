@@ -64,6 +64,7 @@ class ConfigFile:
         self.TMP_DB = self.config_file_values["TMP_DB"]
         self.APPLY_DB = self.config_file_values["APPLY_DB"]
         self.base_DB = self.config_file_values["base_DB"]
+        self.base_view = self.config_file_values["v_base"]
         self.SI_VIEW = self.config_file_values["SI_VIEW"]
 
         self.online_source_t = self.config_file_values["online_source_t"]
@@ -191,11 +192,13 @@ class GenerateScripts:
                                 bmaps_output_path_testing = os.path.join(output_path_testing, "BMAPS_Cases_scripts")
                                 history_output_path_testing = os.path.join(output_path_testing, "HISTORY_Cases_scripts")
                                 ri_output_path_testing = os.path.join(output_path_testing, "RI_Cases_scripts")
+                                input_view_output_path_testing = os.path.join(output_path_testing, "Testing_input_views")
 
                                 self.parallel_create_output_source_path.append(delayed(md.create_folder)(main_output_path))
 
                                 #UDI SCRIPTS
                                 if self.scripts_flag=='All' or self.scripts_flag=='UDI':
+                                    input_views_flag = 'UDI'
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(source_output_path))
                                     self.parallel_templates.append(delayed(D000.d000)(self.cf, source_output_path, source_name, core_Table_mapping, STG_tables, BKEY))
                                     self.parallel_templates.append(delayed(D001.d001)(self.cf, source_output_path, source_name, STG_tables))
@@ -222,12 +225,13 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(D608.d608)(self.cf, source_output_path, Core_tables, BMAP_values))
                                     self.parallel_templates.append(delayed(D610.d610)(self.cf, source_output_path, core_Table_mapping))
                                     self.parallel_templates.append(delayed(D615.d615)(self.cf, source_output_path, Core_tables))
-                                    self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, core_Table_mapping, Column_mapping, Core_tables, Loading_Type))
+                                    self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, core_Table_mapping, Column_mapping, Core_tables, Loading_Type,input_views_flag))
                                     self.parallel_templates.append(delayed(D630.d630)(self.cf, source_output_path, core_Table_mapping))
                                     self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, core_Table_mapping))
 
                                 #TESTING SCRIPTS
                                 if self.scripts_flag=='All' or self.scripts_flag=='Testing':
+                                    input_views_flag='TESTING'
                                     #CREATING  PATHS FOR THE OUTPUT SCRIPTS
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(output_path_testing))
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(process_check_output_path_testing))
@@ -238,10 +242,11 @@ class GenerateScripts:
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(bmaps_output_path_testing))
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(history_output_path_testing))
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(ri_output_path_testing))
+                                    self.parallel_create_output_source_path.append(delayed(md.create_folder)(input_view_output_path_testing))
 
                                     self.parallel_templates.append(delayed(testing_script_01.source_testing_script)(self.cf, output_path_testing,source_name,core_Table_mapping,Column_mapping, STG_tables,BKEY))
                                     self.parallel_templates.append(delayed(testing_script_02.source_testing_script)(self.cf, output_path_testing,source_name,core_Table_mapping, Core_tables))
-                                    self.parallel_templates.append(delayed(PROCESS_CHECK_TEST_SHEET.process_check)(self.cf, process_check_output_path_testing,source_name, core_Table_mapping))
+                                    self.parallel_templates.append(delayed(PROCESS_CHECK_TEST_SHEET.process_check)(self.cf, process_check_output_path_testing,source_name, core_Table_mapping,Core_tables))
                                     self.parallel_templates.append(delayed(CSO_TEST_SHEET.cso_check)(self.cf, cso_output_path_testing,source_name,core_Table_mapping,Column_mapping))
                                     self.parallel_templates.append(delayed(NULLS_TEST_SHEET.nulls_check)(self.cf, nulls_output_path_testing, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(DUP_TEST_SHEET.duplicates_check)(self.cf, duplicate_output_path_testing,core_Table_mapping,Core_tables))
@@ -257,6 +262,7 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(HIST_TIME_GAP_TEST_SHEET.hist_timegap_check)(self.cf, history_output_path_testing, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(HIST_STRT_NULL_TEST_SHEET.hist_start_null_check)(self.cf, history_output_path_testing, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(RI_TEST_SHEET.ri_check)(self.cf, ri_output_path_testing, core_Table_mapping, RI_relations))
+                                    self.parallel_templates.append(delayed(D620.d620)(self.cf, input_view_output_path_testing, core_Table_mapping, Column_mapping, Core_tables, Loading_Type,input_views_flag))
 
                         except Exception as e_source:
                             # print(error)

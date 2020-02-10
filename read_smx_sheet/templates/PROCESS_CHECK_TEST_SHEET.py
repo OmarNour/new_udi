@@ -16,7 +16,7 @@ def process_check(cf, source_output_path, source_name, Table_mapping,Core_tables
             tbl_name = table_maping_row['Target table name']
             table_pks=TransformDDL.get_trgt_pk(Core_tables,tbl_name)
             table_pks_splitted = table_pks.split(',')
-            call_line1 = "SEL * FROM " + cf.INPUT_VIEW_DB + ".TXF_CORE_" + process_name + " INP_VIEW"
+            call_line1 = "SEL * FROM " + cf.INPUT_VIEW_DB + ".TXF_CORE_" + process_name + "_IN INP_VIEW"
             call_line2 = " WHERE NOT EXISTS ( SEL 1 FROM " + cf.base_view + "." + tbl_name + " BASE_VIEW"
             call_line3 = " WHERE INP_VIEW." + table_pks_splitted[0] + " = BASE_VIEW." + table_pks_splitted[0]
             process_check_test_case_exp = call_line1 + '\n' + call_line2 + '\n' + call_line3 + ');\n\n\n'

@@ -21,7 +21,7 @@ def hist_timegap_check(cf, source_output_path, table_mapping, core_tables):
                 call_line3 = hist_keys+' order by '+start_date+' rows between 1 preceding and 1 preceding)as end_'
                 call_line4 = 'FROM '+cf.base_DB+'.'+target_table
                 call_line5 = "WHERE PROCESS_NAME = 'TXF_CORE_"+process_name+"')tst"
-                call_line6 = "WHERE CAST(tst.end_ AS DATE)+ INTERVAL'1'SECOND<>tst."+start_date+';'+'\n\n\n'
+                call_line6 = "WHERE tst.end_ + INTERVAL'1'SECOND<>tst."+start_date+';'+'\n\n\n'
                 hist_test_case_exp = hist_check_name_line + '\n' + call_line1 + '\n' + call_line2 + '\n' + call_line3 + '\n' \
                                      + call_line4 + '\n' + call_line5 + '\n' + call_line6
                 f.write(hist_test_case_exp)

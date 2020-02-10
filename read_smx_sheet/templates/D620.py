@@ -5,10 +5,12 @@ import traceback
 
 def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loading_Type,input_view_flag):
     file_name = funcs.get_file_name(__file__)
+    if input_view_flag == 'TESTING':
+        file_name = 'testing_input_views'
     f = funcs.WriteFile(source_output_path, file_name, "sql")
     try:
         notes= list()
-        view_name = ''
+        view_name_suffix = ''
         for table_maping_index, table_maping_row in Table_mapping.iterrows():
 
             inp_view_from_clause = ''
@@ -19,11 +21,11 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
             src_layer=str(table_maping_row['Source layer'])
             process_name = process_type + "_" + layer + "_" + table_maping_name
 
-            if input_view_flag=='UDI':
-                view_name=' '
+            if input_view_flag == 'UDI':
+                view_name_suffix=' '
             elif input_view_flag == 'TESTING':
-                view_name='_TESTING '
-            inp_view_header = 'REPLACE VIEW ' + cf.INPUT_VIEW_DB + '.' + process_name + '_IN'+view_name+'AS LOCK ROW FOR ACCESS'
+                view_name_suffix='_TESTING '
+            inp_view_header = 'REPLACE VIEW ' + cf.INPUT_VIEW_DB + '.' + process_name + '_IN'+view_name_suffix+'AS LOCK ROW FOR ACCESS'
             target_table = str(table_maping_row['Target table name'])
             apply_type = table_maping_row['Historization algorithm']
 

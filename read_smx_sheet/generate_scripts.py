@@ -9,7 +9,7 @@ from read_smx_sheet.templates import PROCESS_CHECK_TEST_SHEET, CSO_TEST_SHEET, N
 from read_smx_sheet.templates import BMAP_DUP_CD_TEST_SHEET,BMAP_DUP_DESC_TEST_SHEET,BMAP_NULL_TEST_SHEET
 from read_smx_sheet.templates import DATA_SRC_TEST_SHEET, BMAP_CHECK_TEST_SHEET , BMAP_UNMATCHED_TEST_SHEET
 from read_smx_sheet.templates import HIST_STRT_END_NULL_TEST_SHEET, HIST_DUP_TEST_SHEET ,HIST_STRT_GRT_END_TEST_SHEET,HIST_TIME_GAP_TEST_SHEET
-from read_smx_sheet.templates import HIST_STRT_NULL_TEST_SHEET, RI_TEST_SHEET
+from read_smx_sheet.templates import HIST_STRT_NULL_TEST_SHEET, RI_TEST_SHEET, compare_testing_inputview
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
 from read_smx_sheet.parameters import parameters as pm
 import traceback
@@ -198,7 +198,6 @@ class GenerateScripts:
 
                                 #UDI SCRIPTS
                                 if self.scripts_flag=='All' or self.scripts_flag=='UDI':
-                                    input_views_flag = 'UDI'
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(source_output_path))
                                     self.parallel_templates.append(delayed(D000.d000)(self.cf, source_output_path, source_name, core_Table_mapping, STG_tables, BKEY))
                                     self.parallel_templates.append(delayed(D001.d001)(self.cf, source_output_path, source_name, STG_tables))
@@ -225,7 +224,7 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(D608.d608)(self.cf, source_output_path, Core_tables, BMAP_values))
                                     self.parallel_templates.append(delayed(D610.d610)(self.cf, source_output_path, core_Table_mapping))
                                     self.parallel_templates.append(delayed(D615.d615)(self.cf, source_output_path, Core_tables))
-                                    self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, core_Table_mapping, Column_mapping, Core_tables, Loading_Type,input_views_flag))
+                                    self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, core_Table_mapping, Column_mapping, Core_tables, Loading_Type,'UDI'))
                                     self.parallel_templates.append(delayed(D630.d630)(self.cf, source_output_path, core_Table_mapping))
                                     self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, core_Table_mapping))
 
@@ -262,7 +261,9 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(HIST_TIME_GAP_TEST_SHEET.hist_timegap_check)(self.cf, history_output_path_testing, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(HIST_STRT_NULL_TEST_SHEET.hist_start_null_check)(self.cf, history_output_path_testing, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(RI_TEST_SHEET.ri_check)(self.cf, ri_output_path_testing, core_Table_mapping, RI_relations))
-                                    self.parallel_templates.append(delayed(D620.d620)(self.cf, input_view_output_path_testing, core_Table_mapping, Column_mapping, Core_tables, Loading_Type,input_views_flag))
+                                    self.parallel_templates.append(delayed(D620.d620)(self.cf, input_view_output_path_testing, core_Table_mapping, Column_mapping, Core_tables, Loading_Type,'TESTING'))
+                                    self.parallel_templates.append(delayed(compare_testing_inputview.compare_views_check)(self.cf, input_view_output_path_testing, core_Table_mapping,'FROM_TESTING_TO_UDI'))
+                                    self.parallel_templates.append(delayed(compare_testing_inputview.compare_views_check)(self.cf, input_view_output_path_testing, core_Table_mapping,'FROM_UDI_TO_TESTING'))
 
                         except Exception as e_source:
                             # print(error)

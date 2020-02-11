@@ -197,12 +197,12 @@ class GenerateScripts:
                                 self.parallel_create_output_source_path.append(delayed(md.create_folder)(main_output_path))
 
                                 #UDI SCRIPTS
-                                if self.scripts_flag=='All' or self.scripts_flag=='UDI':
+                                if self.scripts_flag == 'All' or self.scripts_flag == 'UDI':
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(source_output_path))
                                     self.parallel_templates.append(delayed(D000.d000)(self.cf, source_output_path, source_name, core_Table_mapping, STG_tables, BKEY))
                                     self.parallel_templates.append(delayed(D001.d001)(self.cf, source_output_path, source_name, STG_tables))
                                     self.parallel_templates.append(delayed(D002.d002)(self.cf, source_output_path, Core_tables, core_Table_mapping))
-                                    self.parallel_templates.append(delayed(D003.d003)(self.cf, source_output_path, BMAP_values, BMAP))
+                                    self.parallel_templates.append(delayed(D003.d003)(self.cf, source_output_path, source_name, STG_tables, BMAP_values, BMAP))
 
                                     self.parallel_templates.append(delayed(D110.d110)(self.cf, source_output_path, stg_Table_mapping, STG_tables, Loading_Type))
 

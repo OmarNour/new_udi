@@ -86,7 +86,7 @@ class FrontEnd:
         frame_config_file_values.grid(column=0, row=0, sticky="w")
 
         frame_checkboxes_values = Frame(frame_config_file_values, relief="ridge")
-        frame_checkboxes_values.grid(column=1, row=4, sticky="W")
+        frame_checkboxes_values.grid(column=1, row=5, sticky="W")
 
         self.get_config_file_values()
         frame_config_file_values_entry_width = 84
@@ -119,12 +119,20 @@ class FrontEnd:
         self.entry_db_prefix = Entry(frame_config_file_values, textvariable=self.text_db_prefix, width=frame_config_file_values_entry_width)
         self.entry_db_prefix.grid(row=3, column=1, sticky="w", columnspan=1)
 
-        scripts_generation_label = Label(frame_config_file_values, text="Generating scripts")
-        scripts_generation_label.grid(row=4, column=0, sticky='e',columnspan=1)
-        self.scripts_flag = "All"
 
         self.UDI_scripts_generation_value = IntVar()
         self.Testing_scripts_generation_value = IntVar()
+
+        scripts_generation_label = Label(frame_config_file_values, text="CSO stg view name")
+        scripts_generation_label.grid(row=4, column=0, sticky='e', columnspan=1)
+
+        self.cso_stg_view = StringVar(value='cso_new_person')
+        self.cso_stg_view = Entry(frame_config_file_values, textvariable=self.cso_stg_view,width=frame_config_file_values_entry_width)
+        self.cso_stg_view.grid(row=4, column=1, sticky="w", columnspan=1)
+
+        scripts_generation_label = Label(frame_config_file_values, text="Generating scripts")
+        scripts_generation_label.grid(row=5, column=0, sticky='e',columnspan=1)
+        self.scripts_flag = "All"
 
         self.UDI_scripts_generation = Checkbutton(frame_checkboxes_values,text="UDI", variable=self.UDI_scripts_generation_value,onvalue=1,offvalue=0,command=self.toggle_scripts_flag)
         self.UDI_scripts_generation.grid(row=0, column=0, sticky='w', columnspan=1)
@@ -134,13 +142,6 @@ class FrontEnd:
 
         self.UDI_scripts_generation.select()
         self.Testing_scripts_generation.select()
-
-        scripts_generation_label = Label(frame_config_file_values, text="CSO stg view name")
-        scripts_generation_label.grid(row=5, column=0, sticky='e', columnspan=1)
-
-        self.cso_stg_view = StringVar(value='cso_new_person')
-        self.cso_stg_view = Entry(frame_config_file_values,textvariable=self.cso_stg_view, width=frame_config_file_values_entry_width)
-        self.cso_stg_view.grid(row=5, column=1, sticky="w", columnspan=1)
 
         self.populate_config_file_values()
         self.config_file_entry_txt.trace("w", self.refresh_config_file_values)

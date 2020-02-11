@@ -18,7 +18,7 @@ def ri_check(cf, source_output_path, table_mapping, RI_relations):
                     call_line1 = "SELECT DISTINCT " + cf.base_DB + '.' + ri_table_row['CHILD TABLE'] + '.' + ri_table_row['CHILD COLUMN']
                     call_line2 = " FROM " + cf.base_DB + '.' + ri_table_row['CHILD TABLE'] + " CHILD_TABLE LEFT JOIN " + cf.base_DB + '.' + ri_table_row['PARENT TABLE'] + " PARENT_TABLE "
                     call_line3 = " ON CHILD_TABLE." + ri_table_row['CHILD COLUMN']
-                    call_line4 = " = PARENT_TABLE" + '.' + ri_table_row['PARENT COLUMN']
+                    call_line4 = " = PARENT_TABLE." + ri_table_row['PARENT COLUMN']
                     call_line5 = " WHERE PARENT_TABLE." + ri_table_row['PARENT COLUMN'] + " IS NULL"
                     call_line6 = " AND CHILD_TABLE." + ri_table_row['CHILD COLUMN'] + " IS NOT NULL"
                     call_line7 = " AND CHILD_TABLE.END_TS IS NOT NULL"

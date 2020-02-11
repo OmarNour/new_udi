@@ -16,7 +16,7 @@ def bmap_check(cf, source_output_path, source_name, table_mapping, core_tables):
         for table_name in core_tables_list:
             for core_table_index, core_table_row in core_tables[(core_tables['Table name'] == table_name)].iterrows():
                 for core_tables_look_ups_index, core_tables_look_ups_row in core_tables_look_ups.iterrows():
-                    if core_tables_look_ups_row['Column name'] == core_table_row['Column name']:
+                    if core_tables_look_ups_row['Column name'] == core_table_row['Column name'] and core_table_row['PK'] == 'Y':
                         target_model_table=str(core_table_row['Table name'])
                         target_model_column=str(funcs.get_model_col(core_tables,target_model_table))
                         lookup_table_name = str(core_tables_look_ups_row['Table name'])

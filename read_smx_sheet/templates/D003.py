@@ -8,7 +8,7 @@ def d003(cf, source_output_path,source_name, STG_tables, BMAP_values, BMAP):
     f = funcs.WriteFile(source_output_path, file_name, "sql")
     try:
         BMAP_values = BMAP_values[BMAP_values["Code set name"] != '']
-        code_set_names = funcs.get_code_set_names(STG_tables, source_name)
+        code_set_names = funcs.get_src_code_set_names(STG_tables, source_name)
         insert_st_header = "INSERT INTO " + cf.UTLFW_t + ".BMAP_STANDARD_MAP ( \n"
         bm_tbl_cols = "Source_Code \n"+",Domain_Id  \n" + ",Code_Set_Id  \n" + ",EDW_Code  \n" + ",Description  \n"
         bm_tbl_cols += ",Start_Date  \n" + ",End_Date  \n" + ",Record_Deleted_Flag  \n" + ",Ctl_Id  \n" + ",Process_Name \n"

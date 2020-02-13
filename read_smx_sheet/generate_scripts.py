@@ -197,12 +197,12 @@ class GenerateScripts:
                                 self.parallel_create_output_source_path.append(delayed(md.create_folder)(main_output_path))
 
                                 #UDI SCRIPTS
-                                if self.scripts_flag=='All' or self.scripts_flag=='UDI':
+                                if self.scripts_flag == 'All' or self.scripts_flag == 'UDI':
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(source_output_path))
                                     self.parallel_templates.append(delayed(D000.d000)(self.cf, source_output_path, source_name, core_Table_mapping, STG_tables, BKEY))
                                     self.parallel_templates.append(delayed(D001.d001)(self.cf, source_output_path, source_name, STG_tables))
                                     self.parallel_templates.append(delayed(D002.d002)(self.cf, source_output_path, Core_tables, core_Table_mapping))
-                                    self.parallel_templates.append(delayed(D003.d003)(self.cf, source_output_path, BMAP_values, BMAP))
+                                    self.parallel_templates.append(delayed(D003.d003)(self.cf, source_output_path, source_name, STG_tables, BMAP_values, BMAP))
 
                                     self.parallel_templates.append(delayed(D110.d110)(self.cf, source_output_path, stg_Table_mapping, STG_tables, Loading_Type))
 
@@ -221,7 +221,7 @@ class GenerateScripts:
 
                                     self.parallel_templates.append(delayed(D600.d600)(self.cf, source_output_path, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(D607.d607)(self.cf, source_output_path, Core_tables, BMAP_values))
-                                    self.parallel_templates.append(delayed(D608.d608)(self.cf, source_output_path, Core_tables, BMAP_values))
+                                    self.parallel_templates.append(delayed(D608.d608)(self.cf, source_output_path, source_name, STG_tables, Core_tables, BMAP_values))
                                     self.parallel_templates.append(delayed(D610.d610)(self.cf, source_output_path, core_Table_mapping))
                                     self.parallel_templates.append(delayed(D615.d615)(self.cf, source_output_path, Core_tables))
                                     self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, core_Table_mapping, Column_mapping, Core_tables, Loading_Type,'UDI'))
@@ -229,7 +229,7 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, core_Table_mapping))
 
                                 #TESTING SCRIPTS
-                                if self.scripts_flag=='All' or self.scripts_flag=='Testing':
+                                if self.scripts_flag == 'All' or self.scripts_flag == 'Testing':
                                     input_views_flag='TESTING'
                                     #CREATING  PATHS FOR THE OUTPUT SCRIPTS
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(output_path_testing))
@@ -253,7 +253,7 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(BMAP_CHECK_TEST_SHEET.bmap_check)(self.cf, bmaps_output_path_testing,source_name,core_Table_mapping,Core_tables))
                                     self.parallel_templates.append(delayed(BMAP_DUP_CD_TEST_SHEET.bmap_dup_check)(self.cf, bmaps_output_path_testing, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(BMAP_DUP_DESC_TEST_SHEET.bmap_dup_desc_check)(self.cf, bmaps_output_path_testing,core_Table_mapping,Core_tables))
-                                    self.parallel_templates.append(delayed(BMAP_NULL_TEST_SHEET.bmap_null_check)(self.cf, bmaps_output_path_testing,core_Table_mapping,Core_tables))
+                                    self.parallel_templates.append(delayed(BMAP_NULL_TEST_SHEET.bmap_null_check)(self.cf, bmaps_output_path_testing,core_Table_mapping,Core_tables,BMAP_values))
                                     self.parallel_templates.append(delayed(BMAP_UNMATCHED_TEST_SHEET.bmap_unmatched_values_check)(self.cf, bmaps_output_path_testing,core_Table_mapping,Core_tables,BMAP))
                                     self.parallel_templates.append(delayed(HIST_STRT_END_NULL_TEST_SHEET.hist_start_end_null_check)(self.cf, history_output_path_testing, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(HIST_DUP_TEST_SHEET.hist_dup_check)(self.cf, history_output_path_testing, core_Table_mapping, Core_tables))

@@ -5,6 +5,9 @@ from dask import compute, delayed
 import multiprocessing
 import warnings
 warnings.filterwarnings("ignore")
+from read_smx_sheet.Logging_Decorator import Logging_decorator
+
+
 
 class ReadSmx:
     def __init__(self):
@@ -12,77 +15,69 @@ class ReadSmx:
         self.parallel_templates = []
         self.parallel_save_sheet_data = []
 
+    @Logging_decorator
     def read_smx_file(self, output_path, smx_file_path):
-        try:
-            teradata_sources_filter = [['Source type', ['TERADATA']]]
-            teradata_sources = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.System_sht, filter=teradata_sources_filter)
+        teradata_sources_filter = [['Source type', ['TERADATA']]]
+        teradata_sources = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.System_sht, filter=teradata_sources_filter)
 
-            Supplements = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.Supplements_sht)
-            Column_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.Column_mapping_sht)
-            BMAP_values = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.BMAP_values_sht)
-            BMAP = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.BMAP_sht)
-            BKEY = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.BKEY_sht)
-            Core_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
-            Core_tables = delayed(funcs.read_excel)(smx_file_path, pm.Core_tables_sht, None, Core_tables_reserved_words)
-            STG_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
-            STG_tables = delayed(funcs.read_excel)(smx_file_path, pm.STG_tables_sht, None, STG_tables_reserved_words)
-            Table_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.Table_mapping_sht)
+        Supplements = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.Supplements_sht)
+        Column_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.Column_mapping_sht)
+        BMAP_values = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.BMAP_values_sht)
+        BMAP = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.BMAP_sht)
+        BKEY = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.BKEY_sht)
+        Core_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
+        Core_tables = delayed(funcs.read_excel)(smx_file_path, pm.Core_tables_sht, None, Core_tables_reserved_words)
+        STG_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
+        STG_tables = delayed(funcs.read_excel)(smx_file_path, pm.STG_tables_sht, None, STG_tables_reserved_words)
+        Table_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name=pm.Table_mapping_sht)
 
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, teradata_sources, smx_file_path, output_path, pm.System_sht))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, Supplements, smx_file_path, output_path, pm.Supplements_sht))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, Column_mapping, smx_file_path, output_path, pm.Column_mapping_sht))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, BMAP_values, smx_file_path, output_path, pm.BMAP_values_sht))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, BMAP, smx_file_path, output_path, pm.BMAP_sht))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, BKEY, smx_file_path, output_path, pm.BKEY_sht))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, Core_tables, smx_file_path, output_path, pm.Core_tables_sht))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, STG_tables, smx_file_path, output_path, pm.STG_tables_sht))
-            self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, Table_mapping, smx_file_path, output_path, pm.Table_mapping_sht))
-
-        except Exception as error:
-            # print("0", error)
-            pass
+        self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, teradata_sources, smx_file_path, output_path, pm.System_sht))
+        self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, Supplements, smx_file_path, output_path, pm.Supplements_sht))
+        self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, Column_mapping, smx_file_path, output_path, pm.Column_mapping_sht))
+        self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, BMAP_values, smx_file_path, output_path, pm.BMAP_values_sht))
+        self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, BMAP, smx_file_path, output_path, pm.BMAP_sht))
+        self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, BKEY, smx_file_path, output_path, pm.BKEY_sht))
+        self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, Core_tables, smx_file_path, output_path, pm.Core_tables_sht))
+        self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, STG_tables, smx_file_path, output_path, pm.STG_tables_sht))
+        self.parallel_save_sheet_data.append(delayed(funcs.save_sheet_data)(pm.parquet_db_name, Table_mapping, smx_file_path, output_path, pm.Table_mapping_sht))
 
         if len(self.parallel_save_sheet_data) > 0:
             compute(*self.parallel_save_sheet_data, num_workers=self.cpu_count)
 
+    @Logging_decorator
     def read_smx_sheets(self, output_path, smx_file_path, sheet_name):
-        try:
-            if sheet_name == pm.Supplements_sht:
-                Supplements = funcs.read_excel(smx_file_path, sheet_name=pm.Supplements_sht)
-                funcs.save_sheet_data(pm.parquet_db_name, Supplements, smx_file_path, output_path, pm.Supplements_sht)
-            elif sheet_name == pm.System_sht:
-                teradata_sources_filter = [['Source type', ['TERADATA']]]
-                teradata_sources = funcs.read_excel(smx_file_path, sheet_name=pm.System_sht, filter=teradata_sources_filter)
-                funcs.save_sheet_data(pm.parquet_db_name, teradata_sources, smx_file_path, output_path, pm.System_sht)
-            elif sheet_name == pm.Table_mapping_sht:
-                Table_mapping = funcs.read_excel(smx_file_path, sheet_name=pm.Table_mapping_sht)
-                funcs.save_sheet_data(pm.parquet_db_name, Table_mapping, smx_file_path, output_path, pm.Table_mapping_sht)
-            elif sheet_name == pm.Column_mapping_sht:
-                Column_mapping = funcs.read_excel(smx_file_path, sheet_name=pm.Column_mapping_sht)
-                funcs.save_sheet_data(pm.parquet_db_name, Column_mapping, smx_file_path, output_path, pm.Column_mapping_sht)
-            elif sheet_name == pm.BMAP_values_sht:
-                BMAP_values = funcs.read_excel(smx_file_path, sheet_name=pm.BMAP_values_sht)
-                funcs.save_sheet_data(pm.parquet_db_name, BMAP_values, smx_file_path, output_path, pm.BMAP_values_sht)
-            elif sheet_name == pm.BMAP_sht:
-                BMAP = funcs.read_excel(smx_file_path, sheet_name=pm.BMAP_sht)
-                funcs.save_sheet_data(pm.parquet_db_name, BMAP, smx_file_path, output_path, pm.BMAP_sht)
-            elif sheet_name == pm.BKEY_sht:
-                BKEY = funcs.read_excel(smx_file_path, sheet_name=pm.BKEY_sht)
-                funcs.save_sheet_data(pm.parquet_db_name, BKEY, smx_file_path, output_path, pm.BKEY_sht)
-            elif sheet_name == pm.Core_tables_sht:
-                Supplements = funcs.read_excel(smx_file_path, sheet_name=pm.Supplements_sht)
-                Core_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
-                Core_tables = funcs.read_excel(smx_file_path, pm.Core_tables_sht, None, Core_tables_reserved_words)
-                funcs.save_sheet_data(pm.parquet_db_name, Core_tables, smx_file_path, output_path, pm.Core_tables_sht)
-            elif sheet_name == pm.STG_tables_sht:
-                Supplements = funcs.read_excel(smx_file_path, sheet_name=pm.Supplements_sht)
-                STG_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
-                STG_tables = funcs.read_excel(smx_file_path, pm.STG_tables_sht, None, STG_tables_reserved_words)
-                funcs.save_sheet_data(pm.parquet_db_name, STG_tables, smx_file_path, output_path, pm.STG_tables_sht)
-
-        except Exception as error:
-            # print("0", error)
-            pass
+        if sheet_name == pm.Supplements_sht:
+            Supplements = funcs.read_excel(smx_file_path, sheet_name=pm.Supplements_sht)
+            funcs.save_sheet_data(pm.parquet_db_name, Supplements, smx_file_path, output_path, pm.Supplements_sht)
+        elif sheet_name == pm.System_sht:
+            teradata_sources_filter = [['Source type', ['TERADATA']]]
+            teradata_sources = funcs.read_excel(smx_file_path, sheet_name=pm.System_sht, filter=teradata_sources_filter)
+            funcs.save_sheet_data(pm.parquet_db_name, teradata_sources, smx_file_path, output_path, pm.System_sht)
+        elif sheet_name == pm.Table_mapping_sht:
+            Table_mapping = funcs.read_excel(smx_file_path, sheet_name=pm.Table_mapping_sht)
+            funcs.save_sheet_data(pm.parquet_db_name, Table_mapping, smx_file_path, output_path, pm.Table_mapping_sht)
+        elif sheet_name == pm.Column_mapping_sht:
+            Column_mapping = funcs.read_excel(smx_file_path, sheet_name=pm.Column_mapping_sht)
+            funcs.save_sheet_data(pm.parquet_db_name, Column_mapping, smx_file_path, output_path, pm.Column_mapping_sht)
+        elif sheet_name == pm.BMAP_values_sht:
+            BMAP_values = funcs.read_excel(smx_file_path, sheet_name=pm.BMAP_values_sht)
+            funcs.save_sheet_data(pm.parquet_db_name, BMAP_values, smx_file_path, output_path, pm.BMAP_values_sht)
+        elif sheet_name == pm.BMAP_sht:
+            BMAP = funcs.read_excel(smx_file_path, sheet_name=pm.BMAP_sht)
+            funcs.save_sheet_data(pm.parquet_db_name, BMAP, smx_file_path, output_path, pm.BMAP_sht)
+        elif sheet_name == pm.BKEY_sht:
+            BKEY = funcs.read_excel(smx_file_path, sheet_name=pm.BKEY_sht)
+            funcs.save_sheet_data(pm.parquet_db_name, BKEY, smx_file_path, output_path, pm.BKEY_sht)
+        elif sheet_name == pm.Core_tables_sht:
+            Supplements = funcs.read_excel(smx_file_path, sheet_name=pm.Supplements_sht)
+            Core_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
+            Core_tables = funcs.read_excel(smx_file_path, pm.Core_tables_sht, None, Core_tables_reserved_words)
+            funcs.save_sheet_data(pm.parquet_db_name, Core_tables, smx_file_path, output_path, pm.Core_tables_sht)
+        elif sheet_name == pm.STG_tables_sht:
+            Supplements = funcs.read_excel(smx_file_path, sheet_name=pm.Supplements_sht)
+            STG_tables_reserved_words = [Supplements, 'TERADATA', ['Column name', 'Table name']]
+            STG_tables = funcs.read_excel(smx_file_path, pm.STG_tables_sht, None, STG_tables_reserved_words)
+            funcs.save_sheet_data(pm.parquet_db_name, STG_tables, smx_file_path, output_path, pm.STG_tables_sht)
 
     def build_source_scripts(self, smx_file_path, output_path, source_output_path, source_name, Loading_Type):
         Column_mapping = delayed(funcs.get_sheet_data)(pm.parquet_db_name, smx_file_path, output_path, pm.Column_mapping_sht)

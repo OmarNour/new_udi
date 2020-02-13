@@ -76,12 +76,32 @@ def get_lkp_tbls_names (Core_tables):
     return lkp_tbls_names
 
 def get_lkp_tbl_Cols(Core_tables, tbl_name):
-    Lkp_tbls = get_lkp_tbls(Core_tables)
-    lkp_tbl_cols = ""
-    for lkp_tbl_index, lkp_tbl_row in Lkp_tbls[(Lkp_tbls["Table name"] == tbl_name)].iterrows():
-            lkp_tbl_cols += lkp_tbl_row["Column name"] + ","
-    lkp_tbl_cols = lkp_tbl_cols[0:len(lkp_tbl_cols) - 1]
+    lkp_tbl_cols_cd = ''
+    lkp_tbl_cols_desc = ''
+    lkp_tbl_cols_name = ''
+    for lkp_tbl_index, lkp_tbl_row in Core_tables[(Core_tables["Table name"] == tbl_name)].iterrows():
+        if lkp_tbl_row['Column name'].endswith('_CD'):
+            lkp_tbl_cols_cd = str(lkp_tbl_row['Column name'])
+        elif str(lkp_tbl_row['Column name']).upper().endswith('_NAME'):
+            lkp_tbl_cols_name = str(lkp_tbl_row['Column name'])
+        elif str(lkp_tbl_row['Column name']).upper().endswith('_DESC'):
+            lkp_tbl_cols_desc = str(lkp_tbl_row['Column name'])
+    if lkp_tbl_cols_name == '':
+        lkp_tbl_cols = lkp_tbl_cols_cd + ',' + lkp_tbl_cols_desc
+    else:
+        lkp_tbl_cols = lkp_tbl_cols_cd + ',' + lkp_tbl_cols_name + ',' + lkp_tbl_cols_desc
     return lkp_tbl_cols
+
+
+def get_is_look_up_flag(core_tables,tablename):
+    for core_tables_index,core_tables_row in core_tables.iterrows():
+        if core_tables_row['Table name'] == tablename:
+            if core_tables_row['Is lookup'] == 'N':
+                flag = False
+            else:
+                flag = True
+    return flag
+
 
 def get_column_data_type(Core_tables, column_name, table_name):
     trgt_col_data_type = ""

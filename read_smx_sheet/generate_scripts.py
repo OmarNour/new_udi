@@ -229,7 +229,7 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, core_Table_mapping))
 
                                 #TESTING SCRIPTS
-                                if self.scripts_flag=='All' or self.scripts_flag=='Testing':
+                                if self.scripts_flag == 'All' or self.scripts_flag == 'Testing':
                                     input_views_flag='TESTING'
                                     #CREATING  PATHS FOR THE OUTPUT SCRIPTS
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(output_path_testing))
@@ -253,7 +253,7 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(BMAP_CHECK_TEST_SHEET.bmap_check)(self.cf, bmaps_output_path_testing,source_name,core_Table_mapping,Core_tables))
                                     self.parallel_templates.append(delayed(BMAP_DUP_CD_TEST_SHEET.bmap_dup_check)(self.cf, bmaps_output_path_testing, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(BMAP_DUP_DESC_TEST_SHEET.bmap_dup_desc_check)(self.cf, bmaps_output_path_testing,core_Table_mapping,Core_tables))
-                                    self.parallel_templates.append(delayed(BMAP_NULL_TEST_SHEET.bmap_null_check)(self.cf, bmaps_output_path_testing,core_Table_mapping,Core_tables))
+                                    self.parallel_templates.append(delayed(BMAP_NULL_TEST_SHEET.bmap_null_check)(self.cf, bmaps_output_path_testing,core_Table_mapping,Core_tables,BMAP_values))
                                     self.parallel_templates.append(delayed(BMAP_UNMATCHED_TEST_SHEET.bmap_unmatched_values_check)(self.cf, bmaps_output_path_testing,core_Table_mapping,Core_tables,BMAP))
                                     self.parallel_templates.append(delayed(HIST_STRT_END_NULL_TEST_SHEET.hist_start_end_null_check)(self.cf, history_output_path_testing, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(HIST_DUP_TEST_SHEET.hist_dup_check)(self.cf, history_output_path_testing, core_Table_mapping, Core_tables))

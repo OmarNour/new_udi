@@ -8,15 +8,13 @@ from read_smx_sheet.Logging_Decorator import Logging_decorator
 def d640(cf, source_output_path, source_name, Table_mapping):
     file_name = funcs.get_file_name(__file__)
     f = funcs.WriteFile(source_output_path, file_name, "sql")
-    run_id = calendar.timegm(time.gmtime())
-    load_id = run_id
     for table_maping_index, table_maping_row in Table_mapping.iterrows():
         process_type = table_maping_row['Historization algorithm']
         layer = str(table_maping_row['Layer'])
         table_maping_name = str(table_maping_row['Mapping name'])
         tbl_name = table_maping_row['Target table name']
         process_name = "TXF_" + layer + "_" + table_maping_name
-        call_exp="CALL "+cf.APPLY_DB+".APP_APPLY('"+process_name+"','"+tbl_name+"','"+process_type+"',"
-        call_exp+=str(run_id)+",'"+source_name+"',"+str(load_id)+",Y,X);\n"
+        call_exp = "CALL "+cf.APPLY_DB+".APP_APPLY('"+process_name+"','"+tbl_name+"','"+process_type+"',"
+        call_exp += "NULL,'"+source_name+"',NULL,Y,X,Z);\n"
         f.write(call_exp)
     f.close()

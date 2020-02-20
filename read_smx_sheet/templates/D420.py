@@ -51,6 +51,8 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type,cso_stg_vi
         bkey_columns = ""
         bmap_columns = ""
         join_cso_statement = ""
+        bkey_join_statement = ''
+        bkey_join_type = ''
         for STG_table_columns_index, STG_table_columns_row in STG_table_columns.iterrows():
             comma = ',' if STG_table_columns_index > 0 else seq_pk_col
 
@@ -62,6 +64,11 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type,cso_stg_vi
 
             alias = Column_name
             Column_name = "t." + Column_name
+            if STG_table_columns_row['Bkey Join'] != '':
+                Bkey_join = str(STG_table_columns_row['Bkey Join']).upper()
+                Bkey_join_splitted = Bkey_join.split("JOIN ")
+                bkey_join_type = Bkey_join_splitted[0]
+                bkey_join_statement = bkey_join_statement + "JOIN " + cf.v_stg + '.' + Bkey_join_splitted[1]
 
             for i in list(set(Natural_key_list)):
                 i = i.replace(" ", "")
@@ -127,6 +134,9 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type,cso_stg_vi
             modification_type = ""
 
         normal_columns = normal_columns + modification_type
+        if bkey_join_statement != '':
+            bkey_join_statement = bkey_join_type + bkey_join_statement
+            from_clause = from_clause + '/n' + bkey_join_statement
         create_view_script = create_view + normal_columns + bkey_columns + bmap_columns + from_clause + ";\n"
         f.write(create_view_script+"\n")
     f.close()

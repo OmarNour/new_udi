@@ -30,6 +30,8 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
         apply_type = table_maping_row['Historization algorithm']
 
         main_src = table_maping_row['Main source']
+        SRCI = cf.SI_VIEW+'.'
+        main_src = main_src.replace('#SRCI#',SRCI)
         main_src_alias = table_maping_row['Main source alias']
 
         if main_src == main_src_alias:

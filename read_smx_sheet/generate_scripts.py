@@ -112,7 +112,6 @@ class GenerateScripts:
         print("Reading from: \t" + self.cf.smx_path)
         print("Output folder: \t" + self.cf.output_path)
         print("Scripts to be generated: \t"+self.scripts_flag)
-        print("cso stg view :\t"+self.cso_stg_view)
         print("SMX files:")
         filtered_sources = []
         self.start_time = dt.datetime.now()
@@ -217,7 +216,7 @@ class GenerateScripts:
                                     # self.parallel_templates.append(delayed(D400.d400)(self.cf, source_output_path, STG_tables))
                                     # self.parallel_templates.append(delayed(D410.d410)(self.cf, source_output_path, STG_tables))
                                     # self.parallel_templates.append(delayed(D415.d415)(self.cf, source_output_path, STG_tables))
-                                    self.parallel_templates.append(delayed(D420.d420)(self.cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type,self.cso_stg_view ))
+                                    self.parallel_templates.append(delayed(D420.d420)(self.cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type))
 
                                     self.parallel_templates.append(delayed(D600.d600)(self.cf, source_output_path, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(D607.d607)(self.cf, source_output_path, Core_tables, BMAP_values))

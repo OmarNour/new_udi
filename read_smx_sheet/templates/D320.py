@@ -46,6 +46,7 @@ def d320(cf, source_output_path, STG_tables, BKEY):
         key_domain_name = stg_tables_df_row['Key domain name']
         stg_table_name = stg_tables_df_row['Table name']
         stg_Column_name = stg_tables_df_row['Column name']
+        generation_flag = stg_tables_df_row['Bkey generation flag']
 
         Bkey_filter = str(stg_tables_df_row['Bkey filter']).upper()
         Bkey_filter = "WHERE " + Bkey_filter if Bkey_filter != "" and "JOIN" not in Bkey_filter else Bkey_filter
@@ -74,14 +75,15 @@ def d320(cf, source_output_path, STG_tables, BKEY):
         Key_set_ID = str(int(bkey_df['Key set ID'].values[0]))
         Key_domain_ID = str(int(bkey_df['Key domain ID'].values[0]))
 
-        script = "REPLACE VIEW " + cf.INPUT_VIEW_DB + ".BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "_IN AS LOCK ROW FOR ACCESS\n"
-        script = script + "SELECT " + trimmed_Natural_key + " AS Source_Key\n"
-        script = script + "FROM " + cf.v_stg + "." + stg_table_name + "\n"
-        if Bkey_join != "":
-            script = script + join_type + join_statement + "\n"
-        script = script + Bkey_filter + Source_Key_cond + "\n"
-        script = script + "GROUP BY 1;" + "\n"
+        if generation_flag != 0:
+            script = "REPLACE VIEW " + cf.INPUT_VIEW_DB + ".BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "_IN AS LOCK ROW FOR ACCESS\n"
+            script = script + "SELECT " + trimmed_Natural_key + " AS Source_Key\n"
+            script = script + "FROM " + cf.v_stg + "." + stg_table_name + "\n"
+            if Bkey_join != "":
+                script = script + join_type + join_statement + "\n"
+            script = script + Bkey_filter + Source_Key_cond + "\n"
+            script = script + "GROUP BY 1;" + "\n"
 
-        f.write(script)
-        f.write('\n')
+            f.write(script)
+            f.write('\n')
     f.close()

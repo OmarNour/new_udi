@@ -60,7 +60,7 @@ def get_trgt_pk(Core_tables,target_table ):
 def get_trgt_hist_keys(Core_tables,target_table):
     trgt_hist_keys = ''
     for core_tbl_indx, core_tbl_row in Core_tables[
-        (Core_tables['Table name'] == target_table) & (Core_tables['PK'] == 'Y')& (Core_tables['Historization key'] != "S") & (Core_tables['Historization key']!= "E")].iterrows():
+        (Core_tables['Table name'] == target_table) & (Core_tables['Historization key'] == 'Y')& (Core_tables['Historization key'] != "S") & (Core_tables['Historization key']!= "E")].iterrows():
         trgt_hist_keys += core_tbl_row['Column name'] + ','
     trgt_hist_keys = trgt_hist_keys[0:len(trgt_hist_keys) - 1]
     return trgt_hist_keys

@@ -68,6 +68,7 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
                 inp_view_from_clause = inp_view_from_clause+'\n'+table_maping_row['Join']
                 join = 'JOIN '+cf.SI_VIEW+'.'
                 inp_view_from_clause = inp_view_from_clause.replace('JOIN ',join)
+                inp_view_from_clause = inp_view_from_clause.replace('#CORE#', cf.core_view+'.')
             else:
                 sub_query_flag=1
                 join_clause=table_maping_row['Join']

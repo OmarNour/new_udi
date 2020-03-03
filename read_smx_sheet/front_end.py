@@ -123,12 +123,6 @@ class FrontEnd:
         self.UDI_scripts_generation_value = IntVar()
         self.Testing_scripts_generation_value = IntVar()
 
-        scripts_generation_label = Label(frame_config_file_values, text="CSO stg view name")
-        scripts_generation_label.grid(row=4, column=0, sticky='e', columnspan=1)
-
-        self.cso_stg_view = StringVar(value='cso_person')
-        self.cso_stg_view = Entry(frame_config_file_values, textvariable=self.cso_stg_view,width=frame_config_file_values_entry_width)
-        self.cso_stg_view.grid(row=4, column=1, sticky="w", columnspan=1)
 
         scripts_generation_label = Label(frame_config_file_values, text="Generating scripts")
         scripts_generation_label.grid(row=5, column=0, sticky='e',columnspan=1)
@@ -269,7 +263,6 @@ class FrontEnd:
                 self.enable_disable_fields(NORMAL)
                 self.UDI_scripts_generation.config(state=NORMAL)
                 self.Testing_scripts_generation.config(state=NORMAL)
-                self.cso_stg_view.config(state=NORMAL)
                 print("Total Elapsed time: ", self.g.elapsed_time, "\n")
             except Exception as error:
                 try:
@@ -281,7 +274,6 @@ class FrontEnd:
                 self.config_file_entry.config(state=NORMAL)
                 self.UDI_scripts_generation.config(state=NORMAL)
                 self.Testing_scripts_generation.config(state=NORMAL)
-                self.cso_stg_view.config(state=NORMAL)
                 traceback.print_exc()
         except:
             self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
@@ -298,11 +290,9 @@ class FrontEnd:
         self.refresh_config_file_values()
         self.g = gs.GenerateScripts(None, self.config_file_values)
         self.g.scripts_flag = self.scripts_flag
-        self.g.cso_stg_view = self.cso_stg_view.get()
 
         self.UDI_scripts_generation.config(state=DISABLED)
         self.Testing_scripts_generation.config(state=DISABLED)
-        self.cso_stg_view.config(state=DISABLED)
 
 
         thread1 = GenerateScriptsThread(1, "Thread-1", self)

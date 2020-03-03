@@ -13,16 +13,18 @@ def d340(cf, source_output_path, STG_tables, BKEY):
         key_domain_name = stg_tables_df_row['Key domain name']
         stg_table_name = stg_tables_df_row['Table name']
         stg_Column_name = stg_tables_df_row['Column name']
+        generation_flag = stg_tables_df_row['Bkey generation flag']
 
         bkey_df = BKEY.loc[(BKEY['Key domain name'] == key_domain_name)]
         Key_set_ID = str(int(bkey_df['Key set ID'].values[0]))
         Key_domain_ID = str(int(bkey_df['Key domain ID'].values[0]))
 
-        script = "CALL " + cf.APPLY_DB + ".GCFR_PP_BKEY("
-        script = script + "'BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "'"
-        script = script + ",6, oRC, oRM);"
+        if generation_flag != 0:
+            script = "CALL " + cf.APPLY_DB + ".GCFR_PP_BKEY("
+            script = script + "'BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "'"
+            script = script + ",6, oRC, oRM);"
 
-        f.write(script + '\n')
+            f.write(script + '\n')
     f.close()
 
 

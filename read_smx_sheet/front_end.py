@@ -126,7 +126,7 @@ class FrontEnd:
         scripts_generation_label = Label(frame_config_file_values, text="CSO stg view name")
         scripts_generation_label.grid(row=4, column=0, sticky='e', columnspan=1)
 
-        self.cso_stg_view = StringVar(value='cso_new_person')
+        self.cso_stg_view = StringVar(value='cso_person')
         self.cso_stg_view = Entry(frame_config_file_values, textvariable=self.cso_stg_view,width=frame_config_file_values_entry_width)
         self.cso_stg_view.grid(row=4, column=1, sticky="w", columnspan=1)
 

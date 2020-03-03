@@ -96,7 +96,7 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type,cso_stg_vi
                         bkey_domain_id = str(int(BKEY_row['Key domain ID'].values[0]))
                         if bkey_physical_table == 'BKEY_1_PRTY' and bkey_domain_id == '1':
                             join_cso_statement = "\tJOIN " + cf.v_stg + '.' + cso_stg_view + " " + cso_stg_view + '\n'
-                            join_cso_statement = join_cso_statement + "\tON CAST(" + cso_stg_view + '.NATIONAL_ID AS VARCHAR(14)=CAST(SOURCE_KEY AS VARCHAR(14))'
+                            join_cso_statement = join_cso_statement + "\tON CAST(" + cso_stg_view + '.NATIONAL_ID AS VARCHAR(14))=CAST(SOURCE_KEY AS VARCHAR(14))'
                         bkeys_left_join_count = bkeys_left_join_count + 1
                         bk_alias = " bk" + str(bkeys_left_join_count)
 

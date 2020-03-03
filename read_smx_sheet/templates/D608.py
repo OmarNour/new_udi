@@ -23,7 +23,7 @@ def d608(cf, source_output_path,source_name,STG_tables, Core_tables, BMAP_values
                         if columns.count(',') == 1:
                             insert_values = "(" + str(bmap_values_row["EDW code"]) + ", '" + str(bmap_values_row["Description"]) + "');\n\n"
                         elif columns.count(',') == 2:
-                            insert_values = "(" + str(bmap_values_row["EDW code"]) + ", '" + str(bmap_values_row["Description"]) + ", '" + str(bmap_values_row["Description"]) + "');\n\n"
+                            insert_values = "(" + str(bmap_values_row["EDW code"]) + ", '" + str(bmap_values_row["Description"]) + "','" + str(bmap_values_row["Description"]) + "');\n\n"
                         insert_st = insert_into_st + insert_values
                         f.write(del_st)
                         f.write(insert_st)

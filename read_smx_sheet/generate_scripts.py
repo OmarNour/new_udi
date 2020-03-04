@@ -3,7 +3,7 @@ sys.path.append(os.getcwd())
 from read_smx_sheet.app_Lib import manage_directories as md, functions as funcs
 from dask import compute, delayed, config
 from dask.diagnostics import ProgressBar
-from read_smx_sheet.templates import D110, D300, D320, D200, D330, D400, D610, D640
+from read_smx_sheet.templates import D110, D300, D320, D200, D330, D400, D610, D640,D609
 from read_smx_sheet.templates import testing_script_01, testing_script_02
 from read_smx_sheet.templates import PROCESS_CHECK_TEST_SHEET, CSO_TEST_SHEET, NULLS_TEST_SHEET, DUP_TEST_SHEET
 from read_smx_sheet.templates import BMAP_DUP_CD_TEST_SHEET,BMAP_DUP_DESC_TEST_SHEET,BMAP_NULL_TEST_SHEET
@@ -48,6 +48,7 @@ class ConfigFile:
         self.INPUT_VIEW_DB = self.config_file_values["INPUT_VIEW_DB"]
         self.core_table = self.config_file_values["core_table"]
         self.etl_process_table = self.config_file_values["etl_process_table"]
+        self.keycol_override_table = self.config_file_values["keycol_override_table"]
         self.core_view = self.config_file_values["core_view"]
         self.GCFR_V = self.config_file_values["GCFR_V"]
         self.SOURCE_TABLES_LKP_table = self.config_file_values["SOURCE_TABLES_LKP_table"]
@@ -221,6 +222,7 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(D600.d600)(self.cf, source_output_path, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(D607.d607)(self.cf, source_output_path, Core_tables, BMAP_values))
                                     self.parallel_templates.append(delayed(D608.d608)(self.cf, source_output_path, source_name, STG_tables, Core_tables, BMAP_values))
+                                    self.parallel_templates.append(delayed(D609.d609)(self.cf, source_output_path, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(D610.d610)(self.cf, source_output_path, core_Table_mapping))
                                     self.parallel_templates.append(delayed(D615.d615)(self.cf, source_output_path, Core_tables))
                                     self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, core_Table_mapping, Column_mapping, Core_tables, Loading_Type,'UDI'))

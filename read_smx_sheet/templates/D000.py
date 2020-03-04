@@ -32,7 +32,6 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
 
     for STG_tables_index, STG_tables_row in STG_tables.loc[STG_tables['Key set name'] != ""].iterrows():
         generation_flag = STG_tables_row['Bkey generation flag']
-        print(generation_flag)
         Key_set_name = STG_tables_row['Key set name']
         Key_domain_name = STG_tables_row['Key domain name']
         Table_name = STG_tables_row['Table name']
@@ -42,8 +41,7 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
         Historization_algorithm = "INSERT"
 
 
-        for BKEY_index, BKEY_row in BKEY.loc[
-            (BKEY['Key set name'] == Key_set_name) & (BKEY['Key domain name'] == Key_domain_name) & (generation_flag != 0)].iterrows():
+        for BKEY_index, BKEY_row in BKEY.loc[(BKEY['Key set name'] == Key_set_name) & (BKEY['Key domain name'] == Key_domain_name) & (generation_flag != 0)].iterrows():
             Key_set_id = int(BKEY_row['Key set ID'])
             Key_domain_ID = int(BKEY_row['Key domain ID'])
 

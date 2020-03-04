@@ -57,6 +57,14 @@ def get_trgt_pk(Core_tables,target_table ):
     trgt_pk=trgt_pk[0:len(trgt_pk)-1]
     return trgt_pk
 
+
+def get_trgt_pk_list(Core_tables,target_table ):
+    trgt_pk = list()
+    for core_tbl_indx, core_tbl_row in Core_tables[(Core_tables['Table name'] == target_table) & (Core_tables['PK'] == 'Y')].iterrows():
+        trgt_pk.append(str(core_tbl_row['Column name']).upper())
+    return pd.unique(trgt_pk)
+
+
 def get_trgt_hist_keys(Core_tables,target_table):
     trgt_hist_keys = ''
     for core_tbl_indx, core_tbl_row in Core_tables[

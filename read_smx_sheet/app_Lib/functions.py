@@ -329,6 +329,7 @@ def get_config_file_values(config_file_path=None):
 
         param_dic['GCFR_t'] = db_prefix + "t_GCFR"
         param_dic['GCFR_V'] = db_prefix + "V_GCFR"
+        param_dic['keycol_override_table'] = db_prefix+"T_GCFR.GCFR_TRANSFORM_KEYCOL_OVERRIDE"
 
         param_dic['M_GCFR'] = db_prefix + "M_GCFR"
         param_dic['P_UT'] = db_prefix + "P_UT"

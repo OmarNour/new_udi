@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 from read_smx_sheet.app_Lib import functions as funcs
 
-def get_sub_query(cf, subquery,src_layer,main_src):
+
+def get_sub_query(cf, subquery, src_layer, main_src):
     if src_layer == "SEM":
         join_ = 'JOIN '
         from_ = 'FROM '
@@ -10,15 +11,15 @@ def get_sub_query(cf, subquery,src_layer,main_src):
         join_ = 'JOIN ' + cf.SI_VIEW + '.'
         from_ = 'FROM ' + cf.SI_VIEW + '.'
     if subquery.find("UNION") != -1:
-        subquery = "("+subquery + ")" + main_src
+        subquery = "(" + subquery + ")" + main_src
     out = subquery.replace("FROM ", from_)
     out_2 = out.replace(from_ + " (", "FROM (")
     out_3 = out_2.replace("JOIN ", join_)
-    out_4 = out_3.replace(join_+"(","JOIN (")
-    out_5 = out_4.replace(join_+" (","JOIN (")
+    out_4 = out_3.replace(join_ + "(", "JOIN (")
+    out_5 = out_4.replace(join_ + " (", "JOIN (")
     out_5 = out_5.replace(join_ + "\n (", "JOIN (")
-    out_6 = out_5.replace(join_+"CORE.", "JOIN " + cf.core_view+".")
-    out_6 = out_6.replace(join_+" CORE.", "JOIN " + cf.core_view+".")
+    out_6 = out_5.replace(join_ + "CORE.", "JOIN " + cf.core_view + ".")
+    out_6 = out_6.replace(join_ + " CORE.", "JOIN " + cf.core_view + ".")
     return out_6
 
 
@@ -28,14 +29,15 @@ def get_unique_code_set_name_id(BMAP):
     return bmap_unique
 
 
-def get_bmap_physical_tbl_name (BMAP, code_set_name):
+def get_bmap_physical_tbl_name(BMAP, code_set_name):
     bmap_unique = get_unique_code_set_name_id(BMAP)
     curr_rec = bmap_unique[bmap_unique["Code set name"] == code_set_name.strip()]
     try:
-        tbl_name=curr_rec["Physical table"].item()
+        tbl_name = curr_rec["Physical table"].item()
     except Exception as error:
         tbl_name = "undefined"
     return str(tbl_name)
+
 
 def get_bmap_code_set_id(BMAP, code_set_name):
     bmap_unique = get_unique_code_set_name_id(BMAP)
@@ -50,38 +52,45 @@ def get_bmap_code_set_id(BMAP, code_set_name):
     return str(code_set_id)
 
 
-def get_trgt_pk(Core_tables,target_table ):
+def get_trgt_pk(Core_tables, target_table):
     trgt_pk = ''
-    for core_tbl_indx, core_tbl_row in Core_tables[(Core_tables['Table name'] == target_table) & (Core_tables['PK'] == 'Y')].iterrows():
-        trgt_pk+= core_tbl_row['Column name']+','
-    trgt_pk=trgt_pk[0:len(trgt_pk)-1]
+    for core_tbl_indx, core_tbl_row in Core_tables[
+        (Core_tables['Table name'] == target_table) & (Core_tables['PK'] == 'Y')].iterrows():
+        trgt_pk += core_tbl_row['Column name'] + ','
+    trgt_pk = trgt_pk[0:len(trgt_pk) - 1]
     return trgt_pk
 
 
-def get_trgt_pk_list(Core_tables,target_table ):
+def get_trgt_pk_list(Core_tables, target_table):
     trgt_pk = list()
-    for core_tbl_indx, core_tbl_row in Core_tables[(Core_tables['Table name'] == target_table) & (Core_tables['PK'] == 'Y')].iterrows():
+    for core_tbl_indx, core_tbl_row in Core_tables[
+        (Core_tables['Table name'] == target_table) & (Core_tables['PK'] == 'Y')].iterrows():
         trgt_pk.append(str(core_tbl_row['Column name']).upper())
     return pd.unique(trgt_pk)
 
 
-def get_trgt_hist_keys(Core_tables,target_table):
+def get_trgt_hist_keys(Core_tables, target_table, hist_cols):
     trgt_hist_keys = ''
     for core_tbl_indx, core_tbl_row in Core_tables[
-        (Core_tables['Table name'] == target_table) & (Core_tables['Historization key'] == 'Y')& (Core_tables['Historization key'] != "S") & (Core_tables['Historization key']!= "E")].iterrows():
+                                           (Core_tables['Table name'] == target_table) & (Core_tables['PK'] == 'Y') & (
+                                                   Core_tables['Historization key'] != "S") & (
+                                                   Core_tables['Historization key'] != "E")] & (
+                                               Core_tables['Column name'] != hist_cols).iterrows():
         trgt_hist_keys += core_tbl_row['Column name'] + ','
     trgt_hist_keys = trgt_hist_keys[0:len(trgt_hist_keys) - 1]
     return trgt_hist_keys
 
-def get_lkp_tbls (Core_tables):
+
+def get_lkp_tbls(Core_tables):
     lkp_tbls = Core_tables[Core_tables['Is lookup'] == 'Y']
     return lkp_tbls
 
 
-def get_lkp_tbls_names (Core_tables):
-    lkp_tbls= get_lkp_tbls(Core_tables)
-    lkp_tbls_names=pd.unique(list(lkp_tbls['Table name']))
+def get_lkp_tbls_names(Core_tables):
+    lkp_tbls = get_lkp_tbls(Core_tables)
+    lkp_tbls_names = pd.unique(list(lkp_tbls['Table name']))
     return lkp_tbls_names
+
 
 def get_lkp_tbl_Cols(Core_tables, tbl_name):
     lkp_tbl_cols_cd = ''
@@ -101,8 +110,8 @@ def get_lkp_tbl_Cols(Core_tables, tbl_name):
     return lkp_tbl_cols
 
 
-def get_is_look_up_flag(core_tables,tablename):
-    for core_tables_index,core_tables_row in core_tables.iterrows():
+def get_is_look_up_flag(core_tables, tablename):
+    for core_tables_index, core_tables_row in core_tables.iterrows():
         if core_tables_row['Table name'] == tablename:
             if core_tables_row['Is lookup'] == 'N':
                 flag = False
@@ -113,10 +122,11 @@ def get_is_look_up_flag(core_tables,tablename):
 
 def get_column_data_type(Core_tables, column_name, table_name):
     trgt_col_data_type = ""
-    curr_rec =Core_tables[(Core_tables['Table name'].str.strip()== table_name.strip()) & (Core_tables['Column name'].str.strip()== column_name.strip())]
+    curr_rec = Core_tables[(Core_tables['Table name'].str.strip() == table_name.strip()) & (
+                Core_tables['Column name'].str.strip() == column_name.strip())]
 
     try:
-        trgt_col_data_type=curr_rec['Data type'].item()
+        trgt_col_data_type = curr_rec['Data type'].item()
     except Exception as ERROR_msg:
         # print(ERROR_msg)
         # print("tbl:", table_name,"Col_name: ", column_name, "trgt_col_data_type ", trgt_col_data_type)
@@ -128,6 +138,7 @@ def get_code_set_names(Bmap_values):
     code_set_names = pd.unique(list(Bmap_values['Code set name']))
     return code_set_names
 
+
 def get_tbl_cols(Core_tables, tbl_name):
     tbl_cols = ""
     for lkp_tbl_index, lkp_tbl_row in Core_tables[(Core_tables["Table name"] == tbl_name)].iterrows():
@@ -137,16 +148,17 @@ def get_tbl_cols(Core_tables, tbl_name):
 
 
 def get_core_tables_list(Core_tables):
-    core_tables_list= pd.unique(list(Core_tables['Table name']))
+    core_tables_list = pd.unique(list(Core_tables['Table name']))
     return core_tables_list
 
+
 def get_bmap_values_for_codeset(Bmap_values, code_set_name):
-    values=Bmap_values[Bmap_values['Code set name']==code_set_name]
+    values = Bmap_values[Bmap_values['Code set name'] == code_set_name]
     return values
 
 
-def get_select_clause(target_table,Core_tables,table_maping_name, Column_mapping):
-    sel_clause='\n'
+def get_select_clause(target_table, Core_tables, table_maping_name, Column_mapping):
+    sel_clause = '\n'
     for col_map_indx, col_map_row in Column_mapping[(Column_mapping['Mapping name'] == table_maping_name)].iterrows():
         sel_ready = ""
         src_tbl = col_map_row['Mapped to table']
@@ -157,22 +169,22 @@ def get_select_clause(target_table,Core_tables,table_maping_name, Column_mapping
             sql_const = "NULL"
 
         trgt_col_data_type = get_column_data_type(Core_tables, col_map_row['Column name'], target_table)
-        src=""
+        src = ""
         if src_tbl != "":
             src = 'Cast (' + src_tbl + '.' + src_col + ' AS ' + trgt_col_data_type + ')'
         if sql_const != "":
-            src = 'Cast (' + sql_const+ ' AS ' + trgt_col_data_type + ')'
+            src = 'Cast (' + sql_const + ' AS ' + trgt_col_data_type + ')'
 
-        trgt_col = ' AS '+col_map_row['Column name']
-        sel_ready=str(src)+str(trgt_col)+',\n'
-        sel_clause=sel_clause+sel_ready
+        trgt_col = ' AS ' + col_map_row['Column name']
+        sel_ready = str(src) + str(trgt_col) + ',\n'
+        sel_clause = sel_clause + sel_ready
     return sel_clause
 
 
 def get_src_core_tbls(Table_mapping):
     # src_mappings_df=Table_mapping[Table_mapping['Source']  == source_name]
-    core_tables_list=Table_mapping['Target table name']
- #   core_tables_list = [Table_mapping['Target table name'] for Table_mapping['Target table name'] in Table_mapping if Table_mapping['Source']  == source_name]
+    core_tables_list = Table_mapping['Target table name']
+    #   core_tables_list = [Table_mapping['Target table name'] for Table_mapping['Target table name'] in Table_mapping if Table_mapping['Source']  == source_name]
     core_tables_list = pd.unique(core_tables_list)
     return core_tables_list
 
@@ -190,28 +202,31 @@ def get_src_lkp_tbls(table_mapping, core_tables):
     return pd.unique(lookup_tables_src)
 
 
-def get_src_tbl_mappings (source_name, Table_mapping):
-    src_mappings_df=Table_mapping[Table_mapping['Source']  == source_name]
+def get_src_tbl_mappings(source_name, Table_mapping):
+    src_mappings_df = Table_mapping[Table_mapping['Source'] == source_name]
     return src_mappings_df
 
-def get_core_tbl_sart_date_column (Core_tables, tbl_name):
 
-    hist_key="S"
-    curr_rec = Core_tables[(Core_tables['Table name'].str.strip() == tbl_name.strip()) & (Core_tables['Historization key'].str.strip() == hist_key.strip())]
+def get_core_tbl_sart_date_column(Core_tables, tbl_name):
+    hist_key = "S"
+    curr_rec = Core_tables[(Core_tables['Table name'].str.strip() == tbl_name.strip()) & (
+                Core_tables['Historization key'].str.strip() == hist_key.strip())]
     try:
-        start_date_col=curr_rec['Column name'].item()
+        start_date_col = curr_rec['Column name'].item()
     except Exception as error:
         start_date_col = "undefined"
         # print(error)
         # print ("start_date_col for tbl ", tbl_name, " is undefined")
         return start_date_col
-    return  start_date_col
+    return start_date_col
 
-def get_core_tbl_end_date_column (Core_tables, tbl_name):
-    hist_key="E"
-    curr_rec = Core_tables[(Core_tables['Table name'].str.strip() == tbl_name.strip()) & (Core_tables['Historization key'].str.strip() == hist_key.strip())]
+
+def get_core_tbl_end_date_column(Core_tables, tbl_name):
+    hist_key = "E"
+    curr_rec = Core_tables[(Core_tables['Table name'].str.strip() == tbl_name.strip()) & (
+                Core_tables['Historization key'].str.strip() == hist_key.strip())]
     try:
-        end_date_col=curr_rec['Column name'].item()
+        end_date_col = curr_rec['Column name'].item()
     except Exception as error:
         end_date_col = "undefined"
         # print(error)
@@ -236,21 +251,22 @@ def get_core_tbl_end_date_column (Core_tables, tbl_name):
 #     return hist_keys_list
 
 
-def get_core_tbl_hist_keys_list (Core_tables, tbl_name , history_column_list):
-     try:
+def get_core_tbl_hist_keys_list(Core_tables, tbl_name, history_column_list):
+    try:
         # primary_keys = Core_tables[(Core_tables['Table name'] == tbl_name) & (Core_tables['PK'] == "Y")]
         # hist_keys = Core_tables[ (Core_tables['Table name'] == tbl_name) & (Core_tables['Historization key'] == "Y")]
         hist_col_list = history_column_list
-        hist_keys = Core_tables[(Core_tables['Table name'] == tbl_name) & (Core_tables['PK'] == "Y") & (Core_tables['Historization key'] != "S") & (Core_tables['Historization key']!= "E")]
+        hist_keys = Core_tables[(Core_tables['Table name'] == tbl_name) & (Core_tables['PK'] == "Y") & (
+                    Core_tables['Historization key'] != "S") & (Core_tables['Historization key'] != "E")]
         hist_keys_list = pd.unique(list(hist_keys['Column name']))
         hist_keys_list = np.setdiff1d(hist_keys_list, hist_col_list)
 
-        if len(hist_keys_list)==0:
-            hist_keys_list={"undefined"}
+        if len(hist_keys_list) == 0:
+            hist_keys_list = {"undefined"}
 
-     except Exception as error:
-        hist_keys_list ={"undefine"}
+    except Exception as error:
+        hist_keys_list = {"undefine"}
         # print(error)
         # print("hist_keys for tbl ", tbl_name, " is undefined")
         return hist_keys_list
-     return hist_keys_list
+    return hist_keys_list

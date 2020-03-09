@@ -15,7 +15,7 @@ def d609(cf, source_output_path, Table_mapping, Core_tables):
         if len(filtered_keys) == 0:
             funcs.TemplateLogError(cf.output_path, source_output_path, file_name, "All the table's ["+table_mapping_row['Target table name']+"] keys are excluded and base tables must have at least one key in it.").log_error()
         for table_pk in filtered_keys:
-            insert_statment = "INSERT INTO " + cf.keycol_override_table + "\n(Out_DB_Name\n,Out_Object_Name\n,Key_Column\n,Update_date"
+            insert_statment = "INSERT INTO " + cf.keycol_override_base + "\n(Out_DB_Name\n,Out_Object_Name\n,Key_Column\n,Update_date"
             insert_statment = insert_statment + "\n,Update_User\n,Update_Ts\n,Process_Name) \nVALUES\n"
             insert_statment = insert_statment + "('" + cf.base_view + "',\n'" + table_mapping_row['Target table name']
             insert_statment = insert_statment + "',\n'" + table_pk + "',\n"+"CURRENT_DATE,\nCURRENT_USER,\nCURRENT_TIMESTAMP,\n"

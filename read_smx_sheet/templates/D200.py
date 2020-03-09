@@ -44,14 +44,17 @@ def d200(cf, source_output_path, STG_tables, Loading_Type):
         else:
             seq_column = ""
 
-        Primary_Index = ")Primary Index (" + pi_columns + ")"
+        Primary_Index = ")Primary Index (" + pi_columns + ")\n"
 
         if MODIFICATION_TYPE_found == 0:
             MODIFICATION_TYPE = ",MODIFICATION_TYPE char(1) CHARACTER SET UNICODE NOT CASESPECIFIC  not null\n"
         else:
             MODIFICATION_TYPE = ""
-        create_stg_table = create_stg_table + MODIFICATION_TYPE + INS_DTTM + seq_column + Primary_Index
-        create_wrk_table = create_wrk_table + MODIFICATION_TYPE + INS_DTTM + wrk_extra_columns + seq_column + Primary_Index
+
+        partition_statement = "PARTITION BY RANGE_N(RUN_DATE BETWEEN TIMESTAMP '2020-03-03 00:00:00.000000+00:00' AND TIMESTAMP '2100-03-03 00:00:00.000000+00:00' EACH INTERVAL'1'DAY)\n"
+
+        create_stg_table = create_stg_table + MODIFICATION_TYPE + INS_DTTM + seq_column + Primary_Index + partition_statement
+        create_wrk_table = create_wrk_table + MODIFICATION_TYPE + INS_DTTM + wrk_extra_columns + seq_column + Primary_Index + partition_statement
 
         create_stg_table = create_stg_table + ";\n\n"
         create_wrk_table = create_wrk_table + ";\n\n"

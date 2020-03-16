@@ -13,9 +13,11 @@ def hist_timegap_check(cf, source_output_path, table_mapping, core_tables):
         if table_mapping_row['Historization algorithm'] == 'HISTORY':
             target_table = table_mapping_row['Target table name']
             process_name = table_mapping_row['Mapping name']
+            hist_cols = table_mapping_row['Historization columns'].split(',')
+            hist_cols = [x.strip() for x in hist_cols]
             start_date = TransformDDL.get_core_tbl_sart_date_column(core_tables, target_table)
             end_date = TransformDDL.get_core_tbl_end_date_column(core_tables, target_table)
-            hist_keys = TransformDDL.get_trgt_hist_keys(core_tables, target_table)
+            hist_keys = TransformDDL.get_trgt_hist_keys(core_tables, target_table, hist_cols)
             call_line1 = "SELECT "+hist_keys+','+start_date+',end_'
             call_line2 = "FROM ( sel "+hist_keys+','+start_date+',MAX('+end_date+')over(partition by '
             call_line3 = hist_keys+' order by '+start_date+' rows between 1 preceding and 1 preceding)as end_'

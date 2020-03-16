@@ -16,8 +16,8 @@ def d640(cf, source_output_path, source_name, Table_mapping):
         process_name = "TXF_" + layer + "_" + table_maping_name
         call_exp = "CALL "+cf.APPLY_DB+".APP_APPLY('"+process_name+"','"+tbl_name+"','"+process_type+"',"
         if cf.db_prefix == 'GDEVP1':
-            call_exp += "NULL,'"+source_name+"',NULL,Y,X,Z);\n"
-        else :
+            call_exp += "NULL,'"+source_name+"',NULL,NULL,Y,X,Z);\n"
+        else:
             call_exp += "NULL,'"+source_name+"',NULL,Y,X);\n"
         f.write(call_exp)
     f.close()

@@ -72,11 +72,13 @@ def get_trgt_pk_list(Core_tables, target_table):
 def get_trgt_hist_keys(Core_tables, target_table, hist_cols):
     trgt_hist_keys = ''
     for core_tbl_indx, core_tbl_row in Core_tables[
-                                           (Core_tables['Table name'] == target_table) & (Core_tables['PK'] == 'Y') & (
-                                                   Core_tables['Historization key'] != "S") & (
-                                                   Core_tables['Historization key'] != "E")] & (
-                                               Core_tables['Column name'] != hist_cols).iterrows():
-        trgt_hist_keys += core_tbl_row['Column name'] + ','
+        (Core_tables['Table name'] == target_table) &
+        (Core_tables['PK'] == 'Y') &
+        (Core_tables['Historization key'] != "S") &
+        (Core_tables['Historization key'] != "E")
+    ].iterrows():
+        if core_tbl_row['Column name'] not in hist_cols:
+            trgt_hist_keys += core_tbl_row['Column name'] + ','
     trgt_hist_keys = trgt_hist_keys[0:len(trgt_hist_keys) - 1]
     return trgt_hist_keys
 
@@ -123,7 +125,7 @@ def get_is_look_up_flag(core_tables, tablename):
 def get_column_data_type(Core_tables, column_name, table_name):
     trgt_col_data_type = ""
     curr_rec = Core_tables[(Core_tables['Table name'].str.strip() == table_name.strip()) & (
-                Core_tables['Column name'].str.strip() == column_name.strip())]
+            Core_tables['Column name'].str.strip() == column_name.strip())]
 
     try:
         trgt_col_data_type = curr_rec['Data type'].item()
@@ -210,7 +212,7 @@ def get_src_tbl_mappings(source_name, Table_mapping):
 def get_core_tbl_sart_date_column(Core_tables, tbl_name):
     hist_key = "S"
     curr_rec = Core_tables[(Core_tables['Table name'].str.strip() == tbl_name.strip()) & (
-                Core_tables['Historization key'].str.strip() == hist_key.strip())]
+            Core_tables['Historization key'].str.strip() == hist_key.strip())]
     try:
         start_date_col = curr_rec['Column name'].item()
     except Exception as error:
@@ -224,7 +226,7 @@ def get_core_tbl_sart_date_column(Core_tables, tbl_name):
 def get_core_tbl_end_date_column(Core_tables, tbl_name):
     hist_key = "E"
     curr_rec = Core_tables[(Core_tables['Table name'].str.strip() == tbl_name.strip()) & (
-                Core_tables['Historization key'].str.strip() == hist_key.strip())]
+            Core_tables['Historization key'].str.strip() == hist_key.strip())]
     try:
         end_date_col = curr_rec['Column name'].item()
     except Exception as error:
@@ -257,7 +259,7 @@ def get_core_tbl_hist_keys_list(Core_tables, tbl_name, history_column_list):
         # hist_keys = Core_tables[ (Core_tables['Table name'] == tbl_name) & (Core_tables['Historization key'] == "Y")]
         hist_col_list = history_column_list
         hist_keys = Core_tables[(Core_tables['Table name'] == tbl_name) & (Core_tables['PK'] == "Y") & (
-                    Core_tables['Historization key'] != "S") & (Core_tables['Historization key'] != "E")]
+                Core_tables['Historization key'] != "S") & (Core_tables['Historization key'] != "E")]
         hist_keys_list = pd.unique(list(hist_keys['Column name']))
         hist_keys_list = np.setdiff1d(hist_keys_list, hist_col_list)
 

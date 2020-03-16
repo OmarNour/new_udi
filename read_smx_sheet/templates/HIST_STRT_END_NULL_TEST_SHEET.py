@@ -13,7 +13,9 @@ def hist_start_end_null_check(cf, source_output_path, table_mapping, core_tables
         if table_mapping_row['Historization algorithm'] == 'HISTORY':
             target_table = table_mapping_row['Target table name']
             process_name = table_mapping_row['Mapping name']
-            hist_keys = TransformDDL.get_trgt_hist_keys(core_tables, target_table)
+            hist_cols = table_mapping_row['Historization columns'].split(',')
+            hist_cols = [x.strip() for x in hist_cols]
+            hist_keys = TransformDDL.get_trgt_hist_keys(core_tables, target_table, hist_cols)
             start_date = TransformDDL.get_core_tbl_sart_date_column(core_tables, target_table)
             end_date = TransformDDL.get_core_tbl_end_date_column(core_tables, target_table)
             call_line1 = "SELECT "+hist_keys+" FROM "+cf.base_DB+'.'+target_table+" WHERE "+start_date+" IS NULL "

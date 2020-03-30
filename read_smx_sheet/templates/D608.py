@@ -14,17 +14,15 @@ def d608(cf, source_output_path,source_name,STG_tables, Core_tables, BMAP_values
             if code_set_name == code_set:
                 tbl_pk = TransformDDL.get_trgt_pk(Core_tables, code_set)
                 columns = TransformDDL.get_lkp_tbl_Cols(Core_tables, code_set)
-                flag_look_up = TransformDDL.get_is_look_up_flag(Core_tables,code_set)
-                if flag_look_up:
-                    for bmap_values_indx, bmap_values_row in BMAP_values[(BMAP_values['Code set name'] == code_set) & (BMAP_values['Layer'] == 'CORE')][['EDW code','Description']].drop_duplicates().iterrows():
-                        del_st = "DELETE FROM " + cf.core_table + "." + code_set + " WHERE " + tbl_pk + " = '" + str(bmap_values_row['EDW code']) + "';\n"
-                        insert_into_st = "INSERT INTO " + cf.core_table + "." + code_set + "(" + columns + ")\nVALUES "
-                        insert_values = ''
-                        if columns.count(',') == 1:
-                            insert_values = "(" + str(bmap_values_row["EDW code"]) + ", '" + str(bmap_values_row["Description"]) + "');\n\n"
-                        elif columns.count(',') == 2:
-                            insert_values = "(" + str(bmap_values_row["EDW code"]) + ", '" + str(bmap_values_row["Description"]) + "','" + str(bmap_values_row["Description"]) + "');\n\n"
-                        insert_st = insert_into_st + insert_values
-                        f.write(del_st)
-                        f.write(insert_st)
+                for bmap_values_indx, bmap_values_row in BMAP_values[(BMAP_values['Code set name'] == code_set) & (BMAP_values['Layer'] == 'CORE')][['EDW code','Description']].drop_duplicates().iterrows():
+                    del_st = "DELETE FROM " + cf.core_table + "." + code_set + " WHERE " + tbl_pk + " = '" + str(bmap_values_row['EDW code']) + "';\n"
+                    insert_into_st = "INSERT INTO " + cf.core_table + "." + code_set + "(" + columns + ")\nVALUES "
+                    insert_values = ''
+                    if columns.count(',') == 1:
+                        insert_values = "(" + str(bmap_values_row["EDW code"]) + ", '" + str(bmap_values_row["Description"]) + "');\n\n"
+                    elif columns.count(',') == 2:
+                        insert_values = "(" + str(bmap_values_row["EDW code"]) + ", '" + str(bmap_values_row["Description"]) + "','" + str(bmap_values_row["Description"]) + "');\n\n"
+                    insert_st = insert_into_st + insert_values
+                    f.write(del_st)
+                    f.write(insert_st)
     f.close()

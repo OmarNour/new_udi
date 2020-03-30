@@ -13,8 +13,13 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
         matching_flag = funcs.xstr(table_maping_row['Matching Included'])
         process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name'])
         target_table = str(table_maping_row['Target table name'])
+        process_active_flag = str(table_maping_row['Process Activation Flag'])
+        if process_active_flag == "0":
+            active_flag = "0"
+        else:
+            active_flag = "1"
+
         Historization_algorithm = str(table_maping_row['Historization algorithm'])
-        active_flag = "1"
         f.write(
             "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID, active)\n")
         f.write(

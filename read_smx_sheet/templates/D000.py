@@ -13,26 +13,32 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
         matching_flag = funcs.xstr(table_maping_row['Matching Included'])
         process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name'])
         target_table = str(table_maping_row['Target table name'])
+        scheduled_after_cso_loading = str(table_maping_row['Scheduled After CSO Loading'])
         process_active_flag = str(table_maping_row['Process Activation Flag'])
         if process_active_flag == "0":
             active_flag = "0"
         else:
             active_flag = "1"
 
+        if scheduled_after_cso_loading == "1":
+            refresh_cso_flag = "1"
+        else:
+            refresh_cso_flag = "0"
+
         Historization_algorithm = str(table_maping_row['Historization algorithm'])
         f.write(
-            "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID, active)\n")
+            "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
         f.write(
-            "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL," + active_flag + ")" + ";\n")
+            "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm +"', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
         f.write("\n")
 
         if str(matching_flag) == "1":
             process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name']) + "_Matching"
             active_flag = "0"
             f.write(
-                "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID, active)\n")
+                "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
             f.write(
-                "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL," + active_flag + ")" + ";\n")
+                "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm +"', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
             f.write("\n")
 
     for STG_tables_index, STG_tables_row in STG_tables.loc[STG_tables['Key set name'] != ""].iterrows():
@@ -54,6 +60,6 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
             f.write(
                 "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID)\n")
             f.write(
-                "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL)" + ";\n")
+                "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + ", NULL)" + ";\n")
             f.write("\n")
     f.close()

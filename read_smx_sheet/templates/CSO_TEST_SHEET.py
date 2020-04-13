@@ -18,7 +18,7 @@ def cso_check(cf, source_output_path, source_name, table_mapping, Column_mapping
 
                 call_line1 = "SEL X."+target_coloumn_name+" from "
                 call_line2 = cf.base_DB+"."+target_table_name+" X left join "+cf.UTLFW_v+".BKEY_1_PRTY "
-                call_line3 = "on X." + target_coloumn_name + "= "+cf.UTLFW_v+".BKEY_1_PRTY.EDW_KEY" +" left join STG_ONLINE.CSO_NEW_PERSON B "
+                call_line3 = "on X." + target_coloumn_name + "= "+cf.UTLFW_v+".BKEY_1_PRTY.EDW_KEY" +" left join STG_ONLINE.CSO_PERSON B "
                 call_line4 = "on trim(cast (B.national_id as varchar(100))) = "+cf.UTLFW_v+".BKEY_1_PRTY.source_key "
                 call_line5 = "where trim(cast (B.national_id as varchar(100))) is null "
                 call_line6 = "AND "+cf.UTLFW_v+".BKEY_1_PRTY.DOMAIN_ID=1 "

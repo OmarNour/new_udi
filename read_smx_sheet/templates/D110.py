@@ -18,6 +18,10 @@ def d110(cf, source_output_path, stg_Table_mapping, STG_tables, Loading_Type):
             where_clause = where_clause.replace("#SRC#", source_t)
         except:
             where_clause = ""
+        for stg_Table_mapping_index,stg_Table_mapping_row in stg_Table_mapping.iterrows():
+            if stg_Table_mapping_row['Mapping name'] == Table_name:
+                if stg_Table_mapping_row['Source layer'] == 'MATCHING':
+                    source_t = cf.db_prefix + 'V_ANALYTICS'
 
         create_stg_view = "REPLACE VIEW " + source_v + "." + Table_name + " AS LOCK ROW FOR ACCESS \n"
         create_stg_view = create_stg_view + "SELECT\n"
@@ -33,6 +37,8 @@ def d110(cf, source_output_path, stg_Table_mapping, STG_tables, Loading_Type):
             comma_Column_name = comma + Column_name
 
             create_stg_view = create_stg_view + comma_Column_name + "\n"
+
+
 
         create_stg_view = create_stg_view + "from " + source_t + "." + Table_name + " t " + where_clause + ";\n\n"
         f.write(create_stg_view)

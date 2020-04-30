@@ -29,7 +29,7 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
         f.write(
             "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
         f.write(
-            "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm +"', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
+            "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
         f.write("\n")
 
         if str(matching_flag) == "1":
@@ -38,7 +38,33 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
             f.write(
                 "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
             f.write(
-                "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm +"', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
+                "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
+            f.write("\n")
+
+        if str(matching_flag) == "2":
+            process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name']) + "_TDMatching"
+            active_flag = "0"
+            f.write(
+                    "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
+            f.write(
+                    "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
+            f.write("\n")
+
+        if str(matching_flag) == "3":
+            process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name']) + "_Matching"
+            active_flag = "0"
+            f.write(
+                        "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
+            f.write(
+                        "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
+            f.write("\n")
+
+            process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name']) + "_TDMatching"
+            active_flag = "0"
+            f.write(
+                        "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
+            f.write(
+                        "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
             f.write("\n")
 
     for STG_tables_index, STG_tables_row in STG_tables.loc[STG_tables['Key set name'] != ""].iterrows():
@@ -51,8 +77,9 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
         target_table = ""
         Historization_algorithm = "INSERT"
 
-
-        for BKEY_index, BKEY_row in BKEY.loc[(BKEY['Key set name'] == Key_set_name) & (BKEY['Key domain name'] == Key_domain_name) & (generation_flag != 0)].iterrows():
+        for BKEY_index, BKEY_row in BKEY.loc[
+            (BKEY['Key set name'] == Key_set_name) & (BKEY['Key domain name'] == Key_domain_name) & (
+                    generation_flag != 0)].iterrows():
             Key_set_id = int(BKEY_row['Key set ID'])
             Key_domain_ID = int(BKEY_row['Key domain ID'])
 

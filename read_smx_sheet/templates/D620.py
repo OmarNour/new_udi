@@ -28,6 +28,9 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
         inp_view_header = 'REPLACE VIEW ' + cf.INPUT_VIEW_DB + '.' + process_name + '_IN'+view_name_suffix+'AS LOCK ROW FOR ACCESS'
         target_table = str(table_maping_row['Target table name'])
         apply_type = table_maping_row['Historization algorithm']
+        process_names_condition = str(table_maping_row['SubProcess Condition'])
+        process_names_case_when = process_names_condition.replace('#process_name#',  process_name)
+        process_names_case_when_clause = '(' + process_names_case_when + ') AS PROCESS_NAME '
 
         main_src = table_maping_row['Main source']
         SRCI = cf.SI_VIEW+'.'
@@ -58,7 +61,10 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
         start_date = '(SELECT Business_Date FROM ' + cf.GCFR_V + '.GCFR_Process_Id'+'\n'+'   WHERE Process_Name = ' + "'" + process_name + "'"+'\n'+') AS Start_Date,'
         end_date='DATE '+"'9999-12-31'"+' AS End_Date,'
         modification_type = main_src_alias + '.MODIFICATION_TYPE'
-        inp_view_select_clause=inp_view_select_clause+'\n'+ map_grp+'\n'+start_date+ '\n'+end_date+ '\n'+modification_type+'\n'
+        if process_names_case_when != '':
+            inp_view_select_clause=inp_view_select_clause+'\n'+ map_grp+'\n'+start_date+ '\n'+end_date+ '\n'+modification_type+'\n'+','+process_names_case_when_clause+'\n'
+        else:
+            inp_view_select_clause=inp_view_select_clause+'\n'+ map_grp+'\n'+start_date+ '\n'+end_date+ '\n'+modification_type+'\n'
 
         if table_maping_row['Join'] == "":
             inp_view_from_clause = 'FROM ' + main_src + ' ' + main_src_alias
@@ -81,7 +87,6 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
             inp_view_where_clause = 'Where '+table_maping_row['Filter criterion']+';'
             # else:
             #     inp_view_where_clause = 'Where '+table_maping_row['Filter criterion']+');'
-
 
         f.write(inp_view_header)
         f.write("\n")

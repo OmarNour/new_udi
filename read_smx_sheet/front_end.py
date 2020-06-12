@@ -86,7 +86,10 @@ class FrontEnd:
         frame_config_file_values.grid(column=0, row=0, sticky="w")
 
         frame_checkboxes_values = Frame(frame_config_file_values, relief="ridge")
-        frame_checkboxes_values.grid(column=1, row=5, sticky="W")
+        frame_checkboxes_values.grid(column=1, row=6, sticky="W")
+
+        frame_radiobuttons_values = Frame(frame_config_file_values, relief="ridge")
+        frame_radiobuttons_values.grid(column=1, row=5, sticky="W")
 
         self.get_config_file_values()
         frame_config_file_values_entry_width = 84
@@ -122,10 +125,12 @@ class FrontEnd:
 
         self.UDI_scripts_generation_value = IntVar()
         self.Testing_scripts_generation_value = IntVar()
+        self.excel_sheet = StringVar()
+
 
 
         scripts_generation_label = Label(frame_config_file_values, text="Generating scripts")
-        scripts_generation_label.grid(row=5, column=0, sticky='e',columnspan=1)
+        scripts_generation_label.grid(row=6, column=0, sticky='e',columnspan=1)
         self.scripts_flag = "All"
 
         self.UDI_scripts_generation = Checkbutton(frame_checkboxes_values,text="UDI", variable=self.UDI_scripts_generation_value,onvalue=1,offvalue=0,command=self.toggle_scripts_flag)
@@ -134,6 +139,17 @@ class FrontEnd:
         self.Testing_scripts_generation = Checkbutton(frame_checkboxes_values,text="Testing",variable=self.Testing_scripts_generation_value,onvalue=1,offvalue=0,command=self.toggle_scripts_flag)
         self.Testing_scripts_generation.grid(row=0, column=1, sticky='w', columnspan=1)
 
+        scripts_generation_label = Label(frame_config_file_values, text="Project")
+        scripts_generation_label.grid(row=5, column=0, sticky='e', columnspan=1)
+        self.project_generation_flag = "Project ACA"
+
+        self.aca_smx_flag = Radiobutton(frame_radiobuttons_values,text="ACA",value='Project ACA',variable=self.excel_sheet,command=self.toggle_excel_sheet_flag)
+        self.aca_smx_flag.grid(row=1, column=0, sticky='w', columnspan=1)
+
+        self.sama_smx_flag = Radiobutton(frame_radiobuttons_values,text="SAMA ",value='Peoject Sama',variable=self.excel_sheet,command=self.toggle_excel_sheet_flag)
+        self.sama_smx_flag.grid(row=1, column=1, sticky='w', columnspan=1)
+
+        self.aca_smx_flag.select()
         self.UDI_scripts_generation.select()
         self.Testing_scripts_generation.select()
 
@@ -160,6 +176,13 @@ class FrontEnd:
         elif UDI_scripts_flag ==0 and testing_scripts_flag == 0:
             self.enable_disable_fields(DISABLED)
 
+    def toggle_excel_sheet_flag(self):
+        generate_smx_flag = self.excel_sheet.get()
+        if generate_smx_flag == 'Project ACA':
+            self.enable_disable_scripts_generation_fields(NORMAL)
+        elif generate_smx_flag == 'Project Sama':
+            self.enable_disable_scripts_generation_fields(DISABLED)
+        self.project_generation_flag = generate_smx_flag
 
     def change_status_label(self, msg, color):
         self.status_label_text.set(msg)
@@ -253,6 +276,10 @@ class FrontEnd:
         self.config_file_entry.config(state=f_state)
         self.config_file_browse_button.config(state=f_state)
 
+    def enable_disable_scripts_generation_fields(self, f_state):
+        self.Testing_scripts_generation.config(state=f_state)
+        self.UDI_scripts_generation.config(state=f_state)
+
     def generate_scripts_thread(self):
         try:
             config_file_path = self.config_file_entry_txt.get()
@@ -263,6 +290,9 @@ class FrontEnd:
                 self.enable_disable_fields(NORMAL)
                 self.UDI_scripts_generation.config(state=NORMAL)
                 self.Testing_scripts_generation.config(state=NORMAL)
+                self.aca_smx_flag.config(state=NORMAL)
+                self.sama_smx_flag.config(state=NORMAL)
+
                 print("Total Elapsed time: ", self.g.elapsed_time, "\n")
             except Exception as error:
                 try:
@@ -290,6 +320,10 @@ class FrontEnd:
         self.refresh_config_file_values()
         self.g = gs.GenerateScripts(None, self.config_file_values)
         self.g.scripts_flag = self.scripts_flag
+        self.g.project_generation_flag = self.project_generation_flag
+
+        self.aca_smx_flag.config(state=DISABLED)
+        self.sama_smx_flag.config(state=DISABLED)
 
         self.UDI_scripts_generation.config(state=DISABLED)
         self.Testing_scripts_generation.config(state=DISABLED)

@@ -11,6 +11,7 @@ from read_smx_sheet.templates import DATA_SRC_TEST_SHEET, BMAP_CHECK_TEST_SHEET 
 from read_smx_sheet.templates import HIST_STRT_END_NULL_TEST_SHEET, HIST_DUP_TEST_SHEET ,HIST_STRT_GRT_END_TEST_SHEET,HIST_TIME_GAP_TEST_SHEET
 from read_smx_sheet.templates import HIST_STRT_NULL_TEST_SHEET, RI_TEST_SHEET, compare_testing_inputview
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
+from read_smx_sheet.templates import SAMA_staging
 from read_smx_sheet.parameters import parameters as pm
 import traceback
 import datetime as dt
@@ -105,17 +106,21 @@ class GenerateScripts:
         self.RI_relations_sht = pm.RI_relations_sht
         self.System_sht = pm.System_sht
         self.Supplements_sht = pm.Supplements_sht
+        self.SAMA_sheets = pm.SAMA_sheets
+        self.Data_types_sht = pm.Data_types_sht
 
     def generate_scripts(self):
         self.log_file.write("Reading from: \t" + self.cf.smx_path)
         self.log_file.write("Output folder: \t" + self.cf.output_path)
         self.log_file.write("SMX files:")
         print("Reading from: \t" + self.cf.smx_path)
+        print("Project: \t" + self.project_generation_flag)
         print("Output folder: \t" + self.cf.output_path)
         print("Scripts to be generated: \t"+self.scripts_flag)
         print("SMX files:")
         filtered_sources = []
         self.start_time = dt.datetime.now()
+
         try:
             smx_files = funcs.get_smx_files(self.cf.smx_path, self.smx_ext, self.sheets)
             for smx in smx_files:

@@ -146,7 +146,7 @@ class FrontEnd:
         self.aca_smx_flag = Radiobutton(frame_radiobuttons_values,text="ACA",value='Project ACA',variable=self.excel_sheet,command=self.toggle_excel_sheet_flag)
         self.aca_smx_flag.grid(row=1, column=0, sticky='w', columnspan=1)
 
-        self.sama_smx_flag = Radiobutton(frame_radiobuttons_values,text="SAMA ",value='Peoject Sama',variable=self.excel_sheet,command=self.toggle_excel_sheet_flag)
+        self.sama_smx_flag = Radiobutton(frame_radiobuttons_values,text="SAMA ",value='Project Sama',variable=self.excel_sheet,command=self.toggle_excel_sheet_flag)
         self.sama_smx_flag.grid(row=1, column=1, sticky='w', columnspan=1)
 
         self.aca_smx_flag.select()

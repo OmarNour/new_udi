@@ -95,6 +95,13 @@ def get_stg_tables(STG_tables, source_name=None):
         stg_table_names = STG_tables[['Table name', 'Fallback']].drop_duplicates()
     return stg_table_names
 
+def get_sama_stg_tables(STG_tables, source_name=None):
+    if source_name:
+        stg_table_names = STG_tables.loc[STG_tables['Source System'] == source_name][['Table Name','Schema Name']].drop_duplicates()
+    else:
+        stg_table_names = STG_tables[['Table Name','Schema Name']].drop_duplicates()
+    return stg_table_names
+
 def get_src_code_set_names(STG_tables, source_name):
     code_set_names = list()
     for stg_tables_index,stg_tables_row in STG_tables.iterrows():
@@ -125,6 +132,15 @@ def get_stg_table_columns(STG_tables, source_name, Table_name, with_sk_columns=F
 
     return STG_tables_df
 
+def get_sama_stg_table_columns(STG_tables, source_name, Table_name):
+    if source_name:
+        STG_tables_df = STG_tables.loc[(STG_tables['Source System'] == source_name)
+                                        & (STG_tables['Table Name'].str.upper() == Table_name.upper())
+                                       ].reset_index()
+    else:
+        STG_tables_df = STG_tables.loc[STG_tables['Table Name'].str.upper() == Table_name.upper()].reset_index()
+
+    return STG_tables_df
 
 def single_quotes(string):
     return "'%s'" % string

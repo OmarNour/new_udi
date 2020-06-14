@@ -141,39 +141,31 @@ class GenerateScripts:
                             STG_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.STG_tables_sht)
                             self.parallel_templates.append(delayed(SAMA_staging.stg_tables_DDL)(self.cf,source_name, main_output_path, STG_tables, Data_Types))
                             self.parallel_templates.append(delayed(SAMA_data_mart.data_mart_DDL)(self.cf,source_name, main_output_path, STG_tables, Data_Types))
-
-
                     except Exception as e_smx_file:
                         # print(error)
                         funcs.SMXFilesLogError(self.cf.output_path, smx, None, traceback.format_exc()).log_error()
                         self.count_smx = self.count_smx - 1
             except Exception as e1:
-                # print(error)
-                # traceback.print_exc()
                 self.elapsed_time = dt.datetime.now() - self.start_time
                 funcs.SMXFilesLogError(self.cf.output_path, None, None, traceback.format_exc()).log_error()
-            scheduler_value = 'processes' if self.cf.read_sheets_parallel == 1 else ''
-            with config.set(scheduler=scheduler_value):
-                # compute(*self.parallel_remove_output_home_path)
-                compute(*self.parallel_create_output_home_path)
-                compute(*self.parallel_create_output_source_path)
+            if len(self.parallel_templates) > 0:
+                sources = funcs.list_to_string(filtered_sources, ', ')
+                print("Sources:", sources)
+                self.log_file.write("Sources:" + sources)
+                scheduler_value = 'processes' if self.cf.read_sheets_parallel == 1 else ''
+                with config.set(scheduler=scheduler_value):
+                    compute(*self.parallel_create_output_home_path)
+                    compute(*self.parallel_create_output_source_path)
 
-                with ProgressBar():
-                    smx_files = " smx files" if self.count_smx > 1 else " smx file"
-                    smx_file_sources = " sources" if self.count_sources > 1 else " source"
-                    print("Start generating " + str(len(self.parallel_templates)) + " script for " + str(
-                        self.count_sources) + smx_file_sources + " from " + str(self.count_smx) + smx_files)
-                    compute(*self.parallel_templates)
-                    self.log_file.write(str(len(self.parallel_templates)) + " script generated for " + str(
-                        self.count_sources) + smx_file_sources + " from " + str(self.count_smx) + smx_files)
-                    self.elapsed_time = dt.datetime.now() - self.start_time
-                    self.log_file.write("Elapsed Time: " + str(self.elapsed_time))
-            self.error_message = ""
-            if sys.platform == "win32":
-                os.startfile(self.cf.output_path)
+                self.error_message = ""
+                if sys.platform == "win32":
+                    os.startfile(self.cf.output_path)
+                else:
+                    opener = "open" if sys.platform == "darwin" else "xdg-open"
+                    subprocess.call([opener, self.cf.output_path])
             else:
-                opener = "open" if sys.platform == "darwin" else "xdg-open"
-                subprocess.call([opener, self.cf.output_path])
+                self.error_message = "No SMX Files Found!"
+
 
         elif self.project_generation_flag == 'Project ACA':
             try:
@@ -357,14 +349,6 @@ class GenerateScripts:
                     compute(*self.parallel_used_smx_copy)
                     compute(*self.parallel_create_output_source_path)
 
-                    with ProgressBar():
-                        smx_files = " smx files" if self.count_smx > 1 else " smx file"
-                        smx_file_sources = " sources" if self.count_sources > 1 else " source"
-                        print("Start generating " + str(len(self.parallel_templates)) + " script for " + str(self.count_sources) + smx_file_sources + " from " + str(self.count_smx) + smx_files)
-                        compute(*self.parallel_templates)
-                        self.log_file.write(str(len(self.parallel_templates)) + " script generated for " + str(self.count_sources) + smx_file_sources + " from " + str(self.count_smx) + smx_files)
-                        self.elapsed_time = dt.datetime.now() - self.start_time
-                        self.log_file.write("Elapsed Time: " + str(self.elapsed_time))
                 self.error_message = ""
                 if sys.platform == "win32":
                     os.startfile(self.cf.output_path)
@@ -374,6 +358,16 @@ class GenerateScripts:
             else:
                 self.error_message = "No SMX Files Found!"
 
+        with ProgressBar():
+            smx_files = " smx files" if self.count_smx > 1 else " smx file"
+            smx_file_sources = " sources" if self.count_sources > 1 else " source"
+            print("Start generating " + str(len(self.parallel_templates)) + " script for " + str(
+                self.count_sources) + smx_file_sources + " from " + str(self.count_smx) + smx_files)
+            compute(*self.parallel_templates)
+            self.log_file.write(str(len(self.parallel_templates)) + " script generated for " + str(
+                self.count_sources) + smx_file_sources + " from " + str(self.count_smx) + smx_files)
+            self.elapsed_time = dt.datetime.now() - self.start_time
+            self.log_file.write("Elapsed Time: " + str(self.elapsed_time))
         self.log_file.close()
 
 

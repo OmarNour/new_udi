@@ -258,7 +258,7 @@ class GenerateScripts:
                                         self.parallel_templates.append(delayed(D607.d607)(self.cf, source_output_path, Core_tables, BMAP_values))
                                         self.parallel_templates.append(delayed(D608.d608)(self.cf, source_output_path, source_name, STG_tables, Core_tables, BMAP_values))
                                         self.parallel_templates.append(delayed(D609.d609)(self.cf, source_output_path, core_Table_mapping, Core_tables))
-                                        self.parallel_templates.append(delayed(D610.d610)(self.cf, source_output_path, core_Table_mapping))
+                                        self.parallel_templates.append(delayed(D610.d610)(self.cf, source_output_path, core_Table_mapping,STG_tables,source_name))
                                         self.parallel_templates.append(delayed(D615.d615)(self.cf, source_output_path, Core_tables))
                                         self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, core_Table_mapping, Column_mapping, Core_tables, Loading_Type,'UDI'))
                                         self.parallel_templates.append(delayed(D630.d630)(self.cf, source_output_path, core_Table_mapping))
@@ -335,11 +335,6 @@ class GenerateScripts:
                     compute(*self.parallel_used_smx_copy)
                     compute(*self.parallel_create_output_source_path)
             self.error_message = ""
-            if sys.platform == "win32":
-                os.startfile(self.cf.output_path)
-            else:
-                opener = "open" if sys.platform == "darwin" else "xdg-open"
-                subprocess.call([opener, self.cf.output_path])
         else:
             self.error_message = "No SMX Files Found!"
 
@@ -353,6 +348,13 @@ class GenerateScripts:
                 self.count_sources) + smx_file_sources + " from " + str(self.count_smx) + smx_files)
             self.elapsed_time = dt.datetime.now() - self.start_time
             self.log_file.write("Elapsed Time: " + str(self.elapsed_time))
+
+        if sys.platform == "win32":
+            os.startfile(self.cf.output_path)
+        else:
+            opener = "open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener, self.cf.output_path])
+
         self.log_file.close()
 
 

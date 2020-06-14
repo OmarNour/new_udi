@@ -148,23 +148,6 @@ class GenerateScripts:
             except Exception as e1:
                 self.elapsed_time = dt.datetime.now() - self.start_time
                 funcs.SMXFilesLogError(self.cf.output_path, None, None, traceback.format_exc()).log_error()
-            if len(self.parallel_templates) > 0:
-                sources = funcs.list_to_string(filtered_sources, ', ')
-                print("Sources:", sources)
-                self.log_file.write("Sources:" + sources)
-                scheduler_value = 'processes' if self.cf.read_sheets_parallel == 1 else ''
-                with config.set(scheduler=scheduler_value):
-                    compute(*self.parallel_create_output_home_path)
-                    compute(*self.parallel_create_output_source_path)
-
-                self.error_message = ""
-                if sys.platform == "win32":
-                    os.startfile(self.cf.output_path)
-                else:
-                    opener = "open" if sys.platform == "darwin" else "xdg-open"
-                    subprocess.call([opener, self.cf.output_path])
-            else:
-                self.error_message = "No SMX Files Found!"
 
 
         elif self.project_generation_flag == 'Project ACA':
@@ -337,26 +320,28 @@ class GenerateScripts:
                 self.elapsed_time = dt.datetime.now() - self.start_time
                 funcs.SMXFilesLogError(self.cf.output_path, None, None, traceback.format_exc()).log_error()
 
-            if len(self.parallel_templates) > 0:
-                sources = funcs.list_to_string(filtered_sources, ', ')
-                print("Sources:", sources)
-                self.log_file.write("Sources:" + sources)
-                scheduler_value = 'processes' if self.cf.read_sheets_parallel == 1 else ''
-                with config.set(scheduler=scheduler_value):
-                    # compute(*self.parallel_remove_output_home_path)
+        if len(self.parallel_templates) > 0:
+            sources = funcs.list_to_string(filtered_sources, ', ')
+            print("Sources:", sources)
+            self.log_file.write("Sources:" + sources)
+            scheduler_value = 'processes' if self.cf.read_sheets_parallel == 1 else ''
+            with config.set(scheduler=scheduler_value):
+                if self.project_generation_flag == 'Project Sama':
+                    compute(*self.parallel_create_output_home_path)
+                    compute(*self.parallel_create_output_source_path)
+                else:
                     compute(*self.parallel_create_output_home_path)
                     compute(*self.parallel_create_smx_copy_path)
                     compute(*self.parallel_used_smx_copy)
                     compute(*self.parallel_create_output_source_path)
-
-                self.error_message = ""
-                if sys.platform == "win32":
-                    os.startfile(self.cf.output_path)
-                else:
-                    opener = "open" if sys.platform == "darwin" else "xdg-open"
-                    subprocess.call([opener, self.cf.output_path])
+            self.error_message = ""
+            if sys.platform == "win32":
+                os.startfile(self.cf.output_path)
             else:
-                self.error_message = "No SMX Files Found!"
+                opener = "open" if sys.platform == "darwin" else "xdg-open"
+                subprocess.call([opener, self.cf.output_path])
+        else:
+            self.error_message = "No SMX Files Found!"
 
         with ProgressBar():
             smx_files = " smx files" if self.count_smx > 1 else " smx file"

@@ -24,7 +24,7 @@ def data_mart_DDL(cf,source_name,source_output_path,STG_tables, Data_types):
 
             source_data_type = STG_table_columns_row['Data_Type']
             Data_type = source_data_type
-            if STG_table_columns_row['Data_Length'] != '':
+            if STG_table_columns_row['Data_Length'] != '' and str(STG_table_columns_row['Data_Precision']) == '':
                 source_data_type = source_data_type+"("+str(STG_table_columns_row['Data_Length'])+")"
             elif STG_table_columns_row['Data_Length'] != '' and STG_table_columns_row['Data_Precision'] != '':
                 source_data_type = source_data_type + "(" + str(STG_table_columns_row['Data_Length']) + ',' + str(STG_table_columns_row['Data_Precision']) + ")"

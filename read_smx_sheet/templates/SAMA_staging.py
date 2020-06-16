@@ -22,7 +22,7 @@ def stg_tables_DDL(cf, source_name, source_output_path, STG_tables, Data_types):
             comma_Column_name = comma + Column_name
 
             source_data_type = STG_table_columns_row['Data_Type']
-            if str(STG_table_columns_row['Data_Length']) != '':
+            if str(STG_table_columns_row['Data_Length']) != '' and str(STG_table_columns_row['Data_Precision']) == '':
                 source_data_type = source_data_type+"("+str(STG_table_columns_row['Data_Length'])+")"
                 Data_type = source_data_type
             elif str(STG_table_columns_row['Data_Length']) != '' and str(STG_table_columns_row['Data_Precision']) != '':

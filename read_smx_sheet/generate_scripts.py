@@ -133,14 +133,25 @@ class GenerateScripts:
                         self.log_file.write("\t" + smx_file_name)
                         home_output_path = self.cf.output_path + "/" + smx_file_name + "/"
                         self.parallel_create_output_home_path.append(delayed(md.create_folder)(home_output_path))
-                        self.count_sources=len(self.cf.source_names)
+                        self.count_sources = len(self.cf.source_names)
+                        print(self.cf.source_names)
                         for source_name in self.cf.source_names:
-                            main_output_path = home_output_path + "/" + source_name
-                            self.parallel_create_output_source_path.append(delayed(md.create_folder)(main_output_path))
-                            Data_Types = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.Data_types_sht)
-                            STG_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.STG_tables_sht)
-                            self.parallel_templates.append(delayed(SAMA_staging.stg_tables_DDL)(self.cf,source_name, main_output_path, STG_tables, Data_Types))
-                            self.parallel_templates.append(delayed(SAMA_data_mart.data_mart_DDL)(self.cf,source_name, main_output_path, STG_tables, Data_Types))
+                            if source_name != " ":
+                                main_output_path = home_output_path + "/" + source_name
+                                self.parallel_create_output_source_path.append(delayed(md.create_folder)(main_output_path))
+                                Data_Types = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.Data_types_sht)
+                                STG_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.STG_tables_sht)
+                                self.parallel_templates.append(delayed(SAMA_staging.stg_tables_DDL)(self.cf,source_name, main_output_path, STG_tables, Data_Types))
+                                self.parallel_templates.append(delayed(SAMA_data_mart.data_mart_DDL)(self.cf,source_name, main_output_path, STG_tables, Data_Types))
+                            else:
+                                main_output_path = home_output_path + "/" + "DDLs"
+                                source_name = ""
+                                self.parallel_create_output_source_path.append(delayed(md.create_folder)(main_output_path))
+                                Data_Types = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.Data_types_sht)
+                                STG_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.STG_tables_sht)
+                                self.parallel_templates.append(delayed(SAMA_staging.stg_tables_DDL)(self.cf, source_name, main_output_path, STG_tables,Data_Types))
+                                self.parallel_templates.append(delayed(SAMA_data_mart.data_mart_DDL)(self.cf, source_name, main_output_path,STG_tables, Data_Types))
+
                     except Exception as e_smx_file:
                         # print(error)
                         funcs.SMXFilesLogError(self.cf.output_path, smx, None, traceback.format_exc()).log_error()
@@ -148,23 +159,6 @@ class GenerateScripts:
             except Exception as e1:
                 self.elapsed_time = dt.datetime.now() - self.start_time
                 funcs.SMXFilesLogError(self.cf.output_path, None, None, traceback.format_exc()).log_error()
-            if len(self.parallel_templates) > 0:
-                sources = funcs.list_to_string(filtered_sources, ', ')
-                print("Sources:", sources)
-                self.log_file.write("Sources:" + sources)
-                scheduler_value = 'processes' if self.cf.read_sheets_parallel == 1 else ''
-                with config.set(scheduler=scheduler_value):
-                    compute(*self.parallel_create_output_home_path)
-                    compute(*self.parallel_create_output_source_path)
-
-                self.error_message = ""
-                if sys.platform == "win32":
-                    os.startfile(self.cf.output_path)
-                else:
-                    opener = "open" if sys.platform == "darwin" else "xdg-open"
-                    subprocess.call([opener, self.cf.output_path])
-            else:
-                self.error_message = "No SMX Files Found!"
 
 
         elif self.project_generation_flag == 'Project ACA':
@@ -275,7 +269,7 @@ class GenerateScripts:
                                         self.parallel_templates.append(delayed(D607.d607)(self.cf, source_output_path, Core_tables, BMAP_values))
                                         self.parallel_templates.append(delayed(D608.d608)(self.cf, source_output_path, source_name, STG_tables, Core_tables, BMAP_values))
                                         self.parallel_templates.append(delayed(D609.d609)(self.cf, source_output_path, core_Table_mapping, Core_tables))
-                                        self.parallel_templates.append(delayed(D610.d610)(self.cf, source_output_path, core_Table_mapping))
+                                        self.parallel_templates.append(delayed(D610.d610)(self.cf, source_output_path, core_Table_mapping,STG_tables,source_name))
                                         self.parallel_templates.append(delayed(D615.d615)(self.cf, source_output_path, Core_tables))
                                         self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, core_Table_mapping, Column_mapping, Core_tables, Loading_Type,'UDI'))
                                         self.parallel_templates.append(delayed(D630.d630)(self.cf, source_output_path, core_Table_mapping))
@@ -337,26 +331,23 @@ class GenerateScripts:
                 self.elapsed_time = dt.datetime.now() - self.start_time
                 funcs.SMXFilesLogError(self.cf.output_path, None, None, traceback.format_exc()).log_error()
 
-            if len(self.parallel_templates) > 0:
-                sources = funcs.list_to_string(filtered_sources, ', ')
-                print("Sources:", sources)
-                self.log_file.write("Sources:" + sources)
-                scheduler_value = 'processes' if self.cf.read_sheets_parallel == 1 else ''
-                with config.set(scheduler=scheduler_value):
-                    # compute(*self.parallel_remove_output_home_path)
+        if len(self.parallel_templates) > 0:
+            sources = funcs.list_to_string(filtered_sources, ', ')
+            print("Sources:", sources)
+            self.log_file.write("Sources:" + sources)
+            scheduler_value = 'processes' if self.cf.read_sheets_parallel == 1 else ''
+            with config.set(scheduler=scheduler_value):
+                if self.project_generation_flag == 'Project Sama':
+                    compute(*self.parallel_create_output_home_path)
+                    compute(*self.parallel_create_output_source_path)
+                else:
                     compute(*self.parallel_create_output_home_path)
                     compute(*self.parallel_create_smx_copy_path)
                     compute(*self.parallel_used_smx_copy)
                     compute(*self.parallel_create_output_source_path)
-
-                self.error_message = ""
-                if sys.platform == "win32":
-                    os.startfile(self.cf.output_path)
-                else:
-                    opener = "open" if sys.platform == "darwin" else "xdg-open"
-                    subprocess.call([opener, self.cf.output_path])
-            else:
-                self.error_message = "No SMX Files Found!"
+            self.error_message = ""
+        else:
+            self.error_message = "No SMX Files Found!"
 
         with ProgressBar():
             smx_files = " smx files" if self.count_smx > 1 else " smx file"
@@ -368,6 +359,13 @@ class GenerateScripts:
                 self.count_sources) + smx_file_sources + " from " + str(self.count_smx) + smx_files)
             self.elapsed_time = dt.datetime.now() - self.start_time
             self.log_file.write("Elapsed Time: " + str(self.elapsed_time))
+
+        if sys.platform == "win32":
+            os.startfile(self.cf.output_path)
+        else:
+            opener = "open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener, self.cf.output_path])
+
         self.log_file.close()
 
 

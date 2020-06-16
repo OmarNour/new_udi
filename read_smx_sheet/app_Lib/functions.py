@@ -97,9 +97,9 @@ def get_stg_tables(STG_tables, source_name=None):
 
 def get_sama_stg_tables(STG_tables, source_name=None):
     if source_name:
-        stg_table_names = STG_tables.loc[STG_tables['Source System'] == source_name][['Table Name','Schema Name']].drop_duplicates()
+        stg_table_names = STG_tables.loc[STG_tables['Source System'] == source_name][['Table_Name','Schema_Name']].drop_duplicates()
     else:
-        stg_table_names = STG_tables[['Table Name','Schema Name']].drop_duplicates()
+        stg_table_names = STG_tables[['Table_Name','Schema_Name']].drop_duplicates()
     return stg_table_names
 
 def get_src_code_set_names(STG_tables, source_name):
@@ -135,10 +135,10 @@ def get_stg_table_columns(STG_tables, source_name, Table_name, with_sk_columns=F
 def get_sama_stg_table_columns(STG_tables, source_name, Table_name):
     if source_name:
         STG_tables_df = STG_tables.loc[(STG_tables['Source System'] == source_name)
-                                        & (STG_tables['Table Name'].str.upper() == Table_name.upper())
+                                        & (STG_tables['Table_Name'].str.upper() == Table_name.upper())
                                        ].reset_index()
     else:
-        STG_tables_df = STG_tables.loc[STG_tables['Table Name'].str.upper() == Table_name.upper()].reset_index()
+        STG_tables_df = STG_tables.loc[STG_tables['Table_Name'].str.upper() == Table_name.upper()].reset_index()
 
     return STG_tables_df
 

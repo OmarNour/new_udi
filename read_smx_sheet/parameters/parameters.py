@@ -19,5 +19,5 @@ sheets = [System_sht, Supplements_sht, Column_mapping_sht, BMAP_values_sht, BMAP
 SAMA_sheets = [Data_types_sht,STG_tables_sht]
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #2.10.75"
+ver_no = "| Build #2.11.0"
 # ################################################################################################

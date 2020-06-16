@@ -133,14 +133,25 @@ class GenerateScripts:
                         self.log_file.write("\t" + smx_file_name)
                         home_output_path = self.cf.output_path + "/" + smx_file_name + "/"
                         self.parallel_create_output_home_path.append(delayed(md.create_folder)(home_output_path))
-                        self.count_sources=len(self.cf.source_names)
+                        self.count_sources = len(self.cf.source_names)
+                        print(self.cf.source_names)
                         for source_name in self.cf.source_names:
-                            main_output_path = home_output_path + "/" + source_name
-                            self.parallel_create_output_source_path.append(delayed(md.create_folder)(main_output_path))
-                            Data_Types = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.Data_types_sht)
-                            STG_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.STG_tables_sht)
-                            self.parallel_templates.append(delayed(SAMA_staging.stg_tables_DDL)(self.cf,source_name, main_output_path, STG_tables, Data_Types))
-                            self.parallel_templates.append(delayed(SAMA_data_mart.data_mart_DDL)(self.cf,source_name, main_output_path, STG_tables, Data_Types))
+                            if source_name != " ":
+                                main_output_path = home_output_path + "/" + source_name
+                                self.parallel_create_output_source_path.append(delayed(md.create_folder)(main_output_path))
+                                Data_Types = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.Data_types_sht)
+                                STG_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.STG_tables_sht)
+                                self.parallel_templates.append(delayed(SAMA_staging.stg_tables_DDL)(self.cf,source_name, main_output_path, STG_tables, Data_Types))
+                                self.parallel_templates.append(delayed(SAMA_data_mart.data_mart_DDL)(self.cf,source_name, main_output_path, STG_tables, Data_Types))
+                            else:
+                                main_output_path = home_output_path + "/" + "DDLs"
+                                source_name = ""
+                                self.parallel_create_output_source_path.append(delayed(md.create_folder)(main_output_path))
+                                Data_Types = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.Data_types_sht)
+                                STG_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.STG_tables_sht)
+                                self.parallel_templates.append(delayed(SAMA_staging.stg_tables_DDL)(self.cf, source_name, main_output_path, STG_tables,Data_Types))
+                                self.parallel_templates.append(delayed(SAMA_data_mart.data_mart_DDL)(self.cf, source_name, main_output_path,STG_tables, Data_Types))
+
                     except Exception as e_smx_file:
                         # print(error)
                         funcs.SMXFilesLogError(self.cf.output_path, smx, None, traceback.format_exc()).log_error()

@@ -11,7 +11,7 @@ from read_smx_sheet.templates import DATA_SRC_TEST_SHEET, BMAP_CHECK_TEST_SHEET 
 from read_smx_sheet.templates import HIST_STRT_END_NULL_TEST_SHEET, HIST_DUP_TEST_SHEET ,HIST_STRT_GRT_END_TEST_SHEET,HIST_TIME_GAP_TEST_SHEET
 from read_smx_sheet.templates import HIST_STRT_NULL_TEST_SHEET, RI_TEST_SHEET, compare_testing_inputview
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
-from read_smx_sheet.templates import SAMA_staging,SAMA_data_mart
+from read_smx_sheet.templates import SAMA_staging,SAMA_data_mart,SAMA_bteq
 from read_smx_sheet.parameters import parameters as pm
 import traceback
 import datetime as dt
@@ -28,60 +28,71 @@ class LogFile(funcs.WriteFile):
 
 
 class ConfigFile:
-    def __init__(self, config_file=None, config_file_values=None):
-        self.config_file_values = funcs.get_config_file_values(config_file) if config_file_values is None else config_file_values
-        self.output_path = self.config_file_values["output_path"]
-        self.read_sheets_parallel = self.config_file_values["read_sheets_parallel"]
-        self.smx_path = self.config_file_values["smx_path"]
-        self.source_names = self.config_file_values["source_names"]
-        self.gcfr_system_name = self.config_file_values["gcfr_system_name"]
-        self.gcfr_ctl_Id = self.config_file_values["gcfr_ctl_Id"]
-        self.gcfr_stream_key = self.config_file_values["gcfr_stream_key"]
-        self.gcfr_stream_name = self.config_file_values["gcfr_stream_name"]
-        self.gcfr_bkey_process_type = self.config_file_values["gcfr_bkey_process_type"]
-        self.gcfr_snapshot_txf_process_type = self.config_file_values["gcfr_snapshot_txf_process_type"]
-        self.gcfr_insert_txf_process_type = self.config_file_values["gcfr_insert_txf_process_type"]
-        self.gcfr_others_txf_process_type = self.config_file_values["gcfr_others_txf_process_type"]
-        self.M_GCFR = self.config_file_values["M_GCFR"]
-        self.P_UT = self.config_file_values["P_UT"]
-        self.GCFR_t = self.config_file_values["GCFR_t"]
-        self.SI_DB = self.config_file_values["SI_DB"]
-        self.INPUT_VIEW_DB = self.config_file_values["INPUT_VIEW_DB"]
-        self.core_table = self.config_file_values["core_table"]
-        self.etl_process_table = self.config_file_values["etl_process_table"]
-        self.keycol_override_base = self.config_file_values["keycol_override_base"]
-        self.core_view = self.config_file_values["core_view"]
-        self.GCFR_V = self.config_file_values["GCFR_V"]
-        self.SOURCE_TABLES_LKP_table = self.config_file_values["SOURCE_TABLES_LKP_table"]
-        self.SOURCE_NAME_LKP_table = self.config_file_values["SOURCE_NAME_LKP_table"]
-        self.history_tbl = self.config_file_values["history_tbl"]
-        self.db_prefix = self.config_file_values["db_prefix"]
-        self.T_STG = self.config_file_values["T_STG"]
-        self.t_WRK = self.config_file_values["t_WRK"]
-        self.v_stg = self.config_file_values["v_stg"]
-        self.MACRO_DB = self.config_file_values["MACRO_DB"]
-        self.UT_DB = self.config_file_values["UT_DB"]
-        self.UTLFW_v = self.config_file_values["UTLFW_v"]
-        self.UTLFW_t = self.config_file_values["UTLFW_t"]
-        self.TMP_DB = self.config_file_values["TMP_DB"]
-        self.APPLY_DB = self.config_file_values["APPLY_DB"]
-        self.base_DB = self.config_file_values["base_DB"]
-        self.base_view = self.config_file_values["v_base"]
-        self.SI_VIEW = self.config_file_values["SI_VIEW"]
+    def __init__(self,project_name, config_file=None, config_file_values=None):
+        self.config_file_values = funcs.get_config_file_values(project_name,config_file) if config_file_values is None else config_file_values
+        if project_name == 'Project ACA':
+            self.output_path = self.config_file_values["output_path"]
+            self.read_sheets_parallel = self.config_file_values["read_sheets_parallel"]
+            self.smx_path = self.config_file_values["smx_path"]
+            self.source_names = self.config_file_values["source_names"]
+            self.gcfr_system_name = self.config_file_values["gcfr_system_name"]
+            self.gcfr_ctl_Id = self.config_file_values["gcfr_ctl_Id"]
+            self.gcfr_stream_key = self.config_file_values["gcfr_stream_key"]
+            self.gcfr_stream_name = self.config_file_values["gcfr_stream_name"]
+            self.gcfr_bkey_process_type = self.config_file_values["gcfr_bkey_process_type"]
+            self.gcfr_snapshot_txf_process_type = self.config_file_values["gcfr_snapshot_txf_process_type"]
+            self.gcfr_insert_txf_process_type = self.config_file_values["gcfr_insert_txf_process_type"]
+            self.gcfr_others_txf_process_type = self.config_file_values["gcfr_others_txf_process_type"]
+            self.M_GCFR = self.config_file_values["M_GCFR"]
+            self.P_UT = self.config_file_values["P_UT"]
+            self.GCFR_t = self.config_file_values["GCFR_t"]
+            self.SI_DB = self.config_file_values["SI_DB"]
+            self.INPUT_VIEW_DB = self.config_file_values["INPUT_VIEW_DB"]
+            self.core_table = self.config_file_values["core_table"]
+            self.etl_process_table = self.config_file_values["etl_process_table"]
+            self.keycol_override_base = self.config_file_values["keycol_override_base"]
+            self.core_view = self.config_file_values["core_view"]
+            self.GCFR_V = self.config_file_values["GCFR_V"]
+            self.SOURCE_TABLES_LKP_table = self.config_file_values["SOURCE_TABLES_LKP_table"]
+            self.SOURCE_NAME_LKP_table = self.config_file_values["SOURCE_NAME_LKP_table"]
+            self.history_tbl = self.config_file_values["history_tbl"]
+            self.db_prefix = self.config_file_values["db_prefix"]
+            self.T_STG = self.config_file_values["T_STG"]
+            self.t_WRK = self.config_file_values["t_WRK"]
+            self.v_stg = self.config_file_values["v_stg"]
+            self.MACRO_DB = self.config_file_values["MACRO_DB"]
+            self.UT_DB = self.config_file_values["UT_DB"]
+            self.UTLFW_v = self.config_file_values["UTLFW_v"]
+            self.UTLFW_t = self.config_file_values["UTLFW_t"]
+            self.TMP_DB = self.config_file_values["TMP_DB"]
+            self.APPLY_DB = self.config_file_values["APPLY_DB"]
+            self.base_DB = self.config_file_values["base_DB"]
+            self.base_view = self.config_file_values["v_base"]
+            self.SI_VIEW = self.config_file_values["SI_VIEW"]
 
-        self.online_source_t = self.config_file_values["online_source_t"]
-        self.online_source_v = self.config_file_values["online_source_v"]
-        self.offline_source_t = self.config_file_values["offline_source_t"]
-        self.offline_source_v = self.config_file_values["offline_source_v"]
-        try:
-            self.scripts_flag = self.config_file_values["scripts_flag"]
-        except:
-            self.scripts_flag = "All"
+            self.online_source_t = self.config_file_values["online_source_t"]
+            self.online_source_v = self.config_file_values["online_source_v"]
+            self.offline_source_t = self.config_file_values["offline_source_t"]
+            self.offline_source_v = self.config_file_values["offline_source_v"]
+            try:
+                self.scripts_flag = self.config_file_values["scripts_flag"]
+            except:
+                self.scripts_flag = "All"
+        elif project_name == 'Project Sama':
+            self.output_path = self.config_file_values["output_path"]
+            self.smx_path = self.config_file_values["smx_path"]
+            self.oi_prefix = self.config_file_values["oi_prefix"]
+            self.stg_prefix = self.config_file_values["stg_prefix"]
+            self.dm_prefix = self.config_file_values["dm_prefix"]
+            self.bteq_run_file = self.config_file_values["bteq_run_file"]
+            self.duplicate_table_suffix = self.config_file_values["duplicate_table_suffix"]
+            self.read_sheets_parallel = self.config_file_values["read_sheets_parallel"]
+
 
 class GenerateScripts:
-    def __init__(self, config_file=None, config_file_values=None):
+    def __init__(self, config_file=None, config_file_values=None,project_generation_flag=None):
         self.start_time = dt.datetime.now()
-        self.cf = ConfigFile(config_file, config_file_values)
+        self.cf = ConfigFile(project_generation_flag,config_file, config_file_values)
         md.remove_folder(self.cf.output_path)
         md.create_folder(self.cf.output_path)
         self.log_file = LogFile(self.cf.output_path)
@@ -127,30 +138,22 @@ class GenerateScripts:
                 for smx in smx_files:
                     try:
                         self.count_smx = self.count_smx + 1
+                        self.count_sources = 1
                         smx_file_path = self.cf.smx_path + "/" + smx
                         smx_file_name = os.path.splitext(smx)[0]
                         print("\t" + smx_file_name)
                         self.log_file.write("\t" + smx_file_name)
                         home_output_path = self.cf.output_path + "/" + smx_file_name + "/"
                         self.parallel_create_output_home_path.append(delayed(md.create_folder)(home_output_path))
-                        self.count_sources = len(self.cf.source_names)
-                        print(self.cf.source_names)
-                        for source_name in self.cf.source_names:
-                            if source_name != " ":
-                                main_output_path = home_output_path + "/" + source_name
-                                self.parallel_create_output_source_path.append(delayed(md.create_folder)(main_output_path))
-                                Data_Types = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.Data_types_sht)
-                                STG_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.STG_tables_sht)
-                                self.parallel_templates.append(delayed(SAMA_staging.stg_tables_DDL)(self.cf,source_name, main_output_path, STG_tables, Data_Types))
-                                self.parallel_templates.append(delayed(SAMA_data_mart.data_mart_DDL)(self.cf,source_name, main_output_path, STG_tables, Data_Types))
-                            else:
-                                main_output_path = home_output_path + "/" + "DDLs"
-                                source_name = ""
-                                self.parallel_create_output_source_path.append(delayed(md.create_folder)(main_output_path))
-                                Data_Types = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.Data_types_sht)
-                                STG_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.STG_tables_sht)
-                                self.parallel_templates.append(delayed(SAMA_staging.stg_tables_DDL)(self.cf, source_name, main_output_path, STG_tables,Data_Types))
-                                self.parallel_templates.append(delayed(SAMA_data_mart.data_mart_DDL)(self.cf, source_name, main_output_path,STG_tables, Data_Types))
+                        main_output_path = home_output_path + "/" + "DDLs"
+                        bteq_output_path = home_output_path + "/" + "BTEQ Scripts"
+                        self.parallel_create_output_source_path.append(delayed(md.create_folder)(main_output_path))
+                        self.parallel_create_output_source_path.append(delayed(md.create_folder)(bteq_output_path))
+                        Data_Types = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.Data_types_sht)
+                        STG_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.STG_tables_sht)
+                        self.parallel_templates.append(delayed(SAMA_staging.stg_tables_DDL)(self.cf, main_output_path, STG_tables,Data_Types))
+                        self.parallel_templates.append(delayed(SAMA_data_mart.data_mart_DDL)(self.cf, main_output_path,STG_tables, Data_Types))
+                        self.parallel_templates.append(delayed(SAMA_bteq.bteq_script)(self.cf, bteq_output_path,STG_tables))
 
                     except Exception as e_smx_file:
                         # print(error)

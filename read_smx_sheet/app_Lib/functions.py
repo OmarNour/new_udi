@@ -1,11 +1,12 @@
 import os
 import sys
+
 sys.path.append(os.getcwd())
 import numpy as np
 import pandas as pd
-#import pyarrow.parquet as pq
-#import pyarrow as pa
-#from pyarrow.formatting import *
+# import pyarrow.parquet as pq
+# import pyarrow as pa
+# from pyarrow.formatting import *
 import dask.dataframe as dd
 from read_smx_sheet.app_Lib import manage_directories as md
 from read_smx_sheet.parameters import parameters as pm
@@ -30,7 +31,8 @@ def read_excel(file_path, sheet_name, filter=None, reserved_words_validation=Non
                 df = pd.DataFrame(columns=df_cols)
 
         if reserved_words_validation is not None:
-            df = rename_sheet_reserved_word(df, reserved_words_validation[0], reserved_words_validation[1], reserved_words_validation[2])
+            df = rename_sheet_reserved_word(df, reserved_words_validation[0], reserved_words_validation[1],
+                                            reserved_words_validation[2])
 
     except:
         df = pd.DataFrame()
@@ -58,14 +60,16 @@ def replace_nan(df, replace_with):
 
 def is_Reserved_word(Supplements, Reserved_words_source, word):
     Reserved_words = Supplements[Supplements['Reserved words source'] == Reserved_words_source][['Reserved words']]
-    is_Reserved_word = True if Reserved_words[Reserved_words['Reserved words'] == word]['Reserved words'].any() == word else False
+    is_Reserved_word = True if Reserved_words[Reserved_words['Reserved words'] == word][
+                                   'Reserved words'].any() == word else False
     return is_Reserved_word
 
 
 def rename_sheet_reserved_word(sheet_df, Supplements_df, Reserved_words_source, columns):
     if not sheet_df.empty:
         for col in columns:
-            sheet_df[col] = sheet_df.apply(lambda row: rename_reserved_word(Supplements_df, Reserved_words_source, row[col]), axis=1)
+            sheet_df[col] = sheet_df.apply(
+                lambda row: rename_reserved_word(Supplements_df, Reserved_words_source, row[col]), axis=1)
     return sheet_df
 
 
@@ -77,10 +81,10 @@ def get_file_name(file):
     return os.path.splitext(os.path.basename(file))[0]
 
 
-def get_core_table_columns(Core_tables, Table_name ):
+def get_core_table_columns(Core_tables, Table_name):
     Core_tables_df = Core_tables.loc[(Core_tables['Layer'] == 'CORE')
-                                    & (Core_tables['Table name'] == Table_name)
-                                    ].reset_index()
+                                     & (Core_tables['Table name'] == Table_name)
+                                     ].reset_index()
     return Core_tables_df
 
 
@@ -90,24 +94,30 @@ def get_core_tables(Core_tables):
 
 def get_stg_tables(STG_tables, source_name=None):
     if source_name:
-        stg_table_names = STG_tables.loc[STG_tables['Source system name'] == source_name][['Table name', 'Fallback']].drop_duplicates()
+        stg_table_names = STG_tables.loc[STG_tables['Source system name'] == source_name][
+            ['Table name', 'Fallback']].drop_duplicates()
     else:
         stg_table_names = STG_tables[['Table name', 'Fallback']].drop_duplicates()
     return stg_table_names
 
+
 def get_sama_stg_tables(STG_tables, source_name=None):
     if source_name:
-        stg_table_names = STG_tables.loc[STG_tables['Source System'] == source_name][['Table_Name','Schema_Name']].drop_duplicates()
+        stg_table_names = STG_tables.loc[STG_tables['Source System'] == source_name][
+            ['Table_Name', 'Schema_Name']].drop_duplicates()
     else:
-        stg_table_names = STG_tables[['Table_Name','Schema_Name']].drop_duplicates()
+        stg_table_names = STG_tables[['Table_Name', 'Schema_Name']].drop_duplicates()
     return stg_table_names
+
 
 def get_src_code_set_names(STG_tables, source_name):
     code_set_names = list()
-    for stg_tables_index,stg_tables_row in STG_tables.iterrows():
-        if stg_tables_row['Source system name'] == source_name and str(stg_tables_row['Column name']).upper().startswith('BM_') and stg_tables_row['Code set name'] != '':
+    for stg_tables_index, stg_tables_row in STG_tables.iterrows():
+        if stg_tables_row['Source system name'] == source_name and str(
+                stg_tables_row['Column name']).upper().startswith('BM_') and stg_tables_row['Code set name'] != '':
             code_set_names.append(str(stg_tables_row['Code set name']))
     return pd.unique(code_set_names)
+
 
 def get_stg_table_nonNK_columns(STG_tables, source_name, Table_name, with_sk_columns=False):
     STG_tables_df = STG_tables.loc[(STG_tables['Source system name'] == source_name)
@@ -120,7 +130,7 @@ def get_stg_table_nonNK_columns(STG_tables, source_name, Table_name, with_sk_col
 def get_stg_table_columns(STG_tables, source_name, Table_name, with_sk_columns=False):
     if source_name:
         STG_tables_df = STG_tables.loc[(STG_tables['Source system name'] == source_name)
-                                        & (STG_tables['Table name'].str.upper() == Table_name.upper())
+                                       & (STG_tables['Table name'].str.upper() == Table_name.upper())
                                        ].reset_index()
     else:
         STG_tables_df = STG_tables.loc[STG_tables['Table name'].str.upper() == Table_name.upper()].reset_index()
@@ -132,13 +142,27 @@ def get_stg_table_columns(STG_tables, source_name, Table_name, with_sk_columns=F
 
     return STG_tables_df
 
-def get_sama_stg_table_columns(STG_tables, source_name, Table_name):
-    if source_name:
-        STG_tables_df = STG_tables.loc[(STG_tables['Source System'] == source_name)
-                                        & (STG_tables['Table_Name'].str.upper() == Table_name.upper())
-                                       ].reset_index()
-    else:
-        STG_tables_df = STG_tables.loc[STG_tables['Table_Name'].str.upper() == Table_name.upper()].reset_index()
+
+def get_sama_stg_table_columns(STG_tables, Table_name):
+    STG_tables_df = STG_tables.loc[
+        (STG_tables['Table_Name'].str.upper() == Table_name.upper())
+    ].reset_index()
+
+    return STG_tables_df
+
+
+def get_sama_stg_table_columns_minus_pk(STG_tables, Table_name):
+    STG_tables_df = STG_tables.loc[(STG_tables['Table_Name'].str.upper() == Table_name.upper())
+                                   & (STG_tables['Primary_Key_Flag'].str.upper() != 'Y')
+                                   ].reset_index()
+
+    return STG_tables_df
+
+
+def get_sama_stg_table_columns_pk(STG_tables, Table_name):
+    STG_tables_df = STG_tables.loc[(STG_tables['Table_Name'].str.upper() == Table_name.upper())
+                                   & (STG_tables['Primary_Key_Flag'].str.upper() == 'Y')
+                                   ].reset_index()
 
     return STG_tables_df
 
@@ -146,7 +170,7 @@ def single_quotes(string):
     return "'%s'" % string
 
 
-def assertions(table_maping_row,Core_tables_list):
+def assertions(table_maping_row, Core_tables_list):
     assert (table_maping_row['Main source'] != None), 'Missing Main Source  for Table Mapping:{}'.format(
         str(table_maping_row['Mapping name']))
     assert (table_maping_row[
@@ -159,7 +183,8 @@ def list_to_string(list, separator=None, between_single_quotes=0):
         prefix = ""
     else:
         prefix = separator
-    to_string = prefix.join((single_quotes(str(x)) if between_single_quotes == 1 else str(x)) if x is not None else "" for x in list)
+    to_string = prefix.join(
+        (single_quotes(str(x)) if between_single_quotes == 1 else str(x)) if x is not None else "" for x in list)
 
     return to_string
 
@@ -202,7 +227,6 @@ def save_to_parquet(pq_df, dataset_root_path, partition_cols=None, string_column
         if string_columns is None:
             # string_columns = df.columns
             string_columns = pq_df.select_dtypes(include='object').columns
-
 
         for i in string_columns:
             pq_df[i] = pq_df[i].apply(xstr)
@@ -283,10 +307,9 @@ def get_config_file_path():
     return config_file_path
 
 
-def get_config_file_values(config_file_path=None):
+def get_config_file_values(project_name, config_file_path=None):
     separator = "$$$"
     parameters = ""
-
     # config_file_path = os.path.dirname(sys.modules['__main__'].__file__)
     if config_file_path is None:
         try:
@@ -309,56 +332,68 @@ def get_config_file_values(config_file_path=None):
                     parameters = parameters + line + separator
 
         param_dic = string_to_dict(parameters, separator)
-        source_names = param_dic['source_names'].split(',')
-        source_names = None if source_names[0] == "" and len(source_names) > 0 else source_names
-        param_dic['source_names'] = source_names
+        if project_name == 'Project Sama':
+            dt_now = dt.datetime.now()
+            dt_folder = dt_now.strftime("%Y") + "_" + \
+                        dt_now.strftime("%b").upper() + "_" + \
+                        dt_now.strftime("%d") + "_" + \
+                        dt_now.strftime("%H") + "_" + \
+                        dt_now.strftime("%M") + "_" + \
+                        dt_now.strftime("%S")
+            param_dic['output_path'] = param_dic["home_output_folder"] + "/" + dt_folder
+            param_dic['read_sheets_parallel'] = 1
 
-        ################################################################################################
-        dt_now = dt.datetime.now()
-        dt_folder = dt_now.strftime("%Y") + "_" + \
-                    dt_now.strftime("%b").upper() + "_" + \
-                    dt_now.strftime("%d") + "_" + \
-                    dt_now.strftime("%H") + "_" + \
-                    dt_now.strftime("%M") + "_" + \
-                    dt_now.strftime("%S")
-        param_dic['output_path'] = param_dic["home_output_folder"] + "/" + dt_folder
+        elif project_name == 'Project ACA':
+            source_names = param_dic['source_names'].split(',')
+            source_names = None if source_names[0] == "" and len(source_names) > 0 else source_names
+            param_dic['source_names'] = source_names
 
-        db_prefix = param_dic['db_prefix']
+            ################################################################################################
+            dt_now = dt.datetime.now()
+            dt_folder = dt_now.strftime("%Y") + "_" + \
+                        dt_now.strftime("%b").upper() + "_" + \
+                        dt_now.strftime("%d") + "_" + \
+                        dt_now.strftime("%H") + "_" + \
+                        dt_now.strftime("%M") + "_" + \
+                        dt_now.strftime("%S")
+            param_dic['output_path'] = param_dic["home_output_folder"] + "/" + dt_folder
 
-        param_dic['T_STG'] = db_prefix + "T_STG"
-        param_dic['t_WRK'] = db_prefix + "T_WRK"
-        param_dic['v_stg'] = db_prefix + "V_STG"
-        param_dic['v_base'] = db_prefix + "V_BASE"
-        param_dic['INPUT_VIEW_DB'] = db_prefix + "V_INP"
+            db_prefix = param_dic['db_prefix']
 
-        param_dic['MACRO_DB'] = db_prefix + "M_GCFR"
-        param_dic['UT_DB'] = db_prefix + "P_UT"
-        param_dic['UTLFW_v'] = db_prefix + "V_UTLFW"
-        param_dic['UTLFW_t'] = db_prefix + "T_UTLFW"
+            param_dic['T_STG'] = db_prefix + "T_STG"
+            param_dic['t_WRK'] = db_prefix + "T_WRK"
+            param_dic['v_stg'] = db_prefix + "V_STG"
+            param_dic['v_base'] = db_prefix + "V_BASE"
+            param_dic['INPUT_VIEW_DB'] = db_prefix + "V_INP"
 
-        param_dic['TMP_DB'] = db_prefix + "T_TMP"
-        param_dic['APPLY_DB'] = db_prefix + "P_PP"
-        param_dic['base_DB']=db_prefix+"T_BASE"
+            param_dic['MACRO_DB'] = db_prefix + "M_GCFR"
+            param_dic['UT_DB'] = db_prefix + "P_UT"
+            param_dic['UTLFW_v'] = db_prefix + "V_UTLFW"
+            param_dic['UTLFW_t'] = db_prefix + "T_UTLFW"
 
-        param_dic['SI_DB'] = db_prefix + "T_SRCI"
-        param_dic['SI_VIEW'] = db_prefix + "V_SRCI"
+            param_dic['TMP_DB'] = db_prefix + "T_TMP"
+            param_dic['APPLY_DB'] = db_prefix + "P_PP"
+            param_dic['base_DB'] = db_prefix + "T_BASE"
 
-        param_dic['GCFR_t'] = db_prefix + "t_GCFR"
-        param_dic['GCFR_V'] = db_prefix + "V_GCFR"
-        param_dic['keycol_override_base'] = db_prefix+"T_GCFR.GCFR_TRANSFORM_KEYCOL_OVERRIDE"
-        param_dic['M_GCFR'] = db_prefix + "M_GCFR"
-        param_dic['P_UT'] = db_prefix + "P_UT"
+            param_dic['SI_DB'] = db_prefix + "T_SRCI"
+            param_dic['SI_VIEW'] = db_prefix + "V_SRCI"
 
-        param_dic['core_table'] = db_prefix + "T_BASE"
-        param_dic['core_view'] = db_prefix + "V_BASE"
+            param_dic['GCFR_t'] = db_prefix + "t_GCFR"
+            param_dic['GCFR_V'] = db_prefix + "V_GCFR"
+            param_dic['keycol_override_base'] = db_prefix + "T_GCFR.GCFR_TRANSFORM_KEYCOL_OVERRIDE"
+            param_dic['M_GCFR'] = db_prefix + "M_GCFR"
+            param_dic['P_UT'] = db_prefix + "P_UT"
 
-        online_source_t = param_dic['online_source_t']
-        offline_source_t = param_dic['offline_source_t']
+            param_dic['core_table'] = db_prefix + "T_BASE"
+            param_dic['core_view'] = db_prefix + "V_BASE"
 
-        param_dic['online_source_v'] = db_prefix + "V_" + online_source_t
-        param_dic['offline_source_v'] = db_prefix + "V_" + offline_source_t
-    else:
-        param_dic = {}
+            online_source_t = param_dic['online_source_t']
+            offline_source_t = param_dic['offline_source_t']
+
+            param_dic['online_source_v'] = db_prefix + "V_" + online_source_t
+            param_dic['offline_source_v'] = db_prefix + "V_" + offline_source_t
+        else:
+            param_dic = {}
     return param_dic
 
 
@@ -368,14 +403,15 @@ def server_info():
     # io = psutil.disk_io_counters()
     mem_per = psutil.virtual_memory()[2]
 
-    return (cpu_per,mem_per)
+    return (cpu_per, mem_per)
 
 
 def get_model_col(df, table_name):
     core_tables_IDS = df[df['Column name'].str.endswith(str('_ID'))]
-    for core_tables_index,core_tables_row in core_tables_IDS.iterrows():
+    for core_tables_index, core_tables_row in core_tables_IDS.iterrows():
         if core_tables_row['Table name'] == table_name:
             return core_tables_row['Column name']
+
 
 class WriteFile:
     def __init__(self, file_path, file_name, ext, f_mode="w+", new_line=False):

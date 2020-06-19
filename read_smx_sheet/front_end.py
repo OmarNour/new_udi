@@ -31,6 +31,7 @@ class FrontEnd:
         self.color_msg_done = "green"
         self.color_msg_done_with_error = "red"
         self.color_error_messager = "red"
+        self.project_generation_flag = "Project ACA"
 
         frame_row0 = Frame(self.root, borderwidth="2", relief="ridge")
         frame_row0.grid(column=0, row=0)
@@ -141,7 +142,6 @@ class FrontEnd:
 
         scripts_generation_label = Label(frame_config_file_values, text="Project")
         scripts_generation_label.grid(row=5, column=0, sticky='e', columnspan=1)
-        self.project_generation_flag = "Project ACA"
 
         self.aca_smx_flag = Radiobutton(frame_radiobuttons_values,text="ACA",value='Project ACA',variable=self.excel_sheet,command=self.toggle_excel_sheet_flag)
         self.aca_smx_flag.grid(row=1, column=0, sticky='w', columnspan=1)
@@ -179,10 +179,13 @@ class FrontEnd:
     def toggle_excel_sheet_flag(self):
         generate_smx_flag = self.excel_sheet.get()
         if generate_smx_flag == 'Project ACA':
+            self.project_generation_flag = generate_smx_flag
+            self.refresh_config_file_values()
             self.enable_disable_scripts_generation_fields(NORMAL)
         elif generate_smx_flag == 'Project Sama':
+            self.project_generation_flag = generate_smx_flag
+            self.refresh_config_file_values()
             self.enable_disable_scripts_generation_fields(DISABLED)
-        self.project_generation_flag = generate_smx_flag
 
     def change_status_label(self, msg, color):
         self.status_label_text.set(msg)
@@ -196,23 +199,46 @@ class FrontEnd:
             pass
 
     def get_config_file_values(self):
-        try:
-            self.config_file_values = funcs.get_config_file_values(self.config_file_entry_txt.get())
-            self.smx_path = self.config_file_values["smx_path"]
-            self.output_path = self.config_file_values["output_path"]
-            source_names = self.config_file_values["source_names"]
-            self.source_names = "All" if source_names is None else source_names
-            self.db_prefix = self.config_file_values["db_prefix"]
-            self.generate_button.config(state=NORMAL)
-            self.change_status_label(self.msg_ready, self.color_msg_ready)
+        if self.project_generation_flag == 'Project Sama':
+            try:
+                self.config_file_values = funcs.get_config_file_values(self.project_generation_flag,self.config_file_entry_txt.get())
+                self.smx_path = self.config_file_values["smx_path"]
+                self.output_path = self.config_file_values["output_path"]
+                self.oi_prefix = self.config_file_values["oi_prefix"]
+                self.stg_prefix = self.config_file_values["stg_prefix"]
+                self.dm_prefix = self.config_file_values["dm_prefix"]
+                self.duplicate_table_suffix = self.config_file_values["duplicate_table_suffix"]
+                self.bteq_run_file = self.config_file_values["bteq_run_file"]
 
-        except:
-            self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
-            self.generate_button.config(state=DISABLED)
-            self.smx_path = ""
-            self.output_path = ""
-            self.source_names = ""
-            self.db_prefix = ""
+                self.source_names = ""
+                self.db_prefix = ""
+                self.generate_button.config(state=NORMAL)
+                self.change_status_label(self.msg_ready, self.color_msg_ready)
+            except:
+                self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
+                self.generate_button.config(state=DISABLED)
+                self.smx_path = ""
+                self.output_path = ""
+                self.source_names = ""
+                self.db_prefix = ""
+        else:
+            try:
+                self.config_file_values = funcs.get_config_file_values(self.project_generation_flag,self.config_file_entry_txt.get())
+                self.smx_path = self.config_file_values["smx_path"]
+                self.output_path = self.config_file_values["output_path"]
+                source_names = self.config_file_values["source_names"]
+                self.source_names = "All" if source_names is None else source_names
+                self.db_prefix = self.config_file_values["db_prefix"]
+                self.generate_button.config(state=NORMAL)
+                self.change_status_label(self.msg_ready, self.color_msg_ready)
+
+            except:
+                self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
+                self.generate_button.config(state=DISABLED)
+                self.smx_path = ""
+                self.output_path = ""
+                self.source_names = ""
+                self.db_prefix = ""
 
     def get_scripts_to_generate_flag(self):
         self.scripts_flag = "All"
@@ -318,7 +344,7 @@ class FrontEnd:
 
     def start(self):
         self.refresh_config_file_values()
-        self.g = gs.GenerateScripts(None, self.config_file_values)
+        self.g = gs.GenerateScripts(None, self.config_file_values,self.project_generation_flag)
         self.g.scripts_flag = self.scripts_flag
         self.g.project_generation_flag = self.project_generation_flag
 

@@ -106,6 +106,6 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
             f.write(
                 "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID)\n")
             f.write(
-                "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + ", NULL)" + ";\n")
+                "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL)" + ";\n")
             f.write("\n")
     f.close()

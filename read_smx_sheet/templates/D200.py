@@ -7,6 +7,7 @@ def d200(cf, source_output_path, STG_tables, Loading_Type):
     file_name = funcs.get_file_name(__file__)
     f = funcs.WriteFile(source_output_path, file_name, "sql")
     MODIFICATION_TYPE_found = 0
+    Data_mover_flag = cf.Data_mover_flag
     INS_DTTM = ",INS_DTTM  TIMESTAMP(6) NOT NULL \n"
     stg_tables_df = funcs.get_stg_tables(STG_tables, None)
     for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
@@ -44,8 +45,6 @@ def d200(cf, source_output_path, STG_tables, Loading_Type):
         else:
             seq_column = ""
 
-        Run_date_column = ", RUN_DATE TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP\n"
-
         Primary_Index = ")Primary Index (" + pi_columns + ")\n"
 
         if MODIFICATION_TYPE_found == 0:
@@ -53,7 +52,12 @@ def d200(cf, source_output_path, STG_tables, Loading_Type):
         else:
             MODIFICATION_TYPE = ""
 
-        partition_statement = "PARTITION BY RANGE_N(RUN_DATE BETWEEN TIMESTAMP '2020-03-03 00:00:00.000000+00:00' AND TIMESTAMP '2100-03-03 00:00:00.000000+00:00' EACH INTERVAL'1'DAY)\n"
+        if Data_mover_flag == 1:
+            Run_date_column = ", RUN_DATE TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP\n"
+            partition_statement = "PARTITION BY RANGE_N(RUN_DATE BETWEEN TIMESTAMP '2020-03-03 00:00:00.000000+00:00' AND TIMESTAMP '2100-03-03 00:00:00.000000+00:00' EACH INTERVAL'1'DAY)\n"
+        else:
+            Run_date_column=""
+            partition_statement=""
 
         create_stg_table = create_stg_table + MODIFICATION_TYPE + INS_DTTM + seq_column + Run_date_column + Primary_Index + partition_statement
         create_wrk_table = create_wrk_table + MODIFICATION_TYPE + INS_DTTM + wrk_extra_columns + seq_column + Run_date_column + Primary_Index + partition_statement

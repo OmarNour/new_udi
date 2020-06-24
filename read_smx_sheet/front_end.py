@@ -123,12 +123,8 @@ class FrontEnd:
         self.entry_db_prefix = Entry(frame_config_file_values, textvariable=self.text_db_prefix, width=frame_config_file_values_entry_width)
         self.entry_db_prefix.grid(row=3, column=1, sticky="w", columnspan=1)
 
-
         self.UDI_scripts_generation_value = IntVar()
         self.Testing_scripts_generation_value = IntVar()
-        self.excel_sheet = StringVar()
-
-
 
         scripts_generation_label = Label(frame_config_file_values, text="Generating scripts")
         scripts_generation_label.grid(row=6, column=0, sticky='e',columnspan=1)
@@ -140,16 +136,6 @@ class FrontEnd:
         self.Testing_scripts_generation = Checkbutton(frame_checkboxes_values,text="Testing",variable=self.Testing_scripts_generation_value,onvalue=1,offvalue=0,command=self.toggle_scripts_flag)
         self.Testing_scripts_generation.grid(row=0, column=1, sticky='w', columnspan=1)
 
-        scripts_generation_label = Label(frame_config_file_values, text="Project")
-        scripts_generation_label.grid(row=5, column=0, sticky='e', columnspan=1)
-
-        self.aca_smx_flag = Radiobutton(frame_radiobuttons_values,text="ACA",value='Project ACA',variable=self.excel_sheet,command=self.toggle_excel_sheet_flag)
-        self.aca_smx_flag.grid(row=1, column=0, sticky='w', columnspan=1)
-
-        self.sama_smx_flag = Radiobutton(frame_radiobuttons_values,text="SAMA ",value='Project Sama',variable=self.excel_sheet,command=self.toggle_excel_sheet_flag)
-        self.sama_smx_flag.grid(row=1, column=1, sticky='w', columnspan=1)
-
-        self.aca_smx_flag.select()
         self.UDI_scripts_generation.select()
         self.Testing_scripts_generation.select()
 
@@ -176,17 +162,6 @@ class FrontEnd:
         elif UDI_scripts_flag ==0 and testing_scripts_flag == 0:
             self.enable_disable_fields(DISABLED)
 
-    def toggle_excel_sheet_flag(self):
-        generate_smx_flag = self.excel_sheet.get()
-        if generate_smx_flag == 'Project ACA':
-            self.project_generation_flag = generate_smx_flag
-            self.refresh_config_file_values()
-            self.enable_disable_scripts_generation_fields(NORMAL)
-        elif generate_smx_flag == 'Project Sama':
-            self.project_generation_flag = generate_smx_flag
-            self.refresh_config_file_values()
-            self.enable_disable_scripts_generation_fields(DISABLED)
-
     def change_status_label(self, msg, color):
         self.status_label_text.set(msg)
         self.status_label.config(fg=color, text=self.status_label_text.get())
@@ -199,46 +174,23 @@ class FrontEnd:
             pass
 
     def get_config_file_values(self):
-        if self.project_generation_flag == 'Project Sama':
-            try:
-                self.config_file_values = funcs.get_config_file_values(self.project_generation_flag,self.config_file_entry_txt.get())
-                self.smx_path = self.config_file_values["smx_path"]
-                self.output_path = self.config_file_values["output_path"]
-                self.oi_prefix = self.config_file_values["oi_prefix"]
-                self.stg_prefix = self.config_file_values["stg_prefix"]
-                self.dm_prefix = self.config_file_values["dm_prefix"]
-                self.duplicate_table_suffix = self.config_file_values["duplicate_table_suffix"]
-                self.bteq_run_file = self.config_file_values["bteq_run_file"]
+        try:
+            self.config_file_values = funcs.get_config_file_values(self.config_file_entry_txt.get())
+            self.smx_path = self.config_file_values["smx_path"]
+            self.output_path = self.config_file_values["output_path"]
+            source_names = self.config_file_values["source_names"]
+            self.source_names = "All" if source_names is None else source_names
+            self.db_prefix = self.config_file_values["db_prefix"]
+            self.generate_button.config(state=NORMAL)
+            self.change_status_label(self.msg_ready, self.color_msg_ready)
 
-                self.source_names = ""
-                self.db_prefix = ""
-                self.generate_button.config(state=NORMAL)
-                self.change_status_label(self.msg_ready, self.color_msg_ready)
-            except:
-                self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
-                self.generate_button.config(state=DISABLED)
-                self.smx_path = ""
-                self.output_path = ""
-                self.source_names = ""
-                self.db_prefix = ""
-        else:
-            try:
-                self.config_file_values = funcs.get_config_file_values(self.project_generation_flag,self.config_file_entry_txt.get())
-                self.smx_path = self.config_file_values["smx_path"]
-                self.output_path = self.config_file_values["output_path"]
-                source_names = self.config_file_values["source_names"]
-                self.source_names = "All" if source_names is None else source_names
-                self.db_prefix = self.config_file_values["db_prefix"]
-                self.generate_button.config(state=NORMAL)
-                self.change_status_label(self.msg_ready, self.color_msg_ready)
-
-            except:
-                self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
-                self.generate_button.config(state=DISABLED)
-                self.smx_path = ""
-                self.output_path = ""
-                self.source_names = ""
-                self.db_prefix = ""
+        except:
+            self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
+            self.generate_button.config(state=DISABLED)
+            self.smx_path = ""
+            self.output_path = ""
+            self.source_names = ""
+            self.db_prefix = ""
 
     def get_scripts_to_generate_flag(self):
         self.scripts_flag = "All"
@@ -316,8 +268,6 @@ class FrontEnd:
                 self.enable_disable_fields(NORMAL)
                 self.UDI_scripts_generation.config(state=NORMAL)
                 self.Testing_scripts_generation.config(state=NORMAL)
-                self.aca_smx_flag.config(state=NORMAL)
-                self.sama_smx_flag.config(state=NORMAL)
 
                 print("Total Elapsed time: ", self.g.elapsed_time, "\n")
             except Exception as error:
@@ -344,16 +294,11 @@ class FrontEnd:
 
     def start(self):
         self.refresh_config_file_values()
-        self.g = gs.GenerateScripts(None, self.config_file_values,self.project_generation_flag)
+        self.g = gs.GenerateScripts(None, self.config_file_values)
         self.g.scripts_flag = self.scripts_flag
-        self.g.project_generation_flag = self.project_generation_flag
-
-        self.aca_smx_flag.config(state=DISABLED)
-        self.sama_smx_flag.config(state=DISABLED)
 
         self.UDI_scripts_generation.config(state=DISABLED)
         self.Testing_scripts_generation.config(state=DISABLED)
-
 
         thread1 = GenerateScriptsThread(1, "Thread-1", self)
         thread1.start()

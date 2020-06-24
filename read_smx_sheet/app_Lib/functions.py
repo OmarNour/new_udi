@@ -307,7 +307,7 @@ def get_config_file_path():
     return config_file_path
 
 
-def get_config_file_values(project_name, config_file_path=None):
+def get_config_file_values(config_file_path=None):
     separator = "$$$"
     parameters = ""
     # config_file_path = os.path.dirname(sys.modules['__main__'].__file__)
@@ -332,68 +332,57 @@ def get_config_file_values(project_name, config_file_path=None):
                     parameters = parameters + line + separator
 
         param_dic = string_to_dict(parameters, separator)
-        if project_name == 'Project Sama':
-            dt_now = dt.datetime.now()
-            dt_folder = dt_now.strftime("%Y") + "_" + \
-                        dt_now.strftime("%b").upper() + "_" + \
-                        dt_now.strftime("%d") + "_" + \
-                        dt_now.strftime("%H") + "_" + \
-                        dt_now.strftime("%M") + "_" + \
-                        dt_now.strftime("%S")
-            param_dic['output_path'] = param_dic["home_output_folder"] + "/" + dt_folder
-            param_dic['read_sheets_parallel'] = 1
 
-        elif project_name == 'Project ACA':
-            source_names = param_dic['source_names'].split(',')
-            source_names = None if source_names[0] == "" and len(source_names) > 0 else source_names
-            param_dic['source_names'] = source_names
+        source_names = param_dic['source_names'].split(',')
+        source_names = None if source_names[0] == "" and len(source_names) > 0 else source_names
+        param_dic['source_names'] = source_names
 
-            ################################################################################################
-            dt_now = dt.datetime.now()
-            dt_folder = dt_now.strftime("%Y") + "_" + \
-                        dt_now.strftime("%b").upper() + "_" + \
-                        dt_now.strftime("%d") + "_" + \
-                        dt_now.strftime("%H") + "_" + \
-                        dt_now.strftime("%M") + "_" + \
-                        dt_now.strftime("%S")
-            param_dic['output_path'] = param_dic["home_output_folder"] + "/" + dt_folder
+        ################################################################################################
+        dt_now = dt.datetime.now()
+        dt_folder = dt_now.strftime("%Y") + "_" + \
+                    dt_now.strftime("%b").upper() + "_" + \
+                    dt_now.strftime("%d") + "_" + \
+                    dt_now.strftime("%H") + "_" + \
+                    dt_now.strftime("%M") + "_" + \
+                    dt_now.strftime("%S")
+        param_dic['output_path'] = param_dic["home_output_folder"] + "/" + dt_folder
 
-            db_prefix = param_dic['db_prefix']
+        db_prefix = param_dic['db_prefix']
 
-            param_dic['T_STG'] = db_prefix + "T_STG"
-            param_dic['t_WRK'] = db_prefix + "T_WRK"
-            param_dic['v_stg'] = db_prefix + "V_STG"
-            param_dic['v_base'] = db_prefix + "V_BASE"
-            param_dic['INPUT_VIEW_DB'] = db_prefix + "V_INP"
+        param_dic['T_STG'] = db_prefix + "T_STG"
+        param_dic['t_WRK'] = db_prefix + "T_WRK"
+        param_dic['v_stg'] = db_prefix + "V_STG"
+        param_dic['v_base'] = db_prefix + "V_BASE"
+        param_dic['INPUT_VIEW_DB'] = db_prefix + "V_INP"
 
-            param_dic['MACRO_DB'] = db_prefix + "M_GCFR"
-            param_dic['UT_DB'] = db_prefix + "P_UT"
-            param_dic['UTLFW_v'] = db_prefix + "V_UTLFW"
-            param_dic['UTLFW_t'] = db_prefix + "T_UTLFW"
+        param_dic['MACRO_DB'] = db_prefix + "M_GCFR"
+        param_dic['UT_DB'] = db_prefix + "P_UT"
+        param_dic['UTLFW_v'] = db_prefix + "V_UTLFW"
+        param_dic['UTLFW_t'] = db_prefix + "T_UTLFW"
 
-            param_dic['TMP_DB'] = db_prefix + "T_TMP"
-            param_dic['APPLY_DB'] = db_prefix + "P_PP"
-            param_dic['base_DB'] = db_prefix + "T_BASE"
+        param_dic['TMP_DB'] = db_prefix + "T_TMP"
+        param_dic['APPLY_DB'] = db_prefix + "P_PP"
+        param_dic['base_DB'] = db_prefix + "T_BASE"
 
-            param_dic['SI_DB'] = db_prefix + "T_SRCI"
-            param_dic['SI_VIEW'] = db_prefix + "V_SRCI"
+        param_dic['SI_DB'] = db_prefix + "T_SRCI"
+        param_dic['SI_VIEW'] = db_prefix + "V_SRCI"
 
-            param_dic['GCFR_t'] = db_prefix + "t_GCFR"
-            param_dic['GCFR_V'] = db_prefix + "V_GCFR"
-            param_dic['keycol_override_base'] = db_prefix + "T_GCFR.GCFR_TRANSFORM_KEYCOL_OVERRIDE"
-            param_dic['M_GCFR'] = db_prefix + "M_GCFR"
-            param_dic['P_UT'] = db_prefix + "P_UT"
+        param_dic['GCFR_t'] = db_prefix + "t_GCFR"
+        param_dic['GCFR_V'] = db_prefix + "V_GCFR"
+        param_dic['keycol_override_base'] = db_prefix + "T_GCFR.GCFR_TRANSFORM_KEYCOL_OVERRIDE"
+        param_dic['M_GCFR'] = db_prefix + "M_GCFR"
+        param_dic['P_UT'] = db_prefix + "P_UT"
 
-            param_dic['core_table'] = db_prefix + "T_BASE"
-            param_dic['core_view'] = db_prefix + "V_BASE"
+        param_dic['core_table'] = db_prefix + "T_BASE"
+        param_dic['core_view'] = db_prefix + "V_BASE"
 
-            online_source_t = param_dic['online_source_t']
-            offline_source_t = param_dic['offline_source_t']
+        online_source_t = param_dic['online_source_t']
+        offline_source_t = param_dic['offline_source_t']
 
-            param_dic['online_source_v'] = db_prefix + "V_" + online_source_t
-            param_dic['offline_source_v'] = db_prefix + "V_" + offline_source_t
-        else:
-            param_dic = {}
+        param_dic['online_source_v'] = db_prefix + "V_" + online_source_t
+        param_dic['offline_source_v'] = db_prefix + "V_" + offline_source_t
+    else:
+        param_dic = {}
     return param_dic
 
 

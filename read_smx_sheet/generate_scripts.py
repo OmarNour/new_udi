@@ -72,6 +72,12 @@ class ConfigFile:
         self.online_source_v = self.config_file_values["online_source_v"]
         self.offline_source_t = self.config_file_values["offline_source_t"]
         self.offline_source_v = self.config_file_values["offline_source_v"]
+
+        try:
+            self.staging_view_db = self.config_file_values["staging_view_db"]
+        except:
+            self.staging_view_db = ''
+
         try:
             self.Data_mover_flag = self.config_file_values["Data_mover_flag"]
         except:

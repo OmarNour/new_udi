@@ -6,9 +6,11 @@ from read_smx_sheet.Logging_Decorator import Logging_decorator
 def d110(cf, source_output_path, stg_Table_mapping, STG_tables, Loading_Type):
     file_name = funcs.get_file_name(__file__)
     f = funcs.WriteFile(source_output_path, file_name, "sql")
-
     source_t = cf.online_source_t if Loading_Type == "ONLINE" else cf.offline_source_t
-    source_v = cf.online_source_v if Loading_Type == "ONLINE" else cf.offline_source_v
+    if cf.staging_view_db == '':
+        source_v = cf.online_source_v if Loading_Type == "ONLINE" else cf.offline_source_v
+    else:
+        source_v = cf.staging_view_db
     stg_tables_df = funcs.get_stg_tables(STG_tables, None)
     for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
         Table_name = stg_tables_df_row['Table name']
@@ -37,8 +39,6 @@ def d110(cf, source_output_path, stg_Table_mapping, STG_tables, Loading_Type):
             comma_Column_name = comma + Column_name
 
             create_stg_view = create_stg_view + comma_Column_name + "\n"
-
-
 
         create_stg_view = create_stg_view + "from " + source_t + "." + Table_name + " t " + where_clause + ";\n\n"
         f.write(create_stg_view)

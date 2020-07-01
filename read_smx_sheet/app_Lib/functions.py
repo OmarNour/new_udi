@@ -101,14 +101,6 @@ def get_stg_tables(STG_tables, source_name=None):
     return stg_table_names
 
 
-def get_sama_stg_tables(STG_tables, source_name=None):
-    if source_name:
-        stg_table_names = STG_tables.loc[STG_tables['Source System'] == source_name][
-            ['Table_Name', 'Schema_Name']].drop_duplicates()
-    else:
-        stg_table_names = STG_tables[['Table_Name', 'Schema_Name']].drop_duplicates()
-    return stg_table_names
-
 
 def get_src_code_set_names(STG_tables, source_name):
     code_set_names = list()
@@ -142,29 +134,6 @@ def get_stg_table_columns(STG_tables, source_name, Table_name, with_sk_columns=F
 
     return STG_tables_df
 
-
-def get_sama_stg_table_columns(STG_tables, Table_name):
-    STG_tables_df = STG_tables.loc[
-        (STG_tables['Table_Name'].str.upper() == Table_name.upper())
-    ].reset_index()
-
-    return STG_tables_df
-
-
-def get_sama_stg_table_columns_minus_pk(STG_tables, Table_name):
-    STG_tables_df = STG_tables.loc[(STG_tables['Table_Name'].str.upper() == Table_name.upper())
-                                   & (STG_tables['Primary_Key_Flag'].str.upper() != 'Y')
-                                   ].reset_index()
-
-    return STG_tables_df
-
-
-def get_sama_stg_table_columns_pk(STG_tables, Table_name):
-    STG_tables_df = STG_tables.loc[(STG_tables['Table_Name'].str.upper() == Table_name.upper())
-                                   & (STG_tables['Primary_Key_Flag'].str.upper() == 'Y')
-                                   ].reset_index()
-
-    return STG_tables_df
 
 def single_quotes(string):
     return "'%s'" % string
@@ -381,6 +350,17 @@ def get_config_file_values(config_file_path=None):
 
         param_dic['online_source_v'] = db_prefix + "V_" + online_source_t
         param_dic['offline_source_v'] = db_prefix + "V_" + offline_source_t
+
+        try :
+            staging_view_db = param_dic['staging_view_db']
+        except:
+            staging_view_db = ''
+
+        if staging_view_db is not None and staging_view_db != "":
+            staging_view_db = db_prefix + "V_" + staging_view_db
+        else:
+            staging_view_db = ''
+        param_dic['staging_view_db'] = staging_view_db
     else:
         param_dic = {}
     return param_dic

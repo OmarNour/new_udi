@@ -1,5 +1,6 @@
 import os
 import sys
+
 sys.path.append(os.getcwd())
 from read_smx_sheet.app_Lib import manage_directories as md, functions as funcs
 import multiprocessing
@@ -80,8 +81,10 @@ class FrontEnd:
         frame_buttons.grid(column=1, row=0)
         self.generate_button = Button(frame_buttons, text="Start", width=12, height=2, command=self.start)
         self.generate_button.grid(row=2, column=0)
+        # close_button = Button(frame_buttons, text="Abort", width=12, height=1, command=self.close)
+        # close_button.grid(row=3, column=0)
         close_button = Button(frame_buttons, text="Exit", width=12, height=2, command=self.close)
-        close_button.grid(row=3, column=0)
+        close_button.grid(row=4, column=0)
 
         frame_config_file_values = Frame(frame_row1, borderwidth="2", relief="ridge")
         frame_config_file_values.grid(column=0, row=0, sticky="w")
@@ -99,45 +102,53 @@ class FrontEnd:
         read_from_smx_label.grid(row=0, column=0, sticky='e')
 
         self.text_field_read_from_smx = StringVar()
-        self.entry_field_read_from_smx = Entry(frame_config_file_values, textvariable=self.text_field_read_from_smx, width=frame_config_file_values_entry_width)
+        self.entry_field_read_from_smx = Entry(frame_config_file_values, textvariable=self.text_field_read_from_smx,
+                                               width=frame_config_file_values_entry_width)
         self.entry_field_read_from_smx.grid(row=0, column=1, sticky="w")
 
         output_path_label = Label(frame_config_file_values, text="Output Folder")
         output_path_label.grid(row=1, column=0, sticky='e')
 
         self.text_field_output_path = StringVar()
-        self.entry_field_output_path = Entry(frame_config_file_values, textvariable=self.text_field_output_path, width=frame_config_file_values_entry_width)
+        self.entry_field_output_path = Entry(frame_config_file_values, textvariable=self.text_field_output_path,
+                                             width=frame_config_file_values_entry_width)
         self.entry_field_output_path.grid(row=1, column=1, sticky="w")
 
         source_names_label = Label(frame_config_file_values, text="Sources")
         source_names_label.grid(row=2, column=0, sticky='e')
 
         self.text_field_source_names = StringVar()
-        self.entry_field_source_names = Entry(frame_config_file_values, textvariable=self.text_field_source_names, width=frame_config_file_values_entry_width)
+        self.entry_field_source_names = Entry(frame_config_file_values, textvariable=self.text_field_source_names,
+                                              width=frame_config_file_values_entry_width)
         self.entry_field_source_names.grid(row=2, column=1, sticky="w", columnspan=1)
 
         db_prefix_label = Label(frame_config_file_values, text="DB Prefix")
         db_prefix_label.grid(row=3, column=0, sticky='e')
 
         self.text_db_prefix = StringVar()
-        self.entry_db_prefix = Entry(frame_config_file_values, textvariable=self.text_db_prefix, width=frame_config_file_values_entry_width)
+        self.entry_db_prefix = Entry(frame_config_file_values, textvariable=self.text_db_prefix,
+                                     width=frame_config_file_values_entry_width)
         self.entry_db_prefix.grid(row=3, column=1, sticky="w", columnspan=1)
 
         self.UDI_scripts_generation_value = IntVar()
         self.Testing_scripts_generation_value = IntVar()
 
         scripts_generation_label = Label(frame_config_file_values, text="Generating scripts")
-        scripts_generation_label.grid(row=6, column=0, sticky='e',columnspan=1)
-        self.scripts_flag = "All"
+        scripts_generation_label.grid(row=6, column=0, sticky='e', columnspan=1)
+        self.scripts_flag = "UDI"
 
-        self.UDI_scripts_generation = Checkbutton(frame_checkboxes_values,text="UDI", variable=self.UDI_scripts_generation_value,onvalue=1,offvalue=0,command=self.toggle_scripts_flag)
+        self.UDI_scripts_generation = Checkbutton(frame_checkboxes_values, text="UDI",
+                                                  variable=self.UDI_scripts_generation_value, onvalue=1, offvalue=0,
+                                                  command=self.toggle_scripts_flag)
+        self.UDI_scripts_generation.grid(row=0, column=0, sticky='w', columnspan=1)
         self.UDI_scripts_generation.grid(row=0, column=0, sticky='w', columnspan=1)
 
-        self.Testing_scripts_generation = Checkbutton(frame_checkboxes_values,text="Testing",variable=self.Testing_scripts_generation_value,onvalue=1,offvalue=0,command=self.toggle_scripts_flag)
+        self.Testing_scripts_generation = Checkbutton(frame_checkboxes_values, text="Testing",
+                                                      variable=self.Testing_scripts_generation_value, onvalue=1,
+                                                      offvalue=0, command=self.toggle_scripts_flag)
         self.Testing_scripts_generation.grid(row=0, column=1, sticky='w', columnspan=1)
 
         self.UDI_scripts_generation.select()
-        self.Testing_scripts_generation.select()
 
         self.populate_config_file_values()
         self.config_file_entry_txt.trace("w", self.refresh_config_file_values)
@@ -156,10 +167,10 @@ class FrontEnd:
         if UDI_scripts_flag == 1 and testing_scripts_flag == 0:
             self.scripts_flag = "UDI"
             self.enable_disable_fields(NORMAL)
-        elif UDI_scripts_flag ==0 and testing_scripts_flag == 1:
+        elif UDI_scripts_flag == 0 and testing_scripts_flag == 1:
             self.scripts_flag = "Testing"
             self.enable_disable_fields(NORMAL)
-        elif UDI_scripts_flag ==0 and testing_scripts_flag == 0:
+        elif UDI_scripts_flag == 0 and testing_scripts_flag == 0:
             self.enable_disable_fields(DISABLED)
 
     def change_status_label(self, msg, color):
@@ -292,6 +303,10 @@ class FrontEnd:
     def close(self):
         self.root.protocol("WM_DELETE_WINDOW", self.destroyer())
 
+    def abort(self):
+        if self.runningthread is not None:
+            self.runningthread.terminate()
+
     def start(self):
         self.refresh_config_file_values()
         self.g = gs.GenerateScripts(None, self.config_file_values)
@@ -315,7 +330,7 @@ class FrontEnd:
             msg = self.msg_generating + str(elapsed_time)
             # color_list = ["white", "black", "red", "green", "blue", "cyan", "yellow", "magenta"]
             # color = random.choice(color_list)
-            color = '#%02X%02X%02X' % (r(),r(),r())
+            color = '#%02X%02X%02X' % (r(), r(), r())
             self.change_status_label(msg, color)
 
         message = self.g.error_message if self.g.error_message != "" else self.msg_done + str(self.g.elapsed_time)
@@ -331,7 +346,7 @@ class FrontEnd:
 
 
 class GenerateScriptsThread(threading.Thread):
-    def __init__(self,threadID ,name, front_end_c, thread=None):
+    def __init__(self, threadID, name, front_end_c, thread=None):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name

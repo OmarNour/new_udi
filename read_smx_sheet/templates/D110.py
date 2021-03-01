@@ -31,9 +31,15 @@ def d110(cf, source_output_path, stg_Table_mapping, STG_tables, Loading_Type):
         STG_table_columns = funcs.get_stg_table_columns(STG_tables, None, Table_name)
 
         for STG_table_columns_index, STG_table_columns_row in STG_table_columns.iterrows():
-            Column_name = '"' + STG_table_columns_row['Column name in source'] + '"'
+            Column_name_as_src = '"' + STG_table_columns_row['Column name in source'] + '"'
+            Column_name = '"' + STG_table_columns_row['Column name'] + '"'
             column_transformation_rule = str(STG_table_columns_row['Column Transformation Rule'])
-            Column_name = (column_transformation_rule + " AS " + Column_name) if column_transformation_rule != "" else  Column_name
+            # Column_name = (column_transformation_rule + " AS " + Column_name) if column_transformation_rule != "" else  Column_name
+
+            if column_transformation_rule != "":
+                Column_name = (column_transformation_rule + " AS " + Column_name)
+            else:
+                Column_name = (Column_name_as_src + " AS " + Column_name)
 
             comma = ',' if STG_table_columns_index > 0 else ' '
             comma_Column_name = comma + Column_name

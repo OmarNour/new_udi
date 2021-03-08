@@ -19,6 +19,12 @@ def d215(cf, source_output_path, source_name, System, STG_tables):
         REJ_TABLE_RULE = System['Rejection Table Rules']
     except:
         REJ_TABLE_RULE = ''
+
+    try:
+        source_DB = System['Rejection Table Rules']
+    except:
+        source_DB = ''
+
     try:
         template_file = open(template_path, "r")
     except:
@@ -47,7 +53,8 @@ def d215(cf, source_output_path, source_name, System, STG_tables):
                                                STG_VDATABASE=cf.v_stg,
                                                REJ_TABLE_NAME=REJ_TABLE_NAME,
                                                REJ_TABLE_RULE=REJ_TABLE_RULE,
-                                               TBL_PKs=TBL_PKs
+                                               TBL_PKs=TBL_PKs,
+                                               source_DB=source_DB
                                                )
         output_script = output_script.upper() + '\n' + '\n' + '\n'
         f.write(output_script.replace('Â', ' '))

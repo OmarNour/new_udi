@@ -3,10 +3,10 @@
 block_cipher = None
 
 
-a = Analysis(['C:\\Users\\TDInstaller\\PycharmProjects\\new_udi\\read_smx_sheet\\front_end.py'],
-             pathex=['C:\\Users\\TDInstaller\\PycharmProjects\\new_udi'],
+a = Analysis(['C:\\Users\\ts250088\\PycharmProjects\\new_udi\\read_smx_sheet\\front_end.py'],
+             pathex=['C:\\Users\\ts250088\\PycharmProjects\\new_udi'],
              binaries=[],
-             datas=[('C:\\Users\\TDInstaller\\Anaconda3\\envs\\conda_p37\\Lib\\site-packages\\dask\\dask.yaml', './dask'), ('C:\\Users\\TDInstaller\\Anaconda3\\envs\\conda_p37\\Lib\\site-packages\\distributed\\distributed.yaml', './distributed'),('C:\\Users\\TDInstaller\\PycharmProjects\\new_udi\\read_smx_sheet\\app_Lib\\script_icon.png', '.')],
+             datas=[('C:\\Users\\ts250088\\Anaconda3\\envs\\conda_p37\\Lib\\site-packages\\dask\\dask.yaml', './dask'), ('C:\\Users\\ts250088\\Anaconda3\\envs\\conda_p37\\Lib\\site-packages\\distributed\\distributed.yaml', './distributed'),('C:\\Users\\ts250088\\PycharmProjects\\new_udi\\read_smx_sheet\\app_Lib\\script_icon.png','.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],

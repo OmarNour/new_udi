@@ -1,12 +1,12 @@
-smx_path="/Users/dinaelhusseiny/Desktop/UDI"
-home_output_folder="/Users/dinaelhusseiny/Desktop/UDI"
+smx_path="C:/NEW_UDI/smx_sheet"
+home_output_folder="C:/NEW_UDI/smx_scripts"
 
 
 
 # Source Filter:
 ## for all sources: source_names=""
 ## for for certain sources: sources: source_names="TAMWEEN,TAX,EDU,CUSTOMS"
-source_names="VIRUS_C"
+source_names="MROR"
 
 online_source_t="stg_online"
 offline_source_t="stg_layer"

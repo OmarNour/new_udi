@@ -21,7 +21,7 @@ def d215(cf, source_output_path, source_name, System, STG_tables):
         REJ_TABLE_RULE = ''
 
     try:
-        source_DB = System['Rejection Table Rules']
+        source_DB = System['Source DB']
     except:
         source_DB = ''
 
@@ -33,8 +33,8 @@ def d215(cf, source_output_path, source_name, System, STG_tables):
     for i in template_file.readlines():
         if i != "":
             template_string = template_string + i
-    stg_table_names=funcs.get_stg_tables(STG_tables)
-    for stg_tables_df_index, stg_tables_df_row in stg_table_names.iterrows():
+    stg_table_names = funcs.get_stg_tables(STG_tables)
+    for stg_tables_df_index, stg_tables_df_row in stg_table_names[(stg_table_names['Table name'] != REJ_TABLE_NAME) & (stg_table_names['Table name'] != REJ_TABLE_RULE)].iterrows():
         TABLE_NAME = stg_tables_df_row['Table name']
         TABLE_COLUMNS = funcs.get_stg_table_columns(STG_tables, source_name, TABLE_NAME)
         TBL_PKs = TDDL.get_trgt_pk(STG_tables, TABLE_NAME)
@@ -42,9 +42,9 @@ def d215(cf, source_output_path, source_name, System, STG_tables):
         WRK_TABLE_COLUMNS = ""
         lengthh = len(TABLE_COLUMNS)
         for stg_tbl_index, stg_tbl_row in TABLE_COLUMNS.iterrows():
-            align = '' if stg_tbl_index >= lengthh-1 else '\n\t'
-            STG_TABLE_COLUMNS += 'STG_TBL.' + '"' + stg_tbl_row['Column name'] + '"' + ','+align
-            WRK_TABLE_COLUMNS += 'WRK_TBL.' + '"' + stg_tbl_row['Column name'] + '"' + ','+align
+            align = '' if stg_tbl_index >= lengthh - 1 else '\n\t'
+            STG_TABLE_COLUMNS += 'STG_TBL.' + '"' + stg_tbl_row['Column name'] + '"' + ',' + align
+            WRK_TABLE_COLUMNS += 'WRK_TBL.' + '"' + stg_tbl_row['Column name'] + '"' + ',' + align
         output_script = template_string.format(TABLE_NAME=TABLE_NAME,
                                                STG_TABLE_COLUMNS=STG_TABLE_COLUMNS,
                                                WRK_TABLE_COLUMNS=WRK_TABLE_COLUMNS,

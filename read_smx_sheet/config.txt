@@ -1,15 +1,17 @@
-smx_path="C:/NEW_UDI/smx_sheet"
-home_output_folder="C:/NEW_UDI/smx_scripts"
+smx_path="/Users/dinaelhusseiny/Desktop/UDI"
+home_output_folder="/Users/dinaelhusseiny/Desktop/UDI"
+templates_folder_path="/Users/dinaelhusseiny/Desktop/UDI/Templates"
 
 
 
 # Source Filter:
 ## for all sources: source_names=""
 ## for for certain sources: sources: source_names="TAMWEEN,TAX,EDU,CUSTOMS"
-source_names="MROR"
+source_names="Insurance_Pension"
 
 online_source_t="stg_online"
 offline_source_t="stg_layer"
+staging_view_db="DEV_STG_ONLINE"
 
 etl_process_table="ETL_PROCESS"
 SOURCE_TABLES_LKP_table="SOURCE_TABLES_LKP"

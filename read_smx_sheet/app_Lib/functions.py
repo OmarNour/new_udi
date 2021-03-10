@@ -101,7 +101,6 @@ def get_stg_tables(STG_tables, source_name=None):
     return stg_table_names
 
 
-
 def get_src_code_set_names(STG_tables, source_name):
     code_set_names = list()
     for stg_tables_index, stg_tables_row in STG_tables.iterrows():
@@ -351,7 +350,7 @@ def get_config_file_values(config_file_path=None):
         param_dic['online_source_v'] = db_prefix + "V_" + online_source_t
         param_dic['offline_source_v'] = db_prefix + "V_" + offline_source_t
 
-        try :
+        try:
             staging_view_db = param_dic['staging_view_db']
         except:
             staging_view_db = ''

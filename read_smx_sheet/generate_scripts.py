@@ -10,7 +10,7 @@ from read_smx_sheet.templates import BMAP_DUP_CD_TEST_SHEET,BMAP_DUP_DESC_TEST_S
 from read_smx_sheet.templates import DATA_SRC_TEST_SHEET, BMAP_CHECK_TEST_SHEET , BMAP_UNMATCHED_TEST_SHEET
 from read_smx_sheet.templates import HIST_STRT_END_NULL_TEST_SHEET, HIST_DUP_TEST_SHEET ,HIST_STRT_GRT_END_TEST_SHEET,HIST_TIME_GAP_TEST_SHEET
 from read_smx_sheet.templates import HIST_STRT_NULL_TEST_SHEET, RI_TEST_SHEET, compare_testing_inputview
-from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340
+from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340,D215
 from read_smx_sheet.parameters import parameters as pm
 import traceback
 import datetime as dt
@@ -32,6 +32,7 @@ class ConfigFile:
         self.output_path = self.config_file_values["output_path"]
         self.read_sheets_parallel = self.config_file_values["read_sheets_parallel"]
         self.smx_path = self.config_file_values["smx_path"]
+        self.templates_path = self.config_file_values["templates_folder_path"]
         self.source_names = self.config_file_values["source_names"]
         self.gcfr_system_name = self.config_file_values["gcfr_system_name"]
         self.gcfr_ctl_Id = self.config_file_values["gcfr_ctl_Id"]
@@ -138,7 +139,7 @@ class GenerateScripts:
                     smx_file_name = os.path.splitext(smx)[0]
                     print("\t" + smx_file_name)
                     self.log_file.write("\t" + smx_file_name)
-                    home_output_path = self.cf.output_path + "/" + smx_file_name + "/"
+                    home_output_path = self.cf.output_path + "/" + smx_file_name
 
                     # self.parallel_remove_output_home_path.append(delayed(md.remove_folder)(home_output_path))
                     self.parallel_create_output_home_path.append(delayed(md.create_folder)(home_output_path))
@@ -176,6 +177,7 @@ class GenerateScripts:
                             Loading_Type = system_row['Loading type'].upper()
                             if Loading_Type != "":
                                 source_name = system_row['Source system name']
+
                                 filtered_sources.append(source_name)
 
                                 source_name_filter = [['Source', [source_name]]]
@@ -222,14 +224,16 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(D200.d200)(self.cf, source_output_path, STG_tables, Loading_Type))
                                     self.parallel_templates.append(delayed(D210.d210)(self.cf, source_output_path, STG_tables, Loading_Type))
 
+                                    self.parallel_templates.append(delayed(D215.d215)(self.cf, source_output_path, source_name,system_row,STG_tables))
+
                                     self.parallel_templates.append(delayed(D320.d320)(self.cf, source_output_path, STG_tables, BKEY))
                                     self.parallel_templates.append(delayed(D330.d330)(self.cf, source_output_path, STG_tables, BKEY))
                                     self.parallel_templates.append(delayed(D340.d340)(self.cf, source_output_path, STG_tables, BKEY))
 
                                     self.parallel_templates.append(delayed(D300.d300)(self.cf, source_output_path, STG_tables, BKEY))
-                                    # self.parallel_templates.append(delayed(D400.d400)(self.cf, source_output_path, STG_tables))
-                                    # self.parallel_templates.append(delayed(D410.d410)(self.cf, source_output_path, STG_tables))
-                                    # self.parallel_templates.append(delayed(D415.d415)(self.cf, source_output_path, STG_tables))
+                                    self.parallel_templates.append(delayed(D400.d400)(self.cf, source_output_path, STG_tables))
+                                    self.parallel_templates.append(delayed(D410.d410)(self.cf, source_output_path, STG_tables))
+                                    self.parallel_templates.append(delayed(D415.d415)(self.cf, source_output_path, STG_tables))
                                     self.parallel_templates.append(delayed(D420.d420)(self.cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type))
 
                                     self.parallel_templates.append(delayed(D600.d600)(self.cf, source_output_path, core_Table_mapping, Core_tables))

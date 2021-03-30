@@ -20,5 +20,5 @@ compareSTGcounts_template_filename = "compareSTGcounts.txt"
 sheets = [System_sht, Supplements_sht, Column_mapping_sht, BMAP_values_sht, BMAP_sht, BKEY_sht, STG_tables_sht, Table_mapping_sht, Core_tables_sht]
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #2.11.3"
+ver_no = "| Build #2.11.4"
 # ################################################################################################

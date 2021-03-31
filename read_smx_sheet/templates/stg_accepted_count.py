@@ -5,7 +5,7 @@ from read_smx_sheet.app_Lib import TransformDDL as TDDL
 
 
 @Logging_decorator
-def stgAcceptedCounts(cf, source_output_path, System, STG_tables, LOADING_TYPE):
+def stg_accepted_count(cf, source_output_path, System, STG_tables, LOADING_TYPE):
     file_name = funcs.get_file_name(__file__)
     f = funcs.WriteFile(source_output_path, file_name, "sql")
     smx_path = cf.smx_path
@@ -49,6 +49,7 @@ def stgAcceptedCounts(cf, source_output_path, System, STG_tables, LOADING_TYPE):
                                                REJ_TABLE_RULE=REJ_TABLE_RULE,
                                                TBL_PKs=TBL_PKs
                                                )
-        output_script = output_script.upper() + '\n' + '\n' + '\n' + '\n'
+        seperation_line = '--------------------------------------------------------------------------------------------------------------------------------------------------------------------'
+        output_script = output_script.upper() + '\n' + seperation_line + '\n'  + seperation_line + '\n'
         f.write(output_script.replace('Â', ' '))
     f.close()

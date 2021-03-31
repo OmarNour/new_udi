@@ -18,6 +18,7 @@ Data_types_sht = "Data type"
 D215_template_filename = "D215.txt"
 compareSTGcounts_template_filename = "compareSTGcounts.txt"
 compareSTGacccounts_template_filename = "compareSTGacceptedCounts.txt"
+dataValidation_template_filename = "dataValidation.txt"
 sheets = [System_sht, Supplements_sht, Column_mapping_sht, BMAP_values_sht, BMAP_sht, BKEY_sht, STG_tables_sht, Table_mapping_sht, Core_tables_sht]
 
 # AppName_<Major>.<Minor>.<BuildNo>

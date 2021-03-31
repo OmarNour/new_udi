@@ -39,6 +39,7 @@ def stgCounts(cf, source_output_path, System, STG_tables):
                                                WRK_DATABASE=cf.t_WRK,
                                                source_DB=source_DB
                                                )
-        output_script = output_script.upper() + '\n' + '\n' + '\n'
+        seperation_line = '--------------------------------------------------------------------------------------------------------------------------------------------------------------------'
+        output_script = output_script.upper() + '\n' + seperation_line + '\n'  + seperation_line + '\n'
         f.write(output_script.replace('Â', ' '))
     f.close()

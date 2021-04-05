@@ -208,7 +208,7 @@ class GenerateScripts:
                                 bmaps_output_path_testing = os.path.join(output_path_testing, "BMAPS_Cases_scripts")
                                 history_output_path_testing = os.path.join(output_path_testing, "HISTORY_Cases_scripts")
                                 ri_output_path_testing = os.path.join(output_path_testing, "RI_Cases_scripts")
-                                input_view_output_path_testing = os.path.join(output_path_testing, "Testing_input_views")
+                                input_view_output_path_testing = os.path.join(output_path_testing, "SMX QUALITY TESTING SCRIPTS")
                                 compare_stg_counts_output_path_testing = os.path.join(output_path_testing,"STG TESTING SCRIPTS")
 
                                 self.parallel_create_output_source_path.append(delayed(md.create_folder)(main_output_path))

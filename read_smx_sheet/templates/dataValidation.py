@@ -5,11 +5,15 @@ from read_smx_sheet.app_Lib import TransformDDL as TDDL
 
 
 @Logging_decorator
-def dataValidation(cf, source_output_path, source_name, System, STG_tables,LOADING_TYPE):
-    file_name = funcs.get_file_name(__file__)
+def dataValidation(cf, source_output_path, source_name, System, STG_tables,LOADING_TYPE,flag):
+    file_name = funcs.get_file_name(__file__) + '_' + flag
     f = funcs.WriteFile(source_output_path, file_name, "sql")
+    if flag == 'Accepted':
+        template_path = cf.templates_path + "/" + pm.dataValidation_template_filename
+        file_name += '_'+flag
+    else:
+        template_path = cf.templates_path + "/" + pm.dataValidationAll_template_filename
     smx_path = cf.smx_path
-    template_path = cf.templates_path + "/" + pm.dataValidation_template_filename
     template_string = ""
     try:
         REJ_TABLE_NAME = System['Rejection Table Name']
@@ -44,27 +48,48 @@ def dataValidation(cf, source_output_path, source_name, System, STG_tables,LOADI
         TBL_PKs = TDDL.get_trgt_pk(STG_tables, TABLE_NAME)
         IBM_STG_TABLE_COLUMNS = ""
         TERADATA_STG_TABLE_COLUMNS = ""
+        TERADATA_WRK_TABLE_COLUMNS = ""
         COUNT_COLS = ''
         lengthh = len(TABLE_COLUMNS)
         for stg_tbl_index, stg_tbl_row in TABLE_COLUMNS.iterrows():
             align = '' if stg_tbl_index >= lengthh - 1 else '\n\t\t'
+            STGalign = '' if stg_tbl_index >= lengthh - 1 else '\n\t\t\t'
             IBM_STG_TABLE_COLUMNS += 'IBM_STG_TABLE.' + '"' + stg_tbl_row['Column name'] + '"' + ',' + align
-            TERADATA_STG_TABLE_COLUMNS += 'TERADATA_STG_TABLE.' + '"' + stg_tbl_row['Column name'] + '"' + ',' + align
+            TERADATA_STG_TABLE_COLUMNS += 'TERADATA_STG_TABLE.' + '"' + stg_tbl_row['Column name'] + '"' + ',' + STGalign
+            TERADATA_WRK_TABLE_COLUMNS += 'TERADATA_WRK_TABLE.' + '"' + stg_tbl_row['Column name'] + '"' + ',' + STGalign
             COUNT_COLS += str(stg_tbl_index+1) + ','
         COUNT_COLS = COUNT_COLS[0:len(COUNT_COLS) - 1]
         IBM_STG_TABLE_COLUMNS = IBM_STG_TABLE_COLUMNS[0:len(IBM_STG_TABLE_COLUMNS) - 1]
         TERADATA_STG_TABLE_COLUMNS = TERADATA_STG_TABLE_COLUMNS[0:len(TERADATA_STG_TABLE_COLUMNS) - 1]
-        output_script = template_string.format(TABLE_NAME=TABLE_NAME,
-                                               IBM_STG_TABLE_COLUMNS=IBM_STG_TABLE_COLUMNS,
-                                               TERADATA_STG_TABLE_COLUMNS=TERADATA_STG_TABLE_COLUMNS,
-                                               STG_DATABASE=cf.T_STG,
-                                               REJ_TABLE_NAME=REJ_TABLE_NAME,
-                                               REJ_TABLE_RULE=REJ_TABLE_RULE,
-                                               TBL_PKs=TBL_PKs,
-                                               source_DB=source_DB,
-                                               LOADING_TYPE=LOADING_TYPE,
-                                               COUNT_COLS=COUNT_COLS
-                                               )
+        TERADATA_WRK_TABLE_COLUMNS = TERADATA_WRK_TABLE_COLUMNS[0:len(TERADATA_WRK_TABLE_COLUMNS) - 1]
+
+        if flag == 'Accepted':
+            output_script = template_string.format(TABLE_NAME=TABLE_NAME,
+                                                   IBM_STG_TABLE_COLUMNS=IBM_STG_TABLE_COLUMNS,
+                                                   TERADATA_STG_TABLE_COLUMNS=TERADATA_STG_TABLE_COLUMNS,
+                                                   STG_DATABASE=cf.T_STG,
+                                                   REJ_TABLE_NAME=REJ_TABLE_NAME,
+                                                   REJ_TABLE_RULE=REJ_TABLE_RULE,
+                                                   TBL_PKs=TBL_PKs,
+                                                   source_DB=source_DB,
+                                                   LOADING_TYPE=LOADING_TYPE,
+                                                   COUNT_COLS=COUNT_COLS
+                                                   )
+        else:
+            output_script = template_string.format(TABLE_NAME=TABLE_NAME,
+                                                   IBM_STG_TABLE_COLUMNS=IBM_STG_TABLE_COLUMNS,
+                                                   TERADATA_STG_TABLE_COLUMNS=TERADATA_STG_TABLE_COLUMNS,
+                                                   STG_DATABASE=cf.T_STG,
+                                                   REJ_TABLE_NAME=REJ_TABLE_NAME,
+                                                   REJ_TABLE_RULE=REJ_TABLE_RULE,
+                                                   TBL_PKs=TBL_PKs,
+                                                   source_DB=source_DB,
+                                                   LOADING_TYPE=LOADING_TYPE,
+                                                   COUNT_COLS=COUNT_COLS,
+                                                   WRK_DATABASE=cf.t_WRK,
+                                                   TERADATA_WRK_TABLE_COLUMNS=TERADATA_WRK_TABLE_COLUMNS
+                                                   )
+
         seperation_line = '--------------------------------------------------------------------------------------------------------------------------------------------------------------------'
         output_script = output_script.upper() + '\n' + seperation_line + '\n' + seperation_line + '\n'
         f.write(output_script.replace('Â', ' '))

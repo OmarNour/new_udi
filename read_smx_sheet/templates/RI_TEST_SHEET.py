@@ -13,7 +13,7 @@ def ri_check(cf, source_output_path, table_mapping, RI_relations):
         for ri_table_index,ri_table_row in RI_relations.iterrows():
             RI_line = "---RI_Test_Case_" + str(count) + "---"
             if ri_table_row['CHILD TABLE'] == table_name :
-                call_line1 = "SELECT DISTINCT " + cf.base_DB + '.' + ri_table_row['CHILD TABLE'] + '.' + ri_table_row['CHILD COLUMN']
+                call_line1 = "SELECT DISTINCT " + 'CHILD_TABLE.' + ri_table_row['CHILD COLUMN']
                 call_line2 = " FROM " + cf.base_DB + '.' + ri_table_row['CHILD TABLE'] + " CHILD_TABLE LEFT JOIN " + cf.base_DB + '.' + ri_table_row['PARENT TABLE'] + " PARENT_TABLE "
                 call_line3 = " ON CHILD_TABLE." + ri_table_row['CHILD COLUMN']
                 call_line4 = " = PARENT_TABLE." + ri_table_row['PARENT COLUMN']

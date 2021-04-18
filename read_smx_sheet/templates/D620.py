@@ -9,7 +9,7 @@ def d620(cf, source_output_path, Table_mapping,Column_mapping,Core_tables, Loadi
     if input_view_flag == 'TESTING':
         file_name = 'testing_input_views'
     f = funcs.WriteFile(source_output_path, file_name, "sql")
-    notes= list()
+    notes = list()
     view_name_suffix = ''
     for table_maping_index, table_maping_row in Table_mapping.iterrows():
 

@@ -11,9 +11,9 @@ def d610(cf, source_output_path, Table_mapping,STG_tables,source_name):
     src_look_up_tables = funcs.get_src_code_set_names(STG_tables,source_name)
 
     for tbl_name in core_tables_list:
-        core_view = 'REPLACE VIEW ' + cf.core_view + '.' + tbl_name + ' AS SELECT * FROM ' + cf.core_table + '.' + tbl_name + '; \n'
+        core_view = 'REPLACE VIEW ' + cf.core_view + '.' + tbl_name + ' AS LOCK ROW FOR ACCESS SELECT * FROM ' + cf.core_table + '.' + tbl_name + '; \n'
         f.write(core_view)
     for src_look_up_table in src_look_up_tables:
-        core_view = 'REPLACE VIEW ' + cf.core_view + '.' + src_look_up_table + ' AS SELECT * FROM ' + cf.core_table + '.' + src_look_up_table + '; \n'
+        core_view = 'REPLACE VIEW ' + cf.core_view + '.' + src_look_up_table + ' AS LOCK ROW FOR ACCESS SELECT * FROM ' + cf.core_table + '.' + src_look_up_table + '; \n'
         f.write(core_view)
     f.close()

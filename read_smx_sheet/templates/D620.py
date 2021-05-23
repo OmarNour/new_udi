@@ -87,14 +87,12 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
 
         inp_view_where_clause = ';'
         if table_maping_row['Filter criterion'] != "":
-            # if (sub_query_flag == 0):
             inp_view_where_clause = 'Where ' + table_maping_row['Filter criterion'] + ';'
-            # else:
-            #     inp_view_where_clause = 'Where '+table_maping_row['Filter criterion']+');'
-        if table_maping_row['Filter criterion'] != "":
-            # if (sub_query_flag == 0):
-            inp_view_where_clause = 'Where ' + table_maping_row['Filter criterion'] + ';'
-            
+
+        if table_maping_row['Aggregation filter criterion'] != "":
+            inp_view_where_clause.replace(';', '\n')
+            inp_view_where_clause = inp_view_where_clause + table_maping_row['Aggregation filter criterion'] + ';'
+
         f.write(inp_view_header)
         f.write("\n")
         f.write(inp_view_select_clause)

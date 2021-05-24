@@ -4,7 +4,7 @@ from read_smx_sheet.Logging_Decorator import Logging_decorator
 
 
 @Logging_decorator
-def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loading_Type, input_view_flag):
+def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loading_Type, input_view_flag,stg_tables):
     file_name = funcs.get_file_name(__file__)
     if input_view_flag == 'TESTING':
         file_name = 'testing_input_views'
@@ -33,9 +33,17 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
         process_names_case_when_clause = '(' + process_names_case_when + ') AS PROCESS_NAME '
 
         main_src = table_maping_row['Main source']
+
         SRCI = cf.SI_VIEW + '.'
         main_src = main_src.replace('#SRCI#', SRCI)
-        main_src_alias = table_maping_row['Main source alias']
+        main_src_alias = table_maping_row['Main source alias'].upper()
+
+        main_src_alias_mt = main_src_alias.replace('_ONLINE', '')
+        modification_type_exists = funcs.table_has_modification_type_column(stg_tables, main_src_alias_mt)
+        if modification_type_exists:
+            modification_type = main_src_alias + '.MODIFICATION_TYPE'
+        else:
+            modification_type = "'U' AS MODIFICATION_TYPE"
 
         if main_src == main_src_alias:
             main_src = cf.SI_VIEW + '.' + main_src
@@ -64,7 +72,7 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
             table_maping_row['Mapping group']) + ' AS VARCHAR(100)) AS  MAP_GROUP ,'
         start_date = '(SELECT Business_Date FROM ' + cf.GCFR_V + '.GCFR_Process_Id' + '\n' + '   WHERE Process_Name = ' + "'" + process_name + "'" + '\n' + ') AS Start_Date,'
         end_date = 'DATE ' + "'9999-12-31'" + ' AS End_Date,'
-        modification_type = main_src_alias + '.MODIFICATION_TYPE'
+
         if process_names_case_when != '':
             inp_view_select_clause = inp_view_select_clause + '\n' + map_grp + '\n' + start_date + '\n' + end_date + '\n' + modification_type + '\n' + ',' + process_names_case_when_clause + '\n'
         else:

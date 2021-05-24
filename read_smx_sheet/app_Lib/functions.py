@@ -381,6 +381,17 @@ def get_model_col(df, table_name):
             return core_tables_row['Column name']
 
 
+def table_has_modification_type_column(stg_tables, table_name):
+    flag = False
+    for stg_table_index, stg_table_row in stg_tables.iterrows():
+        column_table_name = stg_table_row['Table name']
+        if column_table_name.upper() == table_name.upper():
+            Column_name = stg_table_row['Column name'].upper()
+            if Column_name == "MODIFICATION_TYPE":
+                flag = True
+    return flag
+
+
 class WriteFile:
     def __init__(self, file_path, file_name, ext, f_mode="w+", new_line=False):
         self.new_line = new_line

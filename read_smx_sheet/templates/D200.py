@@ -20,10 +20,9 @@ def d200(cf, source_output_path, STG_tables, Loading_Type):
 
         STG_table_columns = funcs.get_stg_table_columns(STG_tables, None, Table_name, False)
         pi_columns = ""
+        MODIFICATION_TYPE_found = funcs.table_has_modification_type_column(STG_tables, Table_name)
         for STG_table_columns_index, STG_table_columns_row in STG_table_columns.iterrows():
             Column_name = STG_table_columns_row['Column name']
-            if Column_name == "MODIFICATION_TYPE":
-                MODIFICATION_TYPE_found = 1
             comma = ',' if STG_table_columns_index > 0 else ' '
             comma_Column_name = comma + Column_name
 

@@ -244,7 +244,7 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(D609.d609)(self.cf, source_output_path, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(D610.d610)(self.cf, source_output_path, core_Table_mapping,STG_tables,source_name))
                                     self.parallel_templates.append(delayed(D615.d615)(self.cf, source_output_path, Core_tables))
-                                    self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, core_Table_mapping, Column_mapping, Core_tables, Loading_Type,'UDI'))
+                                    self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, core_Table_mapping, Column_mapping, Core_tables, Loading_Type,'UDI',STG_tables))
                                     self.parallel_templates.append(delayed(D630.d630)(self.cf, source_output_path, core_Table_mapping))
                                     self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, core_Table_mapping))
 
@@ -282,7 +282,7 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(HIST_TIME_GAP_TEST_SHEET.hist_timegap_check)(self.cf, history_output_path_testing, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(HIST_STRT_NULL_TEST_SHEET.hist_start_null_check)(self.cf, history_output_path_testing, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(RI_TEST_SHEET.ri_check)(self.cf, ri_output_path_testing, core_Table_mapping, RI_relations))
-                                    self.parallel_templates.append(delayed(D620.d620)(self.cf, input_view_output_path_testing, core_Table_mapping, Column_mapping, Core_tables, Loading_Type,'TESTING'))
+                                    self.parallel_templates.append(delayed(D620.d620)(self.cf, input_view_output_path_testing, core_Table_mapping, Column_mapping, Core_tables, Loading_Type,'TESTING',STG_tables))
                                     self.parallel_templates.append(delayed(compare_testing_inputview.compare_views_check)(self.cf, input_view_output_path_testing, core_Table_mapping,'FROM_TESTING_TO_UDI'))
                                     self.parallel_templates.append(delayed(compare_testing_inputview.compare_views_check)(self.cf, input_view_output_path_testing, core_Table_mapping,'FROM_UDI_TO_TESTING'))
                                     self.parallel_templates.append(delayed(stgCounts.stgCounts)(self.cf, compare_stg_counts_output_path_testing, system_row, STG_tables, Loading_Type,'Accepted'))

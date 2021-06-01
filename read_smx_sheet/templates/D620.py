@@ -34,7 +34,7 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
 
         main_src = table_maping_row['Main source']
 
-        SRCI = cf.SI_VIEW + '.'
+        SRCI = cf.SI_DB + '.'
         main_src = main_src.replace('#SRCI#', SRCI)
         main_src_alias = table_maping_row['Main source alias'].upper()
 
@@ -73,10 +73,11 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
         start_date = '(SELECT Business_Date FROM ' + cf.GCFR_V + '.GCFR_Process_Id' + '\n' + '   WHERE Process_Name = ' + "'" + process_name + "'" + '\n' + ') AS Start_Date,'
         end_date = 'DATE ' + "'9999-12-31'" + ' AS End_Date,'
 
+        load_id = main_src_alias + '.LOAD_ID'
         if process_names_case_when != '':
-            inp_view_select_clause = inp_view_select_clause + '\n' + map_grp + '\n' + start_date + '\n' + end_date + '\n' + modification_type + '\n' + ',' + process_names_case_when_clause + '\n'
+            inp_view_select_clause = inp_view_select_clause + '\n' + map_grp + '\n' + start_date + '\n' + end_date + '\n' + modification_type + ',' + '\n'  + load_id + '\n' + ',' + process_names_case_when_clause + '\n'
         else:
-            inp_view_select_clause = inp_view_select_clause + '\n' + map_grp + '\n' + start_date + '\n' + end_date + '\n' + modification_type + '\n'
+            inp_view_select_clause = inp_view_select_clause + '\n' + map_grp + '\n' + start_date + '\n' + end_date + '\n' + modification_type + ',' + '\n' + load_id + '\n'
 
         if table_maping_row['Join'] == "":
             inp_view_from_clause = 'FROM ' + main_src + ' ' + main_src_alias

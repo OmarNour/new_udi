@@ -34,7 +34,7 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
 
         main_src = table_maping_row['Main source']
 
-        SRCI = cf.SI_VIEW + '.'
+        SRCI = cf.SI_DB + '.'
         main_src = main_src.replace('#SRCI#', SRCI)
         main_src_alias = table_maping_row['Main source alias'].upper()
 

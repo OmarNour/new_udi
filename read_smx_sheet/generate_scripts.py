@@ -319,6 +319,7 @@ class GenerateScripts:
                 compute(*self.parallel_create_smx_copy_path)
                 compute(*self.parallel_used_smx_copy)
                 compute(*self.parallel_create_output_source_path)
+                compute(*self.parallel_templates)
             self.error_message = ""
         else:
             self.error_message = "No SMX Files Found!"
@@ -328,7 +329,6 @@ class GenerateScripts:
             smx_file_sources = " sources" if self.count_sources > 1 else " source"
             print("Start generating " + str(len(self.parallel_templates)) + " script for " + str(
                 self.count_sources) + smx_file_sources + " from " + str(self.count_smx) + smx_files)
-            compute(*self.parallel_templates)
             self.log_file.write(str(len(self.parallel_templates)) + " script generated for " + str(
                 self.count_sources) + smx_file_sources + " from " + str(self.count_smx) + smx_files)
             self.elapsed_time = dt.datetime.now() - self.start_time

@@ -4,7 +4,7 @@ from read_smx_sheet.Logging_Decorator import Logging_decorator
 
 
 @Logging_decorator
-def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loading_Type, input_view_flag,stg_tables):
+def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loading_Type, input_view_flag, stg_tables):
     file_name = funcs.get_file_name(__file__)
     if input_view_flag == 'TESTING':
         file_name = 'testing_input_views'
@@ -46,7 +46,7 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
             modification_type = "'U' AS MODIFICATION_TYPE"
 
         if main_src == main_src_alias:
-            main_src = cf.SI_VIEW + '.' + main_src
+            main_src = cf.SI_DB + '.' + main_src
         # core_tables_list= pd.unique(list(Core_tables['Table name']))
         core_tables_list = TransformDDL.get_core_tables_list(Core_tables)
 
@@ -75,7 +75,7 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
 
         load_id = main_src_alias + '.LOAD_ID'
         if process_names_case_when != '':
-            inp_view_select_clause = inp_view_select_clause + '\n' + map_grp + '\n' + start_date + '\n' + end_date + '\n' + modification_type + ',' + '\n'  + load_id + '\n' + ',' + process_names_case_when_clause + '\n'
+            inp_view_select_clause = inp_view_select_clause + '\n' + map_grp + '\n' + start_date + '\n' + end_date + '\n' + modification_type + ',' + '\n' + load_id + '\n' + ',' + process_names_case_when_clause + '\n'
         else:
             inp_view_select_clause = inp_view_select_clause + '\n' + map_grp + '\n' + start_date + '\n' + end_date + '\n' + modification_type + ',' + '\n' + load_id + '\n'
 
@@ -94,20 +94,20 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
                 subquery_clause = TransformDDL.get_sub_query(cf, join_clause, src_layer, main_src)
                 inp_view_from_clause = ' FROM \n' + subquery_clause
 
-        inp_view_where_clause = ';'
+        inp_view_where_clause = ''
         if table_maping_row['Filter criterion'] != "":
-            inp_view_where_clause = 'Where ' + table_maping_row['Filter criterion'] + ';'
+            inp_view_where_clause = '\n' + 'Where ' + table_maping_row['Filter criterion'] + ';'
 
-        if table_maping_row['Aggregation filter criterion'] != "":
-            inp_view_where_clause.replace(';', '\n')
-            inp_view_where_clause = inp_view_where_clause + table_maping_row['Aggregation filter criterion'] + ';'
+        elif table_maping_row['Aggregation filter criterion'] != "":
+            inp_view_where_clause = inp_view_where_clause + '\n' + table_maping_row[
+                'Aggregation filter criterion'] + ';'
+
+        else:
+            inp_view_where_clause = ';'
 
         f.write(inp_view_header)
-        f.write("\n")
         f.write(inp_view_select_clause)
-        f.write("\n")
         f.write(inp_view_from_clause)
-        f.write("\n")
         f.write(inp_view_where_clause)
         f.write("\n")
         f.write("\n")

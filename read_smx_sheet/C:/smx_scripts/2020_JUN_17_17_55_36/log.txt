@@ -1,0 +1,16 @@
+2020-06-17 17:55:40.353854
+Traceback (most recent call last):
+  File "/Users/dinaelhusseiny/PycharmProjects/new_udi/read_smx_sheet/generate_scripts.py", line 126, in generate_scripts
+    smx_files = funcs.get_smx_files(self.cf.smx_path, self.smx_ext, self.SAMA_sheets)
+  File "/Users/dinaelhusseiny/PycharmProjects/new_udi/read_smx_sheet/app_Lib/functions.py", line 274, in get_smx_files
+    all_files = md.get_files_in_dir(smx_path, smx_ext)
+  File "/Users/dinaelhusseiny/PycharmProjects/new_udi/read_smx_sheet/app_Lib/manage_directories.py", line 48, in get_files_in_dir
+    files = [name for name in os.listdir(path) if "."+ext in name
+FileNotFoundError: [Errno 2] No such file or directory: 'C:/smx_sheets'
+
+##############################################################################
+Reading from: 	C:/smx_sheets
+Output folder: 	C:/smx_scripts/2020_JUN_17_17_55_36
+SMX files:
+0 script generated for 0 source from 0 smx file
+Elapsed Time: 0:00:00.001920

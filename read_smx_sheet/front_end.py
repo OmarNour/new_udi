@@ -20,9 +20,9 @@ class FrontEnd:
         self.root = Tk()
         img_icon = PhotoImage(file=os.path.join(md.get_dirs()[0], 'script_icon.png'))
         self.root.tk.call('wm', 'iconphoto', self.root._w, img_icon)
-        self.root.wm_title("SMX Scripts Builder " + pm.ver_no)
+        self.root.wm_title("Need for speed" + pm.ver_no)
         self.root.resizable(width="false", height="false")
-        self.msg_no_config_file = "No Config File Found!"
+        self.msg_no_config_file = "No Destinations File Found!"
         self.color_msg_no_config_file = "red"
         self.msg_ready = "Ready"
         self.color_msg_ready = "green"
@@ -61,8 +61,8 @@ class FrontEnd:
         self.server_info_label = Label(frame_row2_r)
         self.server_info_label.grid(column=1, row=0, sticky=E)
 
-        config_file_label = Label(frame_row0, text="Config File")
-        config_file_label.grid(row=0, column=0, sticky='e')
+        desinations_file_label = Label(frame_row0, text="Destinations file")
+        desinations_file_label.grid(row=0, column=0, sticky='e')
 
         self.config_file_browse_button = Button(frame_row0, text="...", command=self.browsefunc)
         self.config_file_browse_button.grid(row=0, column=3, sticky='w')
@@ -98,57 +98,40 @@ class FrontEnd:
         self.get_config_file_values()
         frame_config_file_values_entry_width = 84
 
-        read_from_smx_label = Label(frame_config_file_values, text="SMXs Folder")
-        read_from_smx_label.grid(row=0, column=0, sticky='e')
+        source_location = Label(frame_config_file_values, text="Source Location")
+        source_location.grid(row=0, column=0, sticky='e')
 
-        self.text_field_read_from_smx = StringVar()
-        self.entry_field_read_from_smx = Entry(frame_config_file_values, textvariable=self.text_field_read_from_smx,
-                                               width=frame_config_file_values_entry_width)
-        self.entry_field_read_from_smx.grid(row=0, column=1, sticky="w")
+        self.source_location_entry = StringVar()
+        self.entry_field_source_location = Entry(frame_config_file_values, textvariable=self.source_location_entry,
+                                                 width=frame_config_file_values_entry_width)
+        self.entry_field_source_location.grid(row=0, column=1, sticky="w")
 
-        output_path_label = Label(frame_config_file_values, text="Output Folder")
-        output_path_label.grid(row=1, column=0, sticky='e')
+        destination_location = Label(frame_config_file_values, text="Destinations File Path")
+        destination_location.grid(row=1, column=0, sticky='e')
 
-        self.text_field_output_path = StringVar()
-        self.entry_field_output_path = Entry(frame_config_file_values, textvariable=self.text_field_output_path,
-                                             width=frame_config_file_values_entry_width)
-        self.entry_field_output_path.grid(row=1, column=1, sticky="w")
+        self.destination_location_entry = StringVar()
+        self.entry_field_destionation_location = Entry(frame_config_file_values,
+                                                       textvariable=self.destination_location_entry,
+                                                       width=frame_config_file_values_entry_width)
+        self.entry_field_destionation_location.grid(row=1, column=1, sticky="w")
 
-        source_names_label = Label(frame_config_file_values, text="Sources")
-        source_names_label.grid(row=2, column=0, sticky='e')
+        output_path_label = Label(frame_config_file_values, text="Output Folder Name")
+        output_path_label.grid(row=2, column=0, sticky='e')
 
-        self.text_field_source_names = StringVar()
-        self.entry_field_source_names = Entry(frame_config_file_values, textvariable=self.text_field_source_names,
-                                              width=frame_config_file_values_entry_width)
-        self.entry_field_source_names.grid(row=2, column=1, sticky="w", columnspan=1)
+        self.output_folder_name_entry = StringVar()
+        self.entry_field_output_folder_name = Entry(frame_config_file_values,
+                                                    textvariable=self.output_folder_name_entry,
+                                                    width=frame_config_file_values_entry_width)
+        self.entry_field_output_folder_name.grid(row=2, column=1, sticky="w")
 
-        db_prefix_label = Label(frame_config_file_values, text="DB Prefix")
-        db_prefix_label.grid(row=3, column=0, sticky='e')
+        source_names_label = Label(frame_config_file_values, text="Output Folder Path")
+        source_names_label.grid(row=3, column=0, sticky='e')
 
-        self.text_db_prefix = StringVar()
-        self.entry_db_prefix = Entry(frame_config_file_values, textvariable=self.text_db_prefix,
-                                     width=frame_config_file_values_entry_width)
-        self.entry_db_prefix.grid(row=3, column=1, sticky="w", columnspan=1)
-
-        self.UDI_scripts_generation_value = IntVar()
-        self.Testing_scripts_generation_value = IntVar()
-
-        scripts_generation_label = Label(frame_config_file_values, text="Generating scripts")
-        scripts_generation_label.grid(row=6, column=0, sticky='e', columnspan=1)
-        self.scripts_flag = "UDI"
-
-        self.UDI_scripts_generation = Checkbutton(frame_checkboxes_values, text="UDI",
-                                                  variable=self.UDI_scripts_generation_value, onvalue=1, offvalue=0,
-                                                  command=self.toggle_scripts_flag)
-        self.UDI_scripts_generation.grid(row=0, column=0, sticky='w', columnspan=1)
-        self.UDI_scripts_generation.grid(row=0, column=0, sticky='w', columnspan=1)
-
-        self.Testing_scripts_generation = Checkbutton(frame_checkboxes_values, text="Testing",
-                                                      variable=self.Testing_scripts_generation_value, onvalue=1,
-                                                      offvalue=0, command=self.toggle_scripts_flag)
-        self.Testing_scripts_generation.grid(row=0, column=1, sticky='w', columnspan=1)
-
-        self.UDI_scripts_generation.select()
+        self.output_folder_path_entry = StringVar()
+        self.entry_field_output_folder_path = Entry(frame_config_file_values,
+                                                    textvariable=self.output_folder_path_entry,
+                                                    width=frame_config_file_values_entry_width)
+        self.entry_field_output_folder_path.grid(row=3, column=1, sticky="w", columnspan=1)
 
         self.populate_config_file_values()
         self.config_file_entry_txt.trace("w", self.refresh_config_file_values)
@@ -157,21 +140,6 @@ class FrontEnd:
         thread0.start()
 
         self.root.mainloop()
-
-    def toggle_scripts_flag(self):
-        testing_scripts_flag = self.Testing_scripts_generation_value.get()
-        UDI_scripts_flag = self.UDI_scripts_generation_value.get()
-        if UDI_scripts_flag == 1 and testing_scripts_flag == 1:
-            self.scripts_flag = "All"
-            self.enable_disable_fields(NORMAL)
-        if UDI_scripts_flag == 1 and testing_scripts_flag == 0:
-            self.scripts_flag = "UDI"
-            self.enable_disable_fields(NORMAL)
-        elif UDI_scripts_flag == 0 and testing_scripts_flag == 1:
-            self.scripts_flag = "Testing"
-            self.enable_disable_fields(NORMAL)
-        elif UDI_scripts_flag == 0 and testing_scripts_flag == 0:
-            self.enable_disable_fields(DISABLED)
 
     def change_status_label(self, msg, color):
         self.status_label_text.set(msg)
@@ -187,55 +155,45 @@ class FrontEnd:
     def get_config_file_values(self):
         try:
             self.config_file_values = funcs.get_config_file_values(self.config_file_entry_txt.get())
-            self.smx_path = self.config_file_values["smx_path"]
-            self.output_path = self.config_file_values["output_path"]
-            source_names = self.config_file_values["source_names"]
-            self.source_names = "All" if source_names is None else source_names
-            self.db_prefix = self.config_file_values["db_prefix"]
+            self.source_location = self.config_file_values["source_location"]
+            self.output_path = self.config_file_values["output_folder_path"]
+            self.output_file = self.config_file_values["output_folder_name"]
+            self.destinations = self.config_file_values["destinations_file_path"]
             self.generate_button.config(state=NORMAL)
             self.change_status_label(self.msg_ready, self.color_msg_ready)
 
         except:
             self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
             self.generate_button.config(state=DISABLED)
-            self.smx_path = ""
+            self.source_location = ""
             self.output_path = ""
-            self.source_names = ""
-            self.db_prefix = ""
-
-    def get_scripts_to_generate_flag(self):
-        self.scripts_flag = "All"
-        testing_scripts_flag = self.Testing_scripts_generation_value.get()
-        UDI_scripts_flag = self.UDI_scripts_generation_value.get()
-        if UDI_scripts_flag == 1 and testing_scripts_flag != 1:
-            self.scripts_flag = "UDI"
-        elif UDI_scripts_flag != 1 and testing_scripts_flag == 1:
-            self.scripts_flag = "Testing"
+            self.output_file = ""
+            self.destinations = ""
 
     def refresh_config_file_values(self, *args):
         self.get_config_file_values()
         self.populate_config_file_values()
 
     def populate_config_file_values(self):
-        self.entry_field_read_from_smx.config(state=NORMAL)
-        self.entry_field_read_from_smx.delete(0, END)
-        self.entry_field_read_from_smx.insert(END, self.smx_path)
-        self.entry_field_read_from_smx.config(state=DISABLED)
+        self.entry_field_source_location.config(state=NORMAL)
+        self.entry_field_source_location.delete(0, END)
+        self.entry_field_source_location.insert(END, self.source_location)
+        self.entry_field_source_location.config(state=DISABLED)
 
-        self.entry_field_output_path.config(state=NORMAL)
-        self.entry_field_output_path.delete(0, END)
-        self.entry_field_output_path.insert(END, self.output_path)
-        self.entry_field_output_path.config(state=DISABLED)
+        self.entry_field_destionation_location.config(state=NORMAL)
+        self.entry_field_destionation_location.delete(0, END)
+        self.entry_field_destionation_location.insert(END, self.destinations)
+        self.entry_field_destionation_location.config(state=DISABLED)
 
-        self.entry_field_source_names.config(state=NORMAL)
-        self.entry_field_source_names.delete(0, END)
-        self.entry_field_source_names.insert(END, self.source_names)
-        self.entry_field_source_names.config(state=DISABLED)
+        self.entry_field_output_folder_name.config(state=NORMAL)
+        self.entry_field_output_folder_name.delete(0, END)
+        self.entry_field_output_folder_name.insert(END, self.output_file)
+        self.entry_field_output_folder_name.config(state=DISABLED)
 
-        self.entry_db_prefix.config(state=NORMAL)
-        self.entry_db_prefix.delete(0, END)
-        self.entry_db_prefix.insert(END, self.db_prefix)
-        self.entry_db_prefix.config(state=DISABLED)
+        self.entry_field_output_folder_path.config(state=NORMAL)
+        self.entry_field_output_folder_path.delete(0, END)
+        self.entry_field_output_folder_path.insert(END, self.output_path)
+        self.entry_field_output_folder_path.config(state=DISABLED)
 
     def browsefunc(self):
         current_file = self.config_file_entry_txt.get()
@@ -265,10 +223,6 @@ class FrontEnd:
         self.config_file_entry.config(state=f_state)
         self.config_file_browse_button.config(state=f_state)
 
-    def enable_disable_scripts_generation_fields(self, f_state):
-        self.Testing_scripts_generation.config(state=f_state)
-        self.UDI_scripts_generation.config(state=f_state)
-
     def generate_scripts_thread(self):
         try:
             config_file_path = self.config_file_entry_txt.get()
@@ -277,8 +231,6 @@ class FrontEnd:
                 self.enable_disable_fields(DISABLED)
                 self.g.generate_scripts()
                 self.enable_disable_fields(NORMAL)
-                self.UDI_scripts_generation.config(state=NORMAL)
-                self.Testing_scripts_generation.config(state=NORMAL)
 
                 print("Total Elapsed time: ", self.g.elapsed_time, "\n")
             except Exception as error:
@@ -289,8 +241,6 @@ class FrontEnd:
                 self.change_status_label(error_messager, self.color_error_messager)
                 self.generate_button.config(state=NORMAL)
                 self.config_file_entry.config(state=NORMAL)
-                self.UDI_scripts_generation.config(state=NORMAL)
-                self.Testing_scripts_generation.config(state=NORMAL)
                 traceback.print_exc()
         except:
             self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
@@ -310,10 +260,6 @@ class FrontEnd:
     def start(self):
         self.refresh_config_file_values()
         self.g = gs.GenerateScripts(None, self.config_file_values)
-        self.g.scripts_flag = self.scripts_flag
-
-        self.UDI_scripts_generation.config(state=DISABLED)
-        self.Testing_scripts_generation.config(state=DISABLED)
 
         thread1 = GenerateScriptsThread(1, "Thread-1", self)
         thread1.start()

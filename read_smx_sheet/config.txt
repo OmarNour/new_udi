@@ -1,36 +1,4 @@
-smx_path="/Users/dinaelhusseiny/Desktop/UDI"
-home_output_folder="/Users/dinaelhusseiny/Desktop/UDI"
-templates_folder_path="/Users/dinaelhusseiny/Desktop/UDI/Templates"
-
-
-
-# Source Filter:
-## for all sources: source_names=""
-## for for certain sources: sources: source_names="TAMWEEN,TAX,EDU,CUSTOMS"
-source_names="EDU"
-
-online_source_t="stg_online"
-offline_source_t="stg_layer"
-staging_view_db="DEV_STG_ONLINE"
-
-etl_process_table="ETL_PROCESS"
-SOURCE_TABLES_LKP_table="SOURCE_TABLES_LKP"
-SOURCE_NAME_LKP_table="SOURCE_NAME_LKP"
-history_tbl="HISTORY"
-
-db_prefix="GPROD1"
-scripts_flag = "All"
-gcfr_ctl_Id=1
-gcfr_stream_key=1
-gcfr_system_name="Economic"
-gcfr_stream_name="Economic stream"
-
-gcfr_bkey_process_type=21
-gcfr_snapshot_txf_process_type=24
-gcfr_insert_txf_process_type=25
-gcfr_others_txf_process_type=29
-
-# values: 1 or 0
-read_sheets_parallel=1
-
-Data_mover_flag=1
+source_location = "Pizza king omrania"
+destinations_file_path = "/Users/dinaelhusseiny/Desktop/WebScraping/Amazon/Target_Locations.csv"
+output_folder_name = "output_file"
+output_folder_path = "/Users/dinaelhusseiny/Desktop/WebScraping/Amazon/output"

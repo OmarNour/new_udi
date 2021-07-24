@@ -1,5 +1,0 @@
-#The hashed annotations in the smx and their replacements from the UDI:
-
-"#SRCI#" with (db_prefix + '_SRCI')
-"#SRC#"  with online(db_prefix + 'stg_online') and offline(db_prefix + 'stg_layer')
-"#CORE#" with (cf.core_view)

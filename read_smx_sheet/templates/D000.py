@@ -1,111 +1,69 @@
-from read_smx_sheet.app_Lib import functions as funcs
-from read_smx_sheet.Logging_Decorator import Logging_decorator
+from selenium import webdriver
+from time import sleep
+import pandas as pd
+
+# Inputs
+sourceLocation = []
+targetLocation = []
+shortestRouteTitle = []
+shortestRouteDistance = []
+parallel_templates = []
 
 
-@Logging_decorator
-def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
-    file_name = funcs.get_file_name(__file__)
-    f = funcs.WriteFile(source_output_path, file_name, "sql")
-    f.write("delete from " + cf.GCFR_t + "." + cf.etl_process_table + " where SOURCE_NAME = '" + source_name + "';\n\n")
-    for table_maping_index, table_maping_row in Table_mapping.iterrows():
-        prcess_type = "TXF"
-        layer = str(table_maping_row['Layer'])
-        matching_flag = funcs.xstr(table_maping_row['Matching Included'])
-        process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name'])
-        target_table = str(table_maping_row['Target table name'])
-        scheduled_after_cso_loading = str(table_maping_row['Scheduled After CSO Loading'])
-        process_active_flag = str(table_maping_row['Process Activation Flag'])
-        process_names_condition = str(table_maping_row['SubProcess Condition'])
-        if process_active_flag == "0":
-            active_flag = "0"
-        else:
-            active_flag = "1"
+def find(driver,destination, cf):
+    print(destination)
+    print(cf.output_folder_name)
+    print(cf.output_folder_path)
+    sleep(2)
+    source_location = cf.source_location
+    print(source_location)
+    driver.get("https://www.google.com/maps/dir/" + source_location)
+    minDistance = 10000
+    minIndex = 0
+    routeTitleCol = []
+    sleep(10)
+    targetLocationInput = driver.find_element_by_xpath(
+        '/html/body/jsl/div[3]/div[9]/div[3]/div[1]/div[2]/div/div[3]/div[1]/div[2]/div[2]/div/div/input')
+    targetLocationInput.send_keys(destination)
+    sleep(10)
+    searchButton = driver.find_element_by_xpath(
+        '/html/body/jsl/div[3]/div[9]/div[3]/div[1]/div[2]/div/div[3]/div[1]/div[2]/div[2]/button[1]')
+    searchButton.click()
+    sleep(10)
+    routes = driver.find_elements_by_class_name('section-directions-trip-title')
+    routes_distances = driver.find_elements_by_class_name('section-directions-trip-distance')
+    for routeTitle in routes:
+        routeTitleText = routeTitle.text
+        if routeTitleText != '':
+            routeTitleCol.append(routeTitleText)
+    count = 0
+    for routeDistance in routes_distances:
+        routeDistanceText = routeDistance.text.replace('km', '')
+        routeDistanceInKM = routeDistanceText.replace('كم', '')
+        minRouteDistance = float(routeDistanceInKM.strip())
+        if minRouteDistance < minDistance:
+            minDistance = minRouteDistance
+            minIndex = count
+        count = count + 1
+    sourceLocation.append(source_location)
+    targetLocation.append(destination)
+    shortestRouteDistance.append(minDistance)
+    shortestRouteTitle.append(routeTitleCol[minIndex])
 
-        if scheduled_after_cso_loading == "1":
-            refresh_cso_flag = "1"
-        else:
-            refresh_cso_flag = "0"
 
-        Historization_algorithm = str(table_maping_row['Historization algorithm'])
-        f.write(
-            "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
-        f.write(
-            "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
-        f.write("\n")
+def parse_file(cf):
+    target_locations = pd.read_csv(cf.destination_location)
+    for target_location in target_locations['Target Locations']:
+        driver = webdriver.Chrome("/Users/dinaelhusseiny/Downloads/chromedriver")
+        find(driver,target_location, cf)
+        driver.close()
+    df = pd.DataFrame(
+    {'Source Location': sourceLocation,
+         'Target Location': targetLocation,
+         'Route Name': shortestRouteTitle,
+         'Route Distance': shortestRouteDistance})
 
-        if process_names_condition != '':
-            process_names_condition = process_names_condition.split()
-            size = len(process_names_condition)
-            print(process_names_condition)
-            print('size='+str(size))
-            count = 0
-            while size > 1:
-                if process_names_condition[count] == 'then':
-                    active_flag = "0"
-                    process_name_condition = str(process_names_condition[count+1]).replace('#process_name#', process_name)
-                    f.write(
-                        "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
-                    f.write(
-                        "VALUES ('" + source_name + "', '" + prcess_type + "', " + process_name_condition + ", '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
-                    f.write("\n")
-                size = size-1
-                count = count+1
-
-        if str(matching_flag) == "1":
-            process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name']) + "_Matching"
-            active_flag = "0"
-            f.write(
-                "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
-            f.write(
-                "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
-            f.write("\n")
-
-        if str(matching_flag) == "2":
-            process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name']) + "_TDMatching"
-            active_flag = "0"
-            f.write(
-                    "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
-            f.write(
-                    "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
-            f.write("\n")
-
-        if str(matching_flag) == "3":
-            process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name']) + "_Matching"
-            active_flag = "0"
-            f.write(
-                        "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
-            f.write(
-                        "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
-            f.write("\n")
-
-            process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name']) + "_TDMatching"
-            active_flag = "0"
-            f.write(
-                        "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
-            f.write(
-                        "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
-            f.write("\n")
-
-    for STG_tables_index, STG_tables_row in STG_tables.loc[STG_tables['Key set name'] != ""].iterrows():
-        generation_flag = STG_tables_row['Bkey generation flag']
-        Key_set_name = STG_tables_row['Key set name']
-        Key_domain_name = STG_tables_row['Key domain name']
-        Table_name = STG_tables_row['Table name']
-        Column_name = STG_tables_row['Column name']
-        prcess_type = "BKEY"
-        target_table = ""
-        Historization_algorithm = "INSERT"
-
-        for BKEY_index, BKEY_row in BKEY.loc[
-            (BKEY['Key set name'] == Key_set_name) & (BKEY['Key domain name'] == Key_domain_name) & (
-                    generation_flag != 0)].iterrows():
-            Key_set_id = int(BKEY_row['Key set ID'])
-            Key_domain_ID = int(BKEY_row['Key domain ID'])
-
-            process_name = "BK_" + str(Key_set_id) + "_" + Table_name + "_" + Column_name + "_" + str(Key_domain_ID)
-            f.write(
-                "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID)\n")
-            f.write(
-                "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL)" + ";\n")
-            f.write("\n")
-    f.close()
+    # Extract the path from the browsed file and concatenate the outputFileName
+    export_file_path = cf.output_folder_path + '/' + cf.output_folder_name + '.csv'
+    print(export_file_path)
+    df.to_csv(export_file_path, index=False, header=True, encoding='utf-8-sig')

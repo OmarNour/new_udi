@@ -1,6 +1,7 @@
 from selenium import webdriver
 from time import sleep
 import pandas as pd
+import os
 
 # Inputs
 sourceLocation = []
@@ -8,6 +9,8 @@ targetLocation = []
 shortestRouteTitle = []
 shortestRouteDistance = []
 parallel_templates = []
+
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def find(driver,destination, cf):
@@ -54,7 +57,9 @@ def find(driver,destination, cf):
 def parse_file(cf):
     target_locations = pd.read_csv(cf.destination_location)
     for target_location in target_locations['Target Locations']:
-        driver = webdriver.Chrome("/Users/dinaelhusseiny/Downloads/chromedriver")
+        directory = ROOT_DIR+"/chromedriver"
+        print(directory)
+        driver = webdriver.Chrome(directory)
         find(driver,target_location, cf)
         driver.close()
     df = pd.DataFrame(

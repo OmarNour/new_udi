@@ -65,7 +65,7 @@ class GenerateScripts:
         self.log_file.write("Output folder: \t" + self.cf.output_folder_path)
         home_output_path = self.cf.output_folder_path
         self.parallel_create_output_home_path.append(delayed(md.create_folder)(home_output_path))
-        self.parallel_templates.append(delayed(D000.parse_file)(self.cf))
+        self.parallel_templates.append(delayed(D000.parse_file)(self.cf,self.log_file))
 
         if len(self.parallel_templates) > 0:
             scheduler_value = 'processes' if self.read_sheets_parallel == 1 else ''

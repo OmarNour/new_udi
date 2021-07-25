@@ -13,18 +13,14 @@ parallel_templates = []
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-def find(driver,destination, cf):
-    print(destination)
-    print(cf.output_folder_name)
-    print(cf.output_folder_path)
+def find(driver, destination, cf,log_file):
     sleep(2)
     source_location = cf.source_location
-    print(source_location)
     driver.get("https://www.google.com/maps/dir/" + source_location)
     minDistance = 10000
     minIndex = 0
     routeTitleCol = []
-    sleep(10)
+    sleep(5)
     targetLocationInput = driver.find_element_by_xpath(
         '/html/body/jsl/div[3]/div[9]/div[3]/div[1]/div[2]/div/div[3]/div[1]/div[2]/div[2]/div/div/input')
     targetLocationInput.send_keys(destination)
@@ -48,22 +44,25 @@ def find(driver,destination, cf):
             minDistance = minRouteDistance
             minIndex = count
         count = count + 1
+    log_file.write("Source location: \t" + source_location)
+    log_file.write("Target location: \t" + destination)
+    log_file.write("Min distance: \t" + str(minDistance))
+    log_file.write("Route title: \t" + routeTitleCol[minIndex])
+    log_file.write("######################################")
     sourceLocation.append(source_location)
     targetLocation.append(destination)
     shortestRouteDistance.append(minDistance)
     shortestRouteTitle.append(routeTitleCol[minIndex])
 
 
-def parse_file(cf):
+def parse_file(cf, log_file):
     target_locations = pd.read_csv(cf.destination_location)
     for target_location in target_locations['Target Locations']:
-        directory = ROOT_DIR+"/chromedriver"
-        print(directory)
-        driver = webdriver.Chrome(directory)
-        find(driver,target_location, cf)
+        driver = webdriver.Chrome()
+        find(driver, target_location, cf,log_file)
         driver.close()
     df = pd.DataFrame(
-    {'Source Location': sourceLocation,
+        {'Source Location': sourceLocation,
          'Target Location': targetLocation,
          'Route Name': shortestRouteTitle,
          'Route Distance': shortestRouteDistance})

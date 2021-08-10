@@ -85,7 +85,10 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
             if table_maping_row['Join'].find("FROM".strip()) == -1:  # no subquery in join clause
                 inp_view_from_clause = 'FROM ' + main_src + ' ' + main_src_alias
                 inp_view_from_clause = inp_view_from_clause + '\n' + table_maping_row['Join']
-                join = 'JOIN ' + cf.SI_VIEW + '.'
+                if '#CORE#' not in inp_view_from_clause:
+                    join = 'JOIN ' + cf.SI_VIEW + '.'
+                else:
+                    join = ' '
                 inp_view_from_clause = inp_view_from_clause.replace('JOIN ', join)
                 inp_view_from_clause = inp_view_from_clause.replace('#CORE#', cf.core_view + '.')
             else:

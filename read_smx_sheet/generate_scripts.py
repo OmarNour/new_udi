@@ -11,6 +11,7 @@ from read_smx_sheet.templates import DATA_SRC_TEST_SHEET, BMAP_CHECK_TEST_SHEET 
 from read_smx_sheet.templates import HIST_STRT_END_NULL_TEST_SHEET, HIST_DUP_TEST_SHEET ,HIST_STRT_GRT_END_TEST_SHEET,HIST_TIME_GAP_TEST_SHEET
 from read_smx_sheet.templates import HIST_STRT_NULL_TEST_SHEET, RI_TEST_SHEET, compare_testing_inputview
 from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340,D215
+from read_smx_sheet.templates import generate_source_smx
 from read_smx_sheet.templates import dataValidation,stgCounts
 from read_smx_sheet.parameters import parameters as pm
 import traceback
@@ -164,6 +165,7 @@ class GenerateScripts:
                     self.count_sources = self.count_sources + len(teradata_sources.index)
 
                     Supplements = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.Supplements_sht)
+                    Data_types = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.Data_types_sht)
                     Column_mapping = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.Column_mapping_sht)
                     BMAP_values = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.BMAP_values_sht)
                     BMAP = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.BMAP_sht)
@@ -193,11 +195,14 @@ class GenerateScripts:
 
 
                                 STG_tables = delayed(funcs.read_excel)(smx_file_path, self.STG_tables_sht, stg_source_name_filter)
+                                STG_tables_export = delayed(funcs.read_excel)(smx_file_path, self.STG_tables_sht, stg_source_name_filter)
+
                                 STG_tables = delayed(funcs.rename_sheet_reserved_word)(STG_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
 
 
                                 main_output_path = home_output_path + "/" + Loading_Type + "/" + source_name
                                 source_output_path = os.path.join(main_output_path, "UDI")
+                                source_smx_output_path = os.path.join(source_output_path, "Source smx")
 
                                 output_path_testing = os.path.join(main_output_path, "TestCases_scripts")
                                 process_check_output_path_testing = os.path.join(output_path_testing, "PROCESS_CHECK_Cases_scripts")
@@ -214,7 +219,7 @@ class GenerateScripts:
                                 self.parallel_create_output_source_path.append(delayed(md.create_folder)(main_output_path))
 
                                 #UDI SCRIPTS
-                                if self.scripts_flag == 'All' or self.scripts_flag == 'UDI':
+                                if 'UDI' in self.scripts_flag :
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(source_output_path))
                                     self.parallel_templates.append(delayed(D000.d000)(self.cf, source_output_path, source_name, core_Table_mapping, STG_tables, BKEY))
                                     self.parallel_templates.append(delayed(D001.d001)(self.cf, source_output_path, source_name, STG_tables))
@@ -249,7 +254,7 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, core_Table_mapping))
 
                                 #TESTING SCRIPTS
-                                if self.scripts_flag == 'All' or self.scripts_flag == 'Testing':
+                                if 'Testing' in self.scripts_flag :
                                     #CREATING  PATHS FOR THE OUTPUT SCRIPTS
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(output_path_testing))
                                     self.parallel_create_output_source_path.append(delayed(md.create_folder)(process_check_output_path_testing))
@@ -289,6 +294,11 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(stgCounts.stgCounts)(self.cf, compare_stg_counts_output_path_testing, system_row, STG_tables, Loading_Type,'All'))
                                     self.parallel_templates.append(delayed(dataValidation.dataValidation)(self.cf, compare_stg_counts_output_path_testing, source_name, system_row, STG_tables, Loading_Type,'Accepted'))
                                     self.parallel_templates.append(delayed(dataValidation.dataValidation)(self.cf, compare_stg_counts_output_path_testing, source_name, system_row, STG_tables, Loading_Type,'All'))
+
+                                # TESTING SCRIPTS
+                                if 'Source smx' in self.scripts_flag:
+                                    self.parallel_create_output_source_path.append(delayed(md.create_folder)(source_smx_output_path))
+                                    self.parallel_templates.append(delayed(generate_source_smx.source_smx)(STG_tables_export,Table_mapping,Column_mapping,System,BKEY,BMAP,BMAP_values,Supplements,Core_tables,Data_types,source_smx_output_path))
 
                         except Exception as e_source:
                             # print(error)

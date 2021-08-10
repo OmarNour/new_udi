@@ -132,6 +132,7 @@ class FrontEnd:
 
         self.UDI_scripts_generation_value = IntVar()
         self.Testing_scripts_generation_value = IntVar()
+        self.Source_smx_generation_value = IntVar()
 
         scripts_generation_label = Label(frame_config_file_values, text="Generating scripts")
         scripts_generation_label.grid(row=6, column=0, sticky='e', columnspan=1)
@@ -148,6 +149,12 @@ class FrontEnd:
                                                       offvalue=0, command=self.toggle_scripts_flag)
         self.Testing_scripts_generation.grid(row=0, column=1, sticky='w', columnspan=1)
 
+        self.source_smx_generation = Checkbutton(frame_checkboxes_values, text="Source smx",
+                                                 variable=self.Source_smx_generation_value, onvalue=1, offvalue=0,
+                                                 command=self.toggle_scripts_flag)
+        self.source_smx_generation.grid(row=0, column=0, sticky='w', columnspan=1)
+        self.source_smx_generation.grid(row=0, column=2, sticky='w', columnspan=1)
+
         self.UDI_scripts_generation.select()
 
         self.populate_config_file_values()
@@ -161,17 +168,32 @@ class FrontEnd:
     def toggle_scripts_flag(self):
         testing_scripts_flag = self.Testing_scripts_generation_value.get()
         UDI_scripts_flag = self.UDI_scripts_generation_value.get()
-        if UDI_scripts_flag == 1 and testing_scripts_flag == 1:
-            self.scripts_flag = "All"
+        Source_smx_flag = self.Source_smx_generation_value.get()
+        if UDI_scripts_flag == 0 and testing_scripts_flag == 0 and Source_smx_flag == 0:
+            self.scripts_flag = 'Invalid'
+            self.enable_disable_fields(DISABLED)
+        elif UDI_scripts_flag == 0 and testing_scripts_flag == 0 and Source_smx_flag == 1:
+            self.scripts_flag = "Source smx"
             self.enable_disable_fields(NORMAL)
-        if UDI_scripts_flag == 1 and testing_scripts_flag == 0:
-            self.scripts_flag = "UDI"
-            self.enable_disable_fields(NORMAL)
-        elif UDI_scripts_flag == 0 and testing_scripts_flag == 1:
+        elif UDI_scripts_flag == 0 and testing_scripts_flag == 1 and Source_smx_flag == 0:
             self.scripts_flag = "Testing"
             self.enable_disable_fields(NORMAL)
-        elif UDI_scripts_flag == 0 and testing_scripts_flag == 0:
-            self.enable_disable_fields(DISABLED)
+        elif UDI_scripts_flag == 0 and testing_scripts_flag == 1 and Source_smx_flag == 1:
+            self.scripts_flag = "Source smx and Testing"
+            self.enable_disable_fields(NORMAL)
+        elif UDI_scripts_flag == 1 and testing_scripts_flag == 0 and Source_smx_flag == 0:
+            self.scripts_flag = "UDI"
+            self.enable_disable_fields(NORMAL)
+        elif UDI_scripts_flag == 1 and testing_scripts_flag == 0 and Source_smx_flag == 1:
+            self.scripts_flag = "UDI and Source smx"
+            self.enable_disable_fields(NORMAL)
+        elif UDI_scripts_flag == 1 and testing_scripts_flag == 1 and Source_smx_flag == 0:
+            self.scripts_flag = "UDI and Testing"
+            self.enable_disable_fields(NORMAL)
+        elif UDI_scripts_flag == 1 and testing_scripts_flag == 1 and Source_smx_flag == 1:
+            self.scripts_flag = "UDI and Testing and Source smx"
+            self.enable_disable_fields(NORMAL)
+        print(self.scripts_flag)
 
     def change_status_label(self, msg, color):
         self.status_label_text.set(msg)
@@ -207,10 +229,31 @@ class FrontEnd:
         self.scripts_flag = "All"
         testing_scripts_flag = self.Testing_scripts_generation_value.get()
         UDI_scripts_flag = self.UDI_scripts_generation_value.get()
-        if UDI_scripts_flag == 1 and testing_scripts_flag != 1:
-            self.scripts_flag = "UDI"
-        elif UDI_scripts_flag != 1 and testing_scripts_flag == 1:
+        Source_smx_flag = self.Source_smx_generation_value.get()
+        if UDI_scripts_flag == 0 and testing_scripts_flag == 0 and Source_smx_flag == 0:
+            self.scripts_flag = 'Invalid'
+            self.enable_disable_fields(DISABLED)
+        elif UDI_scripts_flag == 0 and testing_scripts_flag == 0 and Source_smx_flag == 1:
+            self.scripts_flag = "Source smx"
+            self.enable_disable_fields(NORMAL)
+        elif UDI_scripts_flag == 0 and testing_scripts_flag == 1 and Source_smx_flag == 0:
             self.scripts_flag = "Testing"
+            self.enable_disable_fields(NORMAL)
+        elif UDI_scripts_flag == 0 and testing_scripts_flag == 1 and Source_smx_flag == 1:
+            self.scripts_flag = "Source smx and Testing"
+            self.enable_disable_fields(NORMAL)
+        elif UDI_scripts_flag == 1 and testing_scripts_flag == 0 and Source_smx_flag == 0:
+            self.scripts_flag = "UDI"
+            self.enable_disable_fields(NORMAL)
+        elif UDI_scripts_flag == 1 and testing_scripts_flag == 0 and Source_smx_flag == 1:
+            self.scripts_flag = "UDI and Source smx"
+            self.enable_disable_fields(NORMAL)
+        elif UDI_scripts_flag == 1 and testing_scripts_flag == 1 and Source_smx_flag == 0:
+            self.scripts_flag = "UDI and Testing"
+            self.enable_disable_fields(NORMAL)
+        elif UDI_scripts_flag == 1 and testing_scripts_flag == 1 and Source_smx_flag == 1:
+            self.scripts_flag = "UDI and Testing and Source smx"
+            self.enable_disable_fields(NORMAL)
 
     def refresh_config_file_values(self, *args):
         self.get_config_file_values()
@@ -268,6 +311,7 @@ class FrontEnd:
     def enable_disable_scripts_generation_fields(self, f_state):
         self.Testing_scripts_generation.config(state=f_state)
         self.UDI_scripts_generation.config(state=f_state)
+        self.source_smx_generation.config(state=f_state)
 
     def generate_scripts_thread(self):
         try:
@@ -279,6 +323,7 @@ class FrontEnd:
                 self.enable_disable_fields(NORMAL)
                 self.UDI_scripts_generation.config(state=NORMAL)
                 self.Testing_scripts_generation.config(state=NORMAL)
+                self.source_smx_generation.config(state=NORMAL)
 
                 print("Total Elapsed time: ", self.g.elapsed_time, "\n")
             except Exception as error:
@@ -291,6 +336,7 @@ class FrontEnd:
                 self.config_file_entry.config(state=NORMAL)
                 self.UDI_scripts_generation.config(state=NORMAL)
                 self.Testing_scripts_generation.config(state=NORMAL)
+                self.source_smx_generation.config(state=NORMAL)
                 traceback.print_exc()
         except:
             self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
@@ -314,6 +360,7 @@ class FrontEnd:
 
         self.UDI_scripts_generation.config(state=DISABLED)
         self.Testing_scripts_generation.config(state=DISABLED)
+        self.source_smx_generation.config(state=DISABLED)
 
         thread1 = GenerateScriptsThread(1, "Thread-1", self)
         thread1.start()

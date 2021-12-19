@@ -92,8 +92,9 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
         Key_domain_name = STG_tables_row['Key domain name']
         Table_name = STG_tables_row['Table name']
         Column_name = STG_tables_row['Column name']
+        bkey_df = BKEY.loc[(BKEY['Key domain name'] == Key_domain_name)]
+        target_table = bkey_df['Physical table'].values[0]
         prcess_type = "BKEY"
-        target_table = ""
         Historization_algorithm = "INSERT"
 
         for BKEY_index, BKEY_row in BKEY.loc[

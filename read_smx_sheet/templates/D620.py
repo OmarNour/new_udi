@@ -25,7 +25,7 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
             view_name_suffix = ' '
         elif input_view_flag == 'TESTING':
             view_name_suffix = '_TESTING '
-        inp_view_header = 'REPLACE VIEW ' + cf.INPUT_VIEW_DB + '.' + process_name + '_IN' + view_name_suffix + 'AS LOCK ROW FOR ACCESS'
+        inp_view_header = 'REPLACE VIEW ' + cf.INPUT_VIEW_DB + '.' + process_name + '_IN' + view_name_suffix + 'AS LOCK ROW FOR ACCESS' + '\n'
         target_table = str(table_maping_row['Target table name'])
         apply_type = table_maping_row['Historization algorithm']
         process_names_condition = str(table_maping_row['SubProcess Condition'])
@@ -74,10 +74,12 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
         end_date = 'DATE ' + "'9999-12-31'" + ' AS End_Date,'
 
         load_id = main_src_alias + '.LOAD_ID'
+        batch_id = main_src_alias + '.BATCH_ID'
+        ref_key = main_src_alias + '.REF_KEY'
         if process_names_case_when != '':
-            inp_view_select_clause = inp_view_select_clause + '\n' + map_grp + '\n' + start_date + '\n' + end_date + '\n' + modification_type + ',' + '\n' + load_id + '\n' + ',' + process_names_case_when_clause + '\n'
+            inp_view_select_clause = inp_view_select_clause + '\n' + map_grp + '\n' + start_date + '\n' + end_date + '\n' + modification_type + ',' + '\n' + batch_id + ',' + '\n' + ref_key + ',' + process_names_case_when_clause + '\n'
         else:
-            inp_view_select_clause = inp_view_select_clause + '\n' + map_grp + '\n' + start_date + '\n' + end_date + '\n' + modification_type + ',' + '\n' + load_id + '\n'
+            inp_view_select_clause = inp_view_select_clause + '\n' + map_grp + '\n' + start_date + '\n' + end_date + '\n' + modification_type + ',' + '\n' + batch_id + ',' + '\n' + ref_key + '\n'
 
         if table_maping_row['Join'] == "":
             inp_view_from_clause = 'FROM ' + main_src + ' ' + main_src_alias

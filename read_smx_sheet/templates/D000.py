@@ -95,6 +95,11 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
         prcess_type = "BKEY"
         target_table = ""
         Historization_algorithm = "INSERT"
+        Input_View_DB = cf.db_prefix + 'V_INP'
+        Target_Table_DB =  cf.db_prefix + 'T_UTLFW'
+        Target_View_DB = cf.db_prefix + 'V_UTLFW'
+        Srci_Table_DB = cf.db_prefix + 'T_SRCI'
+
 
         for BKEY_index, BKEY_row in BKEY.loc[
             (BKEY['Key set name'] == Key_set_name) & (BKEY['Key domain name'] == Key_domain_name) & (
@@ -104,8 +109,8 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
 
             process_name = "BK_" + str(Key_set_id) + "_" + Table_name + "_" + Column_name + "_" + str(Key_domain_ID)
             f.write(
-                "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID)\n")
+                "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID,Input_View_DB,Target_Table_DB,Target_View_DB,Srci_Table_DB)\n")
             f.write(
-                "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL)" + ";\n")
+                "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL,'"+Input_View_DB+"','"+Target_Table_DB+"','"+Target_View_DB+"','"+Srci_Table_DB+"')" + ";\n")
             f.write("\n")
     f.close()

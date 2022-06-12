@@ -1,6 +1,6 @@
-smx_path="C:/NEW_UDI/smx_sheet"
-home_output_folder="C:/NEW_UDI/smx_scripts"
-templates_folder_path="C:/Users/ts250088/PycharmProjects/new_udi/Templates_format"
+smx_path="/Users/markessam/Documents/new_udi/new_udi"
+home_output_folder="/Users/markessam/Documents/new_udi/new_udi"
+templates_folder_path="/Users/markessam/Documents/new_udi/new_udi/Templates_format"
 
 
 

@@ -391,6 +391,10 @@ def table_has_modification_type_column(stg_tables, table_name):
                 flag = True
     return flag
 
+def get_bkey_physical_table(key_set_name,BKEY):
+    physical_table = BKEY[BKEY['Key set name'] == key_set_name]['Physical table'].unique()
+    return physical_table[0]
+
 
 class WriteFile:
     def __init__(self, file_path, file_name, ext, f_mode="w+", new_line=False):

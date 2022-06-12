@@ -93,7 +93,7 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
         Table_name = STG_tables_row['Table name']
         Column_name = STG_tables_row['Column name']
         prcess_type = "BKEY"
-        target_table = ""
+        target_table = funcs.get_bkey_physical_table(Key_set_name,BKEY)
         Historization_algorithm = "INSERT"
         Input_View_DB = cf.db_prefix + 'V_INP'
         Target_Table_DB =  cf.db_prefix + 'T_UTLFW'

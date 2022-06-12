@@ -4,11 +4,12 @@ from read_smx_sheet.Logging_Decorator import Logging_decorator
 
 
 @Logging_decorator
-def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
+def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type, source_name):
     file_name = funcs.get_file_name(__file__)
     f = funcs.WriteFile(source_output_path, file_name, "sql")
 
     MODIFICATION_TYPE_found = 0
+    Call_srci = ''
     separator = pm.stg_cols_separator
     stg_tables_df = funcs.get_stg_tables(STG_tables)
 
@@ -133,4 +134,6 @@ def d420(cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type):
             from_clause = from_clause + '/n' + bkey_join_statement
         create_view_script = create_view + normal_columns + bkey_columns + bmap_columns + from_clause + ";\n"
         f.write(create_view_script+"\n")
+    Call_srci = 'CALL ' + cf.db_prefix + "P_PP.SRCI_LOADING('" + source_name + "',NULL,NULL,NULL,1,X,Y,Z);"
+    f.write(Call_srci+"\n")
     f.close()

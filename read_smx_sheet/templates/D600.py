@@ -34,7 +34,7 @@ def d600(cf, source_output_path, Table_mapping, Core_tables):
         core_tech_cols += ',Record_Deleted_Flag	BYTEINT \n' + ',Ctl_Id	SMALLINT COMPRESS(997) \n'
         core_tech_cols += ',Process_Name	VARCHAR(128)\n' + ',Process_Id	INTEGER \n'
         core_tech_cols += ',Update_Process_Name	VARCHAR(128)\n' + ',Update_Process_Id	INTEGER \n' + Run_date_column
-        core_tbl_pk = ') PRIMARY INDEX (' + TransformDDL.get_trgt_pk(Core_tables, tbl_name) + ')\n'+partition_statement+'; \n  \n'
+        core_tbl_pk = ') UNIQUE PRIMARY INDEX (' + TransformDDL.get_trgt_pk(Core_tables, tbl_name) + ')\n'+partition_statement+'; \n  \n'
         core_tbl_ddl = core_tbl_header + col_ddl + core_tech_cols + core_tbl_pk
         f.write(core_tbl_ddl)
     f.close()

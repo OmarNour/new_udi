@@ -44,7 +44,7 @@ def d200(cf, source_output_path, STG_tables, Loading_Type):
         else:
             seq_column = ""
 
-        Primary_Index = ")Primary Index (" + pi_columns + ")\n"
+        Primary_Index = ") UNIQUE PRIMARY INDEX (" + pi_columns + ")\n"
 
         if MODIFICATION_TYPE_found == 0:
             MODIFICATION_TYPE = ",MODIFICATION_TYPE char(1) CHARACTER SET UNICODE NOT CASESPECIFIC  not null\n"

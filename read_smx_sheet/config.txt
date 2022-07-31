@@ -7,7 +7,7 @@ templates_folder_path="/Users/markessam/Documents/new_udi/new_udi/Templates_form
 # Source Filter:
 ## for all sources: source_names=""
 ## for for certain sources: sources: source_names="TAMWEEN,TAX,EDU,CUSTOMS"
-source_names="CSO"
+source_names="IDA"
 
 online_source_t="stg_online"
 offline_source_t="stg_layer"
@@ -18,7 +18,7 @@ SOURCE_TABLES_LKP_table="SOURCE_TABLES_LKP"
 SOURCE_NAME_LKP_table="SOURCE_NAME_LKP"
 history_tbl="HISTORY"
 
-db_prefix="GPROD1"
+db_prefix="GDEV1"
 scripts_flag = "All"
 gcfr_ctl_Id=1
 gcfr_stream_key=1

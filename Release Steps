@@ -1,0 +1,21 @@
+1. Open anaconda prompt or cmd
+
+2. type in the cmd/anaconda prompt
+
+    $ pip install pyinstaller
+
+3. get the path of front_end.spec and type in the cmd/anaconda prompt
+
+    $ cd path/to the /front_end.spec
+
+4. open front_end.spec and edit those parameters and put the paths of your device
+
+    a) Analysis
+    b) pathex
+    c) datas
+
+5. type in the cmd/anaconda prompt
+
+    $ pyinstaller front_end.spec
+
+6. You will find the exe file in the dist folder

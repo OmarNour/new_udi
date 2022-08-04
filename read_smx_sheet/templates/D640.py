@@ -14,9 +14,17 @@ def d640(cf, source_output_path, source_name, Table_mapping):
         table_maping_name = str(table_maping_row['Mapping name'])
         tbl_name = table_maping_row['Target table name']
         process_name = "TXF_" + layer + "_" + table_maping_name
-        call_exp = "CALL "+cf.APPLY_DB+".APP_APPLY('"+process_name+"','"+tbl_name+"','"+process_type+"',"
+        # call_exp = "CALL "+cf.APPLY_DB+".APP_APPLY('"+process_name+"','"+tbl_name+"','"+process_type+"',"
+        call_exp = "CALL " + cf.APPLY_DB + ".PROCESS_LOADING(" \
+                                           "'" + cf.db_prefix+"V_INP" + "', " \
+                                                                        "'" + cf.db_prefix+"T_BASE"  +"'," \
+                                                                                                      "'" + tbl_name + "'," \
+                                                                                                                       "'" + process_name + "'," \
+                                                                                                                                            "NULL,"
         if cf.db_prefix == 'GDEVP1':
             call_exp += "NULL,'"+source_name+"',NULL,NULL,Y,X,Z);\n"
+        elif cf.db_prefix == 'GDEV1':
+            call_exp += "NULL,'"+source_name+"',NULL,NULL,NULL,Y,X,Z);\n"
         else:
             call_exp += "NULL,'"+source_name+"',NULL,Y,X);\n"
         f.write(call_exp)

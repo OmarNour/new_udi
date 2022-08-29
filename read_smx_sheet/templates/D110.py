@@ -25,7 +25,7 @@ def d110(cf, source_output_path, stg_Table_mapping, STG_tables, Loading_Type):
                 if stg_Table_mapping_row['Source layer'] == 'MATCHING':
                     source_t = cf.db_prefix + 'V_ANALYTICS'
 
-        create_stg_view = "REPLACE VIEW " + source_v + "." + Table_name + " AS LOCK ROW FOR ACCESS \n"
+        create_stg_view = "CREATE VIEW " + source_v + "." + Table_name + " AS LOCK ROW FOR ACCESS \n"
         create_stg_view = create_stg_view + "SELECT\n"
 
         STG_table_columns = funcs.get_stg_table_columns(STG_tables, None, Table_name)

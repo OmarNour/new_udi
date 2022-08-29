@@ -12,7 +12,7 @@ def d210(cf, source_output_path, STG_tables, Loading_Type):
     for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
         Table_name = stg_tables_df_row['Table name']
 
-        create_stg_view = "REPLACE VIEW " + cf.v_stg + "." + Table_name + " AS LOCK ROW FOR ACCESS \n"
+        create_stg_view = "CREATE VIEW " + cf.v_stg + "." + Table_name + " AS LOCK ROW FOR ACCESS \n"
         create_stg_view = create_stg_view + "SELECT\n"
 
         STG_table_columns = funcs.get_stg_table_columns(STG_tables, None, Table_name)

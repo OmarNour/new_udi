@@ -10,7 +10,7 @@ def d410(cf, source_output_path, STG_tables):
     for stg_tables_df_index, stg_tables_df_row in stg_tables_df.iterrows():
         stg_table_name = stg_tables_df_row['Table name']
 
-        script = "REPLACE VIEW " + cf.SI_VIEW + "." + stg_table_name + " AS\n"
+        script = "CREATE VIEW " + cf.SI_VIEW + "." + stg_table_name + " AS\n"
         script = script + "SELECT * FROM " + cf.SI_DB + "." + stg_table_name + ";\n\n"
 
         f.write(script)

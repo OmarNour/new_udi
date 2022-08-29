@@ -25,7 +25,7 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
             view_name_suffix = ' '
         elif input_view_flag == 'TESTING':
             view_name_suffix = '_TESTING '
-        inp_view_header = 'REPLACE VIEW ' + cf.INPUT_VIEW_DB + '.' + process_name + '_IN' + view_name_suffix + 'AS LOCK ROW FOR ACCESS' + '\n'
+        inp_view_header = 'CREATE VIEW ' + cf.INPUT_VIEW_DB + '.' + process_name + '_IN' + view_name_suffix + 'AS LOCK ROW FOR ACCESS' + '\n'
         target_table = str(table_maping_row['Target table name'])
         apply_type = table_maping_row['Historization algorithm']
         process_names_condition = str(table_maping_row['SubProcess Condition'])

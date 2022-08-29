@@ -76,7 +76,7 @@ def d320(cf, source_output_path, STG_tables, BKEY):
         Key_domain_ID = str(int(bkey_df['Key domain ID'].values[0]))
 
         if generation_flag != 0:
-            script = "REPLACE VIEW " + cf.INPUT_VIEW_DB + ".BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "_IN AS LOCK ROW FOR ACCESS\n"
+            script = "CREATE VIEW " + cf.INPUT_VIEW_DB + ".BK_" + Key_set_ID + "_" + stg_table_name + "_" + stg_Column_name + "_" + Key_domain_ID + "_IN AS LOCK ROW FOR ACCESS\n"
             script = script + "SELECT " + trimmed_Natural_key + " AS Source_Key\n"
             script = script + "FROM " + cf.v_stg + "." + stg_table_name + "\n"
             if Bkey_join != "":

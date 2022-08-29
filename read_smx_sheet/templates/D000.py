@@ -6,7 +6,7 @@ from read_smx_sheet.Logging_Decorator import Logging_decorator
 def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
     file_name = funcs.get_file_name(__file__)
     f = funcs.WriteFile(source_output_path, file_name, "sql")
-    f.write("delete from " + cf.GCFR_t + "." + cf.etl_process_table + " where SOURCE_NAME = '" + source_name + "';\n\n")
+    # f.write("delete from " + cf.GCFR_t + "." + cf.etl_process_table + " where SOURCE_NAME = '" + source_name + "';\n\n")
     for table_maping_index, table_maping_row in Table_mapping.iterrows():
         prcess_type = "TXF"
         layer = str(table_maping_row['Layer'])
@@ -30,7 +30,10 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
         f.write(
             "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active, INPUT_VIEW_DB, TARGET_TABLE_DB, TARGET_VIEW_DB, SRCI_TABLE_DB)\n")
         f.write(
-            "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ", '" + cf.INPUT_VIEW_DB + "', '" + cf.core_table + "', '" + cf.core_view + "', '" + cf.SI_DB + "');\n")
+            "SELECT " + "'" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ", '" + cf.INPUT_VIEW_DB + "', '" + cf.core_table + "', '" + cf.core_view + "', '" + cf.SI_DB + "'  WHERE '"+process_name+"' NOT IN (SELECT PROCESS_NAME FROM " +cf.GCFR_t + "." + cf.etl_process_table+ " WHERE PROCESS_NAME = '"+process_name+"');"
+        )
+        # f.write(
+        #     "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ", '" + cf.INPUT_VIEW_DB + "', '" + cf.core_table + "', '" + cf.core_view + "', '" + cf.SI_DB + "');\n")
         f.write("\n")
 
         if process_names_condition != '':
@@ -45,8 +48,12 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
                     process_name_condition = str(process_names_condition[count+1]).replace('#process_name#', process_name)
                     f.write(
                         "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
+                    # f.write(
+                    #     "VALUES ('" + source_name + "', '" + prcess_type + "', " + process_name_condition + ", '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
                     f.write(
-                        "VALUES ('" + source_name + "', '" + prcess_type + "', " + process_name_condition + ", '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
+                        "SELECT " + "'" + source_name + "', '" + prcess_type + "', " + process_name_condition + ", '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag  +  "'  WHERE '"+process_name+"' NOT IN (SELECT PROCESS_NAME FROM " +cf.GCFR_t + "." + cf.etl_process_table+ " WHERE PROCESS_NAME = '"+process_name+"');"
+                    )
+                    #
                     f.write("\n")
                 size = size-1
                 count = count+1
@@ -57,7 +64,11 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
             f.write(
                 "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
             f.write(
-                "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
+                "SELECT " + "'" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + "'  WHERE '"+process_name+"' NOT IN (SELECT PROCESS_NAME FROM " +cf.GCFR_t + "." + cf.etl_process_table+ " WHERE PROCESS_NAME = '"+process_name+"');"
+            )
+            # f.write(
+            #     "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
+            #
             f.write("\n")
 
         if str(matching_flag) == "2":
@@ -65,8 +76,11 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
             active_flag = "0"
             f.write(
                     "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
+            # f.write(
+            #         "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
             f.write(
-                    "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
+                "SELECT " + "'" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + "'  WHERE '"+process_name+"' NOT IN (SELECT PROCESS_NAME FROM " +cf.GCFR_t + "." + cf.etl_process_table+ " WHERE PROCESS_NAME = '"+process_name+"');"
+            )
             f.write("\n")
 
         if str(matching_flag) == "3":
@@ -74,16 +88,21 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
             active_flag = "0"
             f.write(
                         "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
-            f.write(
-                        "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
+            # f.write(
+            #             "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
+            f.write("SELECT " + "'" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + "'  WHERE '"+process_name+"' NOT IN (SELECT PROCESS_NAME FROM " +cf.GCFR_t + "." + cf.etl_process_table+ " WHERE PROCESS_NAME = '"+process_name+"');"
+                    )
             f.write("\n")
 
             process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name']) + "_TDMatching"
             active_flag = "0"
             f.write(
                         "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active)\n")
+            # f.write(
+            #             "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
             f.write(
-                        "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
+                "SELECT " + "'" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + "'  WHERE '"+process_name+"' NOT IN (SELECT PROCESS_NAME FROM " +cf.GCFR_t + "." + cf.etl_process_table+ " WHERE PROCESS_NAME = '"+process_name+"');"
+            )
             f.write("\n")
 
     for STG_tables_index, STG_tables_row in STG_tables.loc[STG_tables['Key set name'] != ""].iterrows():
@@ -110,7 +129,10 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
             process_name = "BK_" + str(Key_set_id) + "_" + Table_name + "_" + Column_name + "_" + str(Key_domain_ID)
             f.write(
                 "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID,Input_View_DB,Target_Table_DB,Target_View_DB,Srci_Table_DB)\n")
+            # f.write(
+            #     "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL,'"+Input_View_DB+"','"+Target_Table_DB+"','"+Target_View_DB+"','"+Srci_Table_DB+"')" + ";\n")
             f.write(
-                "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL,'"+Input_View_DB+"','"+Target_Table_DB+"','"+Target_View_DB+"','"+Srci_Table_DB+"')" + ";\n")
+                "SELECT " + "'" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL,'"+Input_View_DB+"','"+Target_Table_DB+"','"+Target_View_DB+"','"+Srci_Table_DB+"' WHERE '"+process_name+"' NOT IN (SELECT PROCESS_NAME FROM " +cf.GCFR_t + "." + cf.etl_process_table+ " WHERE PROCESS_NAME = '"+process_name+"');"
+            )
             f.write("\n")
     f.close()

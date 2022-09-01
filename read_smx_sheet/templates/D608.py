@@ -15,13 +15,18 @@ def d608(cf, source_output_path,source_name,STG_tables, Core_tables, BMAP_values
                 tbl_pk = TransformDDL.get_trgt_pk(Core_tables, code_set)
                 columns = TransformDDL.get_lkp_tbl_Cols(Core_tables, code_set)
                 for bmap_values_indx, bmap_values_row in BMAP_values[(BMAP_values['Code set name'] == code_set) & (BMAP_values['Layer'] == 'CORE')][['EDW code','Description']].drop_duplicates().iterrows():
-                    del_st = "DELETE FROM " + cf.core_table + "." + code_set + " WHERE " + tbl_pk + " = '" + str(bmap_values_row['EDW code']) + "';\n"
-                    insert_into_st = "INSERT INTO " + cf.core_table + "." + code_set + "(" + columns + ")\nVALUES "
+                    del_st = "--DELETE FROM " + cf.core_table + "." + code_set + " WHERE " + tbl_pk + " = '" + str(bmap_values_row['EDW code']) + "';\n"
+                    insert_into_st = "INSERT INTO " + cf.core_table + "." + code_set + "(" + columns + ")\n "
                     insert_values = ''
                     if columns.count(',') == 1:
-                        insert_values = "(" + str(bmap_values_row["EDW code"]) + ", '" + str(bmap_values_row["Description"]) + "');\n\n"
+                        # insert_values = "(" + str(bmap_values_row["EDW code"]) + ", '" + str(bmap_values_row["Description"]) + "');\n\n"
+                        insert_values = "SELECT " + str(bmap_values_row["EDW code"]) + ", '" + str(bmap_values_row["Description"]) + "'"
+                        insert_values += " WHERE '" + str(bmap_values_row["EDW code"]) + "_" + str(bmap_values_row["Description"]) + "' NOT IN (SELECT " +  columns.replace(",","||' _ ' || ") + " FROM " + cf.core_table + "." + code_set + ");\n\n"
                     elif columns.count(',') == 2:
-                        insert_values = "(" + str(bmap_values_row["EDW code"]) + ", '" + str(bmap_values_row["Description"]) + "','" + str(bmap_values_row["Description"]) + "');\n\n"
+                        # insert_values = "(" + str(bmap_values_row["EDW code"]) + ", '" + str(bmap_values_row["Description"]) + "','" + str(bmap_values_row["Description"]) + "');\n\n"
+                        insert_values = "SELECT " + str(bmap_values_row["EDW code"]) + ", '" + str(bmap_values_row["Description"]) + "','" + str(bmap_values_row["Description"]) + "'"
+                        insert_values += " WHERE '" + str(bmap_values_row["EDW code"]) + "_" + str(bmap_values_row["Description"]) + "_" + str(bmap_values_row["Description"]) + "' NOT IN (SELECT " + columns.replace(
+                            ",", "|| '_' || ") + " FROM " + cf.core_table + "." + code_set + ");\n\n"
                     insert_st = insert_into_st + insert_values
                     f.write(del_st)
                     f.write(insert_st)

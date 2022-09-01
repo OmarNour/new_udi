@@ -13,7 +13,7 @@ def d002(cf, source_output_path, Core_tables, Table_mapping):
     history_tbl = cf.GCFR_t+"."+cf.history_tbl
     hist_key_insert_header += "INSERT INTO "+ history_tbl
     hist_key_insert_header += "( TRF_TABLE_NAME,PROCESS_NAME,TABLE_NAME,RECORD_ID,START_DATE_COLUMN,END_DATE_COLUMN,HISTORY_COLUMN, HISTORY_KEY)\n"
-    hist_key_insert_header += "VALUES ('"
+    # hist_key_insert_header += "VALUES ('"
     tbl_mapping_name = ""
     process_name = ""
     trgt_tbl = ""
@@ -37,17 +37,23 @@ def d002(cf, source_output_path, Core_tables, Table_mapping):
         history_key_list = TransformDDL.get_core_tbl_hist_keys_list(Core_tables, trgt_tbl, history_column_list)
         history_key_list = [x.strip() for x in history_key_list]
 
-        del_st = " DELETE FROM " + history_tbl + " WHERE PROCESS_NAME = '" + process_name + "';\n"
+        del_st = "--DELETE FROM " + history_tbl + " WHERE PROCESS_NAME = '" + process_name + "';\n"
         f.write(del_st)
         f.write("--History_keys \n")
 
         for hist_key in history_key_list:
-            hist_key_insert_st = process_name + "','" + process_name + "','" + trgt_tbl + "','" + tbl_mapping_name + "','" + start_date_column
+            # hist_key_insert_st = process_name + "','" + process_name + "','" + trgt_tbl + "','" + tbl_mapping_name + "','" + start_date_column
+            # hist_key_insert_st += "','" + end_date_column + "'," + "null,"
+            hist_key_insert_st = " SELECT '" + process_name + "','" + process_name + "','" + trgt_tbl + "','" + tbl_mapping_name + "','" + start_date_column
             hist_key_insert_st += "','" + end_date_column + "'," + "null,"
+
             if hist_key != "undefined":
                 hist_key = funcs.single_quotes(hist_key)
 
-            hist_key_insert_st += hist_key + "); \n"
+            # hist_key_insert_st += hist_key + "); \n"
+            hist_key_insert_st += hist_key + " WHERE "  + hist_key + " NOT IN (SELECT  HISTORY_KEY FROM "
+            hist_key_insert_st += history_tbl + " WHERE PROCESS_NAME = '"+process_name+ "' AND HISTORY_KEY IS NOT NULL);\n"
+
             f.write(hist_key_insert_header)
             f.write(hist_key_insert_st)
 
@@ -62,8 +68,15 @@ def d002(cf, source_output_path, Core_tables, Table_mapping):
             else:
                 hist_col = funcs.single_quotes(hist_col)
 
-            hist_col_insert_st = process_name + "','" + process_name + "','" + trgt_tbl + "','" + tbl_mapping_name + "','" + start_date_column
-            hist_col_insert_st += "','" + end_date_column + "'," + hist_col + "," +"null); \n"
+            # hist_col_insert_st = process_name + "','" + process_name + "','" + trgt_tbl + "','" + tbl_mapping_name + "','" + start_date_column
+            # hist_col_insert_st += "','" + end_date_column + "'," + hist_col + "," +"null); \n"
+
+            hist_col_insert_st = "SELECT '" + process_name + "','" + process_name + "','" + trgt_tbl + "','" + tbl_mapping_name + "','" + start_date_column
+            hist_col_insert_st += "','" + end_date_column + "'," + hist_col + "," +"null "
+
+            hist_col_insert_st +=  " WHERE "  + hist_col + " NOT IN (SELECT  HISTORY_COLUMN FROM "
+            hist_col_insert_st += history_tbl + " WHERE PROCESS_NAME = '"+process_name+ "' AND HISTORY_COLUMN IS NOT NULL);\n"
+
             f.write(hist_key_insert_header)
             f.write(hist_col_insert_st)
         f.write("\n \n")

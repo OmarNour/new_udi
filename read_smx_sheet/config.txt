@@ -1,5 +1,5 @@
-smx_path="/Users/markessam/Documents/new_udi/new_udi"
-home_output_folder="/Users/markessam/Documents/new_udi/new_udi"
+smx_path="/Users/markessam/Documents/ACA 2022-2023/Economics"
+home_output_folder="/Users/markessam/Documents/ACA 2022-2023/UDI_OUTPUT"
 templates_folder_path="/Users/markessam/Documents/new_udi/new_udi/Templates_format"
 
 

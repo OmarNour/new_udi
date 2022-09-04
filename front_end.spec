@@ -3,12 +3,12 @@
 block_cipher = None
 
 
-a = Analysis(['C:\\Users\\Administrator\\Downloads\\new_udi-master\\read_smx_sheet\\front_end.py'],
-             pathex=['C:\\Users\\Administrator\\Downloads\\new_udi-master'],
+a = Analysis(['C:\\Users\\Administrator\\Documents\\GitHub\\new_udi\\read_smx_sheet\\front_end.py'],
+             pathex=['C:\\Users\\Administrator\\Documents\\GitHub\\new_udi'],
              binaries=[],
              datas=[('C:\\ProgramData\\Anaconda3\\envs\\new_udi\\Lib\\site-packages\\dask\\dask.yaml', './dask'),
 			 ('C:\\ProgramData\\Anaconda3\\envs\\new_udi\\Lib\\site-packages\\distributed\\distributed.yaml', './distributed')
-			 ,('C:\\Users\\Administrator\\Downloads\\new_udi-master\\read_smx_sheet\\app_Lib\\script_icon.png','.')],
+			 ,('C:\\Users\\Administrator\\Documents\\GitHub\\new_udi\\read_smx_sheet\\app_Lib\\script_icon.png','.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],

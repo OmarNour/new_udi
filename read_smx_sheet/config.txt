@@ -1,4 +1,4 @@
-smx_path="/Users/markessam/Documents/ACA 2022-2023/Economics"
+smx_path="/Users/markessam/Documents/ACA 2022-2023/CITIZEN/smx"
 home_output_folder="/Users/markessam/Documents/ACA 2022-2023/UDI_OUTPUT"
 templates_folder_path="/Users/markessam/Documents/new_udi/new_udi/Templates_format"
 
@@ -7,7 +7,7 @@ templates_folder_path="/Users/markessam/Documents/new_udi/new_udi/Templates_form
 # Source Filter:
 ## for all sources: source_names=""
 ## for for certain sources: sources: source_names="TAMWEEN,TAX,EDU,CUSTOMS"
-source_names="Investment"
+source_names="CSO"
 
 online_source_t="stg_online"
 offline_source_t="stg_layer"

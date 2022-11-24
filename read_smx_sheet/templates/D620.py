@@ -88,7 +88,7 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
                 inp_view_from_clause = 'FROM ' + main_src + ' ' + main_src_alias
                 inp_view_from_clause = inp_view_from_clause + '\n' + table_maping_row['Join']
                 if '#CORE#' not in inp_view_from_clause:
-                    join = 'JOIN ' + cf.SI_VIEW + '.'
+                    join = 'JOIN ' + cf.SI_DB + '.'
                 else:
                     join = ' '
                 inp_view_from_clause = inp_view_from_clause.replace('JOIN ', join)

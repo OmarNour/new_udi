@@ -395,6 +395,12 @@ def get_bkey_physical_table(key_set_name,BKEY):
     physical_table = BKEY[BKEY['Key set name'] == key_set_name]['Physical table'].unique()
     return physical_table[0]
 
+def get_Staging_Key_Columns(df , tablename ):
+    return list(df[(df['Table name'] == tablename) & (df['PK'] == 'Y')]['Column name'])
+
+
+
+
 
 class WriteFile:
     def __init__(self, file_path, file_name, ext, f_mode="w+", new_line=False):
@@ -446,3 +452,4 @@ class TemplateLogError(WriteFile):
         self.write(self.error_file_name)
         self.write(self.error)
         self.write(error_separator)
+

@@ -3,10 +3,13 @@ from read_smx_sheet.Logging_Decorator import Logging_decorator
 
 
 @Logging_decorator
-def d615(cf, source_output_path, Core_tables):
+def d615(cf, source_output_path, Core_tables,STG_tables):
     file_name = funcs.get_file_name(__file__)
     f = funcs.WriteFile(source_output_path, file_name, "sql")
     core_tables_df = funcs.get_core_tables(Core_tables)
+    staging_tables_df = funcs.get_stg_tables(STG_tables)
+    Script = ""
+    stage_script = ""
     for core_tables_df_index, core_tables_df_row in core_tables_df.iterrows():
         core_table_name = core_tables_df_row['Table name']
 
@@ -24,7 +27,6 @@ def d615(cf, source_output_path, Core_tables):
         # exe_p_t = exe_table + _p
         # exe_p_ = ""
         # exe_p_table = ""
-        Script = ""
         for core_table_columns_index, core_table_columns_row in core_table_columns.iterrows():
             if core_table_columns_row['PK'].upper() == 'Y':
                 Column_name = core_table_columns_row['Column name']
@@ -47,5 +49,16 @@ def d615(cf, source_output_path, Core_tables):
         # f.write(del_script_table)
         # f.write(exe_p)
         # f.write(exe_table)
-        f.write(Script)
+
+    for stage_table_index, stage_table_row in staging_tables_df.iterrows():
+        stage_table = stage_table_row['Table name']
+        stage_columns = funcs.get_Staging_Key_Columns(STG_tables,stage_table)
+
+        for column in stage_columns:
+            stage_script += "INSERT INTO " + cf.GCFR_t + ".GCFR_Transform_KeyCol \n"
+            stage_script += "SELECT '" + cf.T_STG + "' , '" + stage_table + "' , '" + column + "' , " + "CURRENT_DATE , CURRENT_USER , CURRENT_TIMESTAMP    \n"
+            stage_script += "WHERE '" + cf.T_STG + "_" + stage_table + "_" + column + "' NOT IN (SELECT OUT_DB_NAME || '_' || OUT_OBJECT_NAME || '_' || KEY_COLUMN FROM " + cf.GCFR_t + ".GCFR_Transform_KeyCol  ); \n \n \n"
+
+    f.write(Script)
+    f.write(stage_script)
     f.close()

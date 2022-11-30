@@ -39,7 +39,7 @@ def d110(cf, source_output_path, stg_Table_mapping, STG_tables, Loading_Type):
             if column_transformation_rule != "":
                 Column_name = (column_transformation_rule + " AS " + Column_name)
             else:
-                Column_name = (Column_name_as_src + " AS " + Column_name)
+                Column_name = ("TRIM(" + Column_name_as_src + ") AS " + Column_name)
 
             comma = ',' if STG_table_columns_index > 0 else ' '
             comma_Column_name = comma + Column_name

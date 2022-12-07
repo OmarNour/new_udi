@@ -45,7 +45,7 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
         else:
             modification_type = "'U' AS MODIFICATION_TYPE"
 
-        if main_src == main_src_alias:
+        if main_src.upper() == main_src_alias.upper():
             main_src = cf.SI_DB + '.' + main_src
 
 

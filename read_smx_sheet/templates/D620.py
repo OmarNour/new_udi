@@ -47,13 +47,16 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
 
         if main_src == main_src_alias:
             main_src = cf.SI_DB + '.' + main_src
+
+
         # core_tables_list= pd.unique(list(Core_tables['Table name']))
         core_tables_list = TransformDDL.get_core_tables_list(Core_tables)
 
         if main_src is None:
-            msg = 'Missing Main Source  for Table Mapping:{}'.format(str(table_maping_row['Mapping name']))
-            notes += msg
-            continue
+            inp_view_from_clause = ''
+            # msg = 'Missing Main Source  for Table Mapping:{}'.format(str(table_maping_row['Mapping name']))
+            # notes += msg
+            # continue
 
         if target_table not in core_tables_list:
             msg = 'TARGET TABLE NAME not found in Core Tables Sheet for Table Mapping:{}'.format(
@@ -76,12 +79,16 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
         load_id = main_src_alias + '.LOAD_ID'
         batch_id = main_src_alias + '.BATCH_ID'
         ref_key = main_src_alias + '.REF_KEY'
+
         if process_names_case_when != '':
             inp_view_select_clause = inp_view_select_clause + '\n' + map_grp + '\n' + start_date + '\n' + end_date + '\n' + modification_type + ',' + '\n' + batch_id + ',' + '\n' + ref_key + ',' + process_names_case_when_clause + '\n'
         else:
             inp_view_select_clause = inp_view_select_clause + '\n' + map_grp + '\n' + start_date + '\n' + end_date + '\n' + modification_type + ',' + '\n' + batch_id + ',' + '\n' + ref_key + '\n'
 
-        if table_maping_row['Join'] == "":
+        if str(table_maping_row['Main source']).strip() == '':
+            inp_view_from_clause = ""
+
+        elif table_maping_row['Join'] == "":
             inp_view_from_clause = 'FROM ' + main_src + ' ' + main_src_alias
         elif table_maping_row['Join'] != "":
             if table_maping_row['Join'].find("FROM".strip()) == -1:  # no subquery in join clause

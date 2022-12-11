@@ -109,6 +109,13 @@ def get_src_code_set_names(STG_tables, source_name):
             code_set_names.append(str(stg_tables_row['Code set name']))
     return pd.unique(code_set_names)
 
+def get_ALL_code_set_names(stage_tables_sheet):
+    code_set_names = list()
+    for stg_tables_index, stg_tables_row in stage_tables_sheet.iterrows():
+        if str(stg_tables_row['Column name']).upper().startswith('BM_') and stg_tables_row['Code set name'] != '':
+            code_set_names.append(str(stg_tables_row['Code set name']))
+    return pd.unique(code_set_names)
+
 
 def get_stg_table_nonNK_columns(STG_tables, source_name, Table_name, with_sk_columns=False):
     STG_tables_df = STG_tables.loc[(STG_tables['Source system name'] == source_name)

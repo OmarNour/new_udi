@@ -23,5 +23,16 @@ dataValidationAll_template_filename = "dataValidationALL.txt"
 sheets = [System_sht, Supplements_sht, Column_mapping_sht, BMAP_values_sht, BMAP_sht, BKEY_sht, STG_tables_sht, Table_mapping_sht, Core_tables_sht]
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #2.14.3"
+ver_no = "| Build #2.14.4"
 # ################################################################################################
+# What is new : #2.14.4 :
+# New Script is added to insert the constant bmaps into Bmap_Standard_Maps
+#  Scripts : D004.PY
+# ################################################################################################
+# What is new : #2.14.3 :
+# Trimming all Columns in D110
+# Adding Staging Table in the etl process insert statement
+# Removing from statement from base tables selecting constant values only
+# Scripts : D000.py & D620.py
+# ################################################################################################
+

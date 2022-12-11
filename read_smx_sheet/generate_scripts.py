@@ -10,7 +10,7 @@ from read_smx_sheet.templates import BMAP_DUP_CD_TEST_SHEET,BMAP_DUP_DESC_TEST_S
 from read_smx_sheet.templates import DATA_SRC_TEST_SHEET, BMAP_CHECK_TEST_SHEET , BMAP_UNMATCHED_TEST_SHEET
 from read_smx_sheet.templates import HIST_STRT_END_NULL_TEST_SHEET, HIST_DUP_TEST_SHEET ,HIST_STRT_GRT_END_TEST_SHEET,HIST_TIME_GAP_TEST_SHEET
 from read_smx_sheet.templates import HIST_STRT_NULL_TEST_SHEET, RI_TEST_SHEET, compare_testing_inputview
-from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340,D215
+from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340,D215 , D004
 from read_smx_sheet.templates import generate_source_smx
 from read_smx_sheet.templates import dataValidation,stgCounts
 from read_smx_sheet.parameters import parameters as pm
@@ -195,6 +195,7 @@ class GenerateScripts:
 
 
                                 STG_tables = delayed(funcs.read_excel)(smx_file_path, self.STG_tables_sht, stg_source_name_filter)
+                                STG_tables_all_sources = delayed(funcs.read_excel)(smx_file_path, self.STG_tables_sht)
                                 STG_tables_export = delayed(funcs.read_excel)(smx_file_path, self.STG_tables_sht, stg_source_name_filter)
 
                                 STG_tables = delayed(funcs.rename_sheet_reserved_word)(STG_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
@@ -225,6 +226,7 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(D001.d001)(self.cf, source_output_path, source_name, STG_tables))
                                     self.parallel_templates.append(delayed(D002.d002)(self.cf, source_output_path, Core_tables, core_Table_mapping))
                                     self.parallel_templates.append(delayed(D003.d003)(self.cf, source_output_path, source_name, STG_tables, BMAP_values, BMAP))
+                                    self.parallel_templates.append(delayed(D004.d004)(self.cf, source_output_path ,BMAP_values, BMAP , STG_tables_all_sources))
 
                                     self.parallel_templates.append(delayed(D110.d110)(self.cf, source_output_path, stg_Table_mapping, STG_tables, Loading_Type))
 

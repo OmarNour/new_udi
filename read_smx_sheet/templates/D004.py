@@ -29,8 +29,6 @@ def d004(cf, source_output_path, BMAP_values, BMAP, STG_TABLES_SHEET):
             data.append(list_df)
 
     Filtered_bmap_df = pd.DataFrame(data, columns=['Code set name','Code domain ID','Code set ID','Physical table'])
-    print("df is ")
-    print(Filtered_bmap_df)
     insert_st_header = "INSERT INTO " + cf.UTLFW_t + ".BMAP_STANDARD_MAP ( \n"
     bm_tbl_cols = "Source_Code \n" + ",Domain_Id  \n" + ",Code_Set_Id  \n" + ",EDW_Code  \n" + ",Description  \n"
     bm_tbl_cols += ",Start_Date  \n" + ",End_Date  \n" + ",Record_Deleted_Flag  \n" + ",Ctl_Id  \n" + ",Process_Name \n"

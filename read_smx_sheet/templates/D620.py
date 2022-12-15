@@ -93,7 +93,103 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
         elif table_maping_row['Join'] != "":
             if table_maping_row['Join'].find("FROM".strip()) == -1:  # no subquery in join clause
                 inp_view_from_clause = 'FROM ' + main_src + ' ' + main_src_alias
-                inp_view_from_clause = inp_view_from_clause + '\n' + table_maping_row['Join']
+                # inp_view_from_clause = inp_view_from_clause + '\n' + table_maping_row['Join']
+                inp_view_from_clause = inp_view_from_clause
+                join_stmt = str(table_maping_row['Join']).upper().replace('\n',' ')
+                join_stmt = " ".join(join_stmt.split())
+                join_counts = join_stmt.upper().count('JOIN')
+                join_alias = ''
+                if join_counts == 1:
+                    join_stmt_bag_words = join_stmt.upper().split(' ')
+                    if join_stmt_bag_words[0].upper() == 'JOIN':
+                        if join_stmt_bag_words[2].upper() == 'ON':
+                            if '.' in join_stmt_bag_words[1]:
+                                join_alias = join_stmt_bag_words[1].split('.')[1]
+                                join_stmt = join_stmt.replace(' ON ', ' ' + join_alias + ' ON ')
+                            else:
+                                join_alias = join_stmt_bag_words[1]
+                                join = 'JOIN ' + cf.SI_DB + '.'
+                                join_stmt = join_stmt.replace('JOIN ', join).replace(' ON ', ' ' + join_alias + ' ON ')
+                        elif join_stmt_bag_words[3].upper() == 'ON':
+                            if '.' in join_stmt_bag_words[2]:
+                                join_alias = join_stmt_bag_words[2].split('.')[1]
+                                join_stmt = join_stmt.replace(' ON ', ' ' + join_alias + ' ON ')
+                            else:
+                                join = 'JOIN ' + cf.SI_DB + '.'
+                                join_stmt = join_stmt.replace('JOIN ', join)
+                    else :
+                        if join_stmt_bag_words[3].upper() == 'ON':
+                            if '.' in join_stmt_bag_words[2]:
+                                join_alias = join_stmt_bag_words[2].split('.')[1]
+                                join_stmt = join_stmt.replace(' ON ', ' ' + join_alias + ' ON ')
+                            else:
+                                join_alias = join_stmt_bag_words[2]
+                                join = 'JOIN ' + cf.SI_DB + '.'
+                                join_stmt = join_stmt.replace('JOIN ', join).replace(' ON ', ' ' + join_alias + ' ON ')
+                        elif join_stmt_bag_words[4].upper() == 'ON':
+                            if '.' in join_stmt_bag_words[3]:
+                                join_alias = join_stmt_bag_words[3].split('.')[1]
+                                join_stmt = join_stmt.replace(' ON ', ' ' + join_alias + ' ON ')
+                            else:
+                                join = 'JOIN ' + cf.SI_DB + '.'
+                                join_stmt = join_stmt.replace('JOIN ', join)
+                    inp_view_from_clause = inp_view_from_clause + join_stmt
+                else:
+                    if 'LEFT' in join_stmt:
+                        join_stmt = join_stmt.replace('LEFT', '\n' + 'LEFT')
+                    elif 'RIGHT' in join_stmt:
+                        join_stmt = join_stmt.replace('RIGHT', '\n' + 'RIGHT')
+                    else:
+                        join_stmt = join_stmt.replace('JOIN','\n'+'JOIN')
+                    join_stmt_bag_stmts = join_stmt.split('\n')
+                    join_mult = ""
+                    for i in range(0, len(join_stmt_bag_stmts)):
+                        if join_stmt_bag_stmts[i] == '':
+                            continue
+                        else:
+                            join_stmt = ' ' + join_stmt_bag_stmts[i]
+                        join_stmt = join_stmt.upper().replace('\n', ' ')
+                        join_stmt = " ".join(join_stmt.split())
+                        join_stmt_bag_words = join_stmt.upper().split(' ')
+
+                        if join_stmt_bag_words[0].upper() == 'JOIN':
+                            if join_stmt_bag_words[2].upper() == 'ON':
+                                if '.' in join_stmt_bag_words[1]:
+                                    join_alias = join_stmt_bag_words[1].split('.')[1]
+                                    join_stmt = join_stmt.replace(' ON ', ' ' + join_alias + ' ON ')
+                                else:
+                                    join_alias = join_stmt_bag_words[1]
+                                    join = 'JOIN ' + cf.SI_DB + '.'
+                                    join_stmt = join_stmt.replace('JOIN ', join).replace(' ON ',
+                                                                                         ' ' + join_alias + ' ON ')
+                            elif join_stmt_bag_words[3].upper() == 'ON':
+                                if '.' in join_stmt_bag_words[2]:
+                                    join_alias = join_stmt_bag_words[2].split('.')[1]
+                                    join_stmt = join_stmt.replace(' ON ', ' ' + join_alias + ' ON ')
+                                else:
+                                    join = 'JOIN ' + cf.SI_DB + '.'
+                                    join_stmt = join_stmt.replace('JOIN ', join)
+                            join_mult = join_mult + ' ' + join_stmt
+                        else:
+                            if join_stmt_bag_words[3].upper() == 'ON':
+                                if '.' in join_stmt_bag_words[2]:
+                                    join_alias = join_stmt_bag_words[2].split('.')[1]
+                                    join_stmt = join_stmt.replace(' ON ', ' ' + join_alias + ' ON ')
+                                else:
+                                    join_alias = join_stmt_bag_words[2]
+                                    join = 'JOIN ' + cf.SI_DB + '.'
+                                    join_stmt = join_stmt.replace('JOIN ', join).replace(' ON ',
+                                                                                         ' ' + join_alias + ' ON ')
+                            elif join_stmt_bag_words[4].upper() == 'ON':
+                                if '.' in join_stmt_bag_words[3]:
+                                    join_alias = join_stmt_bag_words[3].split('.')[1]
+                                    join_stmt = join_stmt.replace(' ON ', ' ' + join_alias + ' ON ')
+                                else:
+                                    join = 'JOIN ' + cf.SI_DB + '.'
+                                    join_stmt = join_stmt.replace('JOIN ', join)
+                            join_mult = join_mult + ' ' + join_stmt
+                    inp_view_from_clause = inp_view_from_clause + join_mult
+                    # print(inp_view_from_clause)
                 if '#CORE#' not in inp_view_from_clause:
                     join = 'JOIN ' + cf.SI_DB + '.'
                 else:

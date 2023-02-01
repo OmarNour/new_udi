@@ -1,0 +1,25 @@
+certifi==2020.12.5
+dask==2021.1.0
+django-crispy-forms==1.12.0
+et-xmlfile==1.1.0
+fsspec==0.8.5
+locket==0.2.0
+mkl-fft==1.2.0
+mkl-random==1.1.1
+mkl-service==2.3.0
+numpy @ file:///opt/concourse/worker/volumes/live/5572694e-967a-4c0c-52cf-b53d43e72de9/volume/numpy_and_numpy_base_1603491881791/work
+openpyxl==3.0.7
+pandas==1.2.0
+partd==1.1.0
+progress @ file:///opt/concourse/worker/volumes/live/5d1cec5c-7727-4858-59b2-c08fc19c3392/volume/progress_1614270511189/work
+psutil @ file:///opt/concourse/worker/volumes/live/ff72f822-991c-4030-4f3a-8c41d3ac4e4f/volume/psutil_1598370232375/work
+python-dateutil==2.8.1
+pytz @ file:///tmp/build/80754af9/pytz_1608922264688/work
+PyYAML==5.3.1
+selenium==3.141.0
+six @ file:///opt/concourse/worker/volumes/live/5b31cb27-1e37-4ca5-6e9f-86246eb206d2/volume/six_1605205320872/work
+toolz==0.11.1
+tqdm==4.61.0
+urllib3==1.26.5
+xlrd @ file:///tmp/build/80754af9/xlrd_1608072521494/work
+XlsxWriter==1.4.3

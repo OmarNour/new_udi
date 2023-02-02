@@ -132,7 +132,7 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
             # f.write(
             #     "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL,'"+Input_View_DB+"','"+Target_Table_DB+"','"+Target_View_DB+"','"+Srci_Table_DB+"')" + ";\n")
             f.write(
-                "SELECT " + "'" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL,'"+Input_View_DB+"','"+Target_Table_DB+"','"+Target_View_DB+"','"+Srci_Table_DB + "','"+ str(STG_tables_row['Table name'])+"' WHERE '"+process_name+"' NOT IN (SELECT PROCESS_NAME FROM " +cf.GCFR_t + "." + cf.etl_process_table+ " WHERE PROCESS_NAME = '"+process_name+"');\n"
+                "SELECT " + "'" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL,'"+Input_View_DB+"','"+Target_Table_DB+"','"+Target_View_DB+"','"+Srci_Table_DB + "','"+ str(STG_tables_row['Table name'])+"' WHERE  NOT EXISTS (SELECT PROCESS_NAME FROM " +cf.GCFR_t + "." + cf.etl_process_table+ " WHERE PROCESS_NAME = '"+process_name+"');\n"
             )
             f.write("\n")
     f.close()

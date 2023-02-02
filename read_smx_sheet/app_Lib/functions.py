@@ -109,6 +109,20 @@ def get_src_code_set_names(STG_tables, source_name):
             code_set_names.append(str(stg_tables_row['Code set name']))
     return pd.unique(code_set_names)
 
+def get_src_code_domain_names(STG_tables,BMAP):
+    code_domain_names = list()
+    non_stg_set_names = list()
+    non_stg_domain_ids = list()
+    for stg_tables_index, stg_tables_row in STG_tables.iterrows():
+        if str(stg_tables_row['Column name']).upper().startswith('BM_') and stg_tables_row['Code set name'] != '':
+            code_domain_names.append(str(stg_tables_row['Code domain name']).upper().strip())
+    code_domain_names = pd.unique(code_domain_names)
+    for bmap_domain_idx,bmap_domain_row in BMAP.iterrows():
+        if str(bmap_domain_row['Code domain name']).upper().strip() not in code_domain_names:
+            non_stg_set_names.append(str(bmap_domain_row['Code set name']).upper().strip())
+            non_stg_domain_ids.append(bmap_domain_row['Code domain ID'])
+    return non_stg_set_names,non_stg_domain_ids
+
 def get_ALL_code_set_names(stage_tables_sheet):
     code_set_names = list()
     for stg_tables_index, stg_tables_row in stage_tables_sheet.iterrows():

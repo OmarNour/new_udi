@@ -3,7 +3,7 @@ sys.path.append(os.getcwd())
 from read_smx_sheet.app_Lib import manage_directories as md, functions as funcs
 from dask import compute, delayed, config
 from dask.diagnostics import ProgressBar
-from read_smx_sheet.templates import D110, D300, D320, D200, D330, D400, D610, D640, D609
+from read_smx_sheet.templates import D110, D300, D320, D200, D330, D400, D610, D640, D609 , D005
 from read_smx_sheet.templates import testing_script_01, testing_script_02
 from read_smx_sheet.templates import PROCESS_CHECK_TEST_SHEET, CSO_TEST_SHEET, NULLS_TEST_SHEET, DUP_TEST_SHEET
 from read_smx_sheet.templates import BMAP_DUP_CD_TEST_SHEET,BMAP_DUP_DESC_TEST_SHEET,BMAP_NULL_TEST_SHEET
@@ -226,7 +226,8 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(D001.d001)(self.cf, source_output_path, source_name, STG_tables))
                                     self.parallel_templates.append(delayed(D002.d002)(self.cf, source_output_path, Core_tables, core_Table_mapping))
                                     self.parallel_templates.append(delayed(D003.d003)(self.cf, source_output_path, source_name, STG_tables, BMAP_values, BMAP))
-                                    self.parallel_templates.append(delayed(D004.d004)(self.cf, source_output_path ,BMAP_values, BMAP , STG_tables_all_sources))
+                                    self.parallel_templates.append(delayed(D004.d004)(self.cf, source_output_path, BMAP_values, BMAP , STG_tables_all_sources))
+                                    self.parallel_templates.append(delayed(D005.d005)(self.cf, source_output_path, STG_tables_all_sources,Core_tables, BMAP_values , BMAP))
 
                                     self.parallel_templates.append(delayed(D110.d110)(self.cf, source_output_path, stg_Table_mapping, STG_tables, Loading_Type))
 
@@ -254,6 +255,7 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(D620.d620)(self.cf, source_output_path, core_Table_mapping, Column_mapping, Core_tables, Loading_Type,'UDI',STG_tables))
                                     self.parallel_templates.append(delayed(D630.d630)(self.cf, source_output_path, core_Table_mapping))
                                     self.parallel_templates.append(delayed(D640.d640)(self.cf, source_output_path, source_name, core_Table_mapping))
+
 
                                 #TESTING SCRIPTS
                                 if 'Testing' in self.scripts_flag :

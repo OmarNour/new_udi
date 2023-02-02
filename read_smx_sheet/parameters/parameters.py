@@ -23,7 +23,10 @@ dataValidationAll_template_filename = "dataValidationALL.txt"
 sheets = [System_sht, Supplements_sht, Column_mapping_sht, BMAP_values_sht, BMAP_sht, BKEY_sht, STG_tables_sht, Table_mapping_sht, Core_tables_sht]
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #2.14.6"
+ver_no = "| Build #2.14.7"
+# ################################################################################################
+# What is new : #2.14.7 :
+# Adding D005 script to insert constants into base tables directly
 # ################################################################################################
 # What is new : #2.14.6 :
 # converting not in to not exists in (000,001,615) scriptS

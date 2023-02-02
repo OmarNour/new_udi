@@ -32,7 +32,7 @@ def d615(cf, source_output_path, Core_tables,STG_tables):
                 Column_name = core_table_columns_row['Column name']
                 Script += "INSERT INTO " + cf.GCFR_t + ".GCFR_Transform_KeyCol \n"
                 Script += "SELECT '" + cf.core_table + "' , '" + core_table_name + "' , '" + Column_name + "' , " + "CURRENT_DATE , CURRENT_USER , CURRENT_TIMESTAMP    \n"
-                Script += "WHERE '"+  cf.core_table +"_" + core_table_name + "_" + Column_name +"' NOT IN (SELECT OUT_DB_NAME || '_' || OUT_OBJECT_NAME || '_' || KEY_COLUMN FROM " +cf.GCFR_t + ".GCFR_Transform_KeyCol  ); \n \n \n"
+                Script += "WHERE NOT EXISTS (SELECT   OUT_OBJECT_NAME  FROM " +cf.GCFR_t + ".GCFR_Transform_KeyCol  ); \n \n \n"
 
 
 
@@ -57,7 +57,7 @@ def d615(cf, source_output_path, Core_tables,STG_tables):
         for column in stage_columns:
             stage_script += "INSERT INTO " + cf.GCFR_t + ".GCFR_Transform_KeyCol \n"
             stage_script += "SELECT '" + cf.T_STG + "' , '" + stage_table + "' , '" + column + "' , " + "CURRENT_DATE , CURRENT_USER , CURRENT_TIMESTAMP    \n"
-            stage_script += "WHERE '" + cf.T_STG + "_" + stage_table + "_" + column + "' NOT IN (SELECT OUT_DB_NAME || '_' || OUT_OBJECT_NAME || '_' || KEY_COLUMN FROM " + cf.GCFR_t + ".GCFR_Transform_KeyCol  ); \n \n \n"
+            stage_script += "WHERE  NOT EXISTS (SELECT   OUT_OBJECT_NAME  FROM " + cf.GCFR_t + ".GCFR_Transform_KeyCol  ); \n \n \n"
 
     f.write(Script)
     f.write(stage_script)

@@ -24,6 +24,9 @@ sheets = [System_sht, Supplements_sht, Column_mapping_sht, BMAP_values_sht, BMAP
 unified_gov_sheet = "Unified Gov"
 unified_country_sheet = "Unified Country"
 unified_city_sheet = "Unified City"
+unified_district_sheet = "Unified District"
+unified_currency_sheet = "Unified Currency"
+unified_police_station_sheet = "Unified Police Station"
 
 # AppName_<Major>.<Minor>.<BuildNo>
 ver_no = "| Build #2.14.7"

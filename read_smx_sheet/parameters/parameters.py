@@ -29,7 +29,12 @@ unified_currency_sheet = "Unified Currency"
 unified_police_station_sheet = "Unified Police Station"
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #2.14.7"
+ver_no = "| Build #2.15.0"
+# ################################################################################################
+# What is new : #2.15.0 :
+# Adding D500, D501, D502, D503, D504 and D505 scripts to insert unified_country, unified_gov, 
+# unified_district, unified_currency and unified_police_station to the STG layer and running the SRCI_LOADING 
+# SP to copy them to the SRCI layer 
 # ################################################################################################
 # What is new : #2.14.7 :
 # Adding D005 script to insert constants into base tables directly

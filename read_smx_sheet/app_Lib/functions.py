@@ -46,6 +46,7 @@ def df_filter(df, filter=None, filter_index=True):
             if filter_index:
                 df = df[df.index.isin(i[1])]
             else:
+                print("I am here")
                 df = df[df[i[0]].isin(i[1])]
 
     if df.empty:
@@ -336,7 +337,9 @@ def get_config_file_values(config_file_path=None):
                     dt_now.strftime("%S")
         param_dic['output_path'] = param_dic["home_output_folder"] + "/" + dt_folder
 
+
         db_prefix = param_dic['db_prefix']
+        
 
         param_dic['T_STG'] = db_prefix + "T_STG"
         param_dic['t_WRK'] = db_prefix + "T_WRK"

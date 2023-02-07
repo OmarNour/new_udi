@@ -1,6 +1,10 @@
-smx_path="/Users/markessam/Documents/ACA 2022-2023/CITIZEN/smx"
-home_output_folder="/Users/markessam/Documents/ACA 2022-2023/UDI_OUTPUT"
-templates_folder_path="/Users/markessam/Documents/new_udi/new_udi/Templates_format"
+## smx_path="/Users/markessam/Documents/ACA 2022-2023/CITIZEN/smx"
+## home_output_folder="/Users/markessam/Documents/ACA 2022-2023/UDI_OUTPUT"
+## templates_folder_path="/Users/markessam/Documents/new_udi/new_udi/Templates_format"
+smx_path="/Users/oh255011/Documents/Teradata/SMX"
+unified_path = "/Users/oh255011/Documents/Teradata/SMX/UNIFIED/UNIFIED.xlsx"
+home_output_folder="/Users/oh255011/Documents/Teradata/SMX/UDI_OUTPUT"
+templates_folder_path="/Users/oh255011/Documents/Teradata/new_udi/Templates_format"
 
 
 

@@ -10,7 +10,7 @@ from read_smx_sheet.templates import BMAP_DUP_CD_TEST_SHEET,BMAP_DUP_DESC_TEST_S
 from read_smx_sheet.templates import DATA_SRC_TEST_SHEET, BMAP_CHECK_TEST_SHEET , BMAP_UNMATCHED_TEST_SHEET
 from read_smx_sheet.templates import HIST_STRT_END_NULL_TEST_SHEET, HIST_DUP_TEST_SHEET ,HIST_STRT_GRT_END_TEST_SHEET,HIST_TIME_GAP_TEST_SHEET
 from read_smx_sheet.templates import HIST_STRT_NULL_TEST_SHEET, RI_TEST_SHEET, compare_testing_inputview
-from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340,D215 , D004
+from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340,D215 , D004, D500, D501, D502
 from read_smx_sheet.templates import generate_source_smx
 from read_smx_sheet.templates import dataValidation,stgCounts
 from read_smx_sheet.parameters import parameters as pm
@@ -34,6 +34,7 @@ class ConfigFile:
         self.output_path = self.config_file_values["output_path"]
         self.read_sheets_parallel = self.config_file_values["read_sheets_parallel"]
         self.smx_path = self.config_file_values["smx_path"]
+        self.unified_path = self.config_file_values["unified_path"]
         self.templates_path = self.config_file_values["templates_folder_path"]
         self.source_names = self.config_file_values["source_names"]
         self.gcfr_system_name = self.config_file_values["gcfr_system_name"]
@@ -120,6 +121,9 @@ class GenerateScripts:
         self.System_sht = pm.System_sht
         self.Supplements_sht = pm.Supplements_sht
         self.Data_types_sht = pm.Data_types_sht
+        self.unified_gov_sheet = pm.unified_gov_sheet
+        self.unified_country_sheet = pm.unified_country_sheet
+        self.unified_city_sheet = pm.unified_city_sheet
 
     def generate_scripts(self):
         self.log_file.write("Reading from: \t" + self.cf.smx_path)
@@ -173,6 +177,12 @@ class GenerateScripts:
                     Core_tables = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.Core_tables_sht)
                     Core_tables = delayed(funcs.rename_sheet_reserved_word)(Core_tables, Supplements, 'TERADATA', ['Column name', 'Table name'])
                     RI_relations = delayed(funcs.read_excel)(smx_file_path, sheet_name=self.RI_relations_sht)
+                    Unified_Gov = delayed(funcs.read_excel)(self.cf.unified_path, self.unified_gov_sheet, [['SOURCE', self.cf.source_names]])
+                    Unified_Country = delayed(funcs.read_excel)(self.cf.unified_path, self.unified_country_sheet, [['SOURCE', self.cf.source_names]])
+                    Unified_City = delayed(funcs.read_excel)(self.cf.unified_path, self.unified_city_sheet, [['SOURCE', self.cf.source_names]])
+                    
+                    # Unified_Gov = delayed(funcs.read_excel)("C:/Users/oh255011/Documents/Teradata/SMX/UNIFIED/UNIFIED.xlsx", self.unified_gov_sheet, [['SOURCE', ['AZHAR']]])
+                    
                     ##################################### end of read_smx_sheet ################################
 
                     for system_index, system_row in teradata_sources.iterrows():
@@ -245,6 +255,10 @@ class GenerateScripts:
                                     self.parallel_templates.append(delayed(D410.d410)(self.cf, source_output_path, STG_tables))
                                     self.parallel_templates.append(delayed(D415.d415)(self.cf, source_output_path, STG_tables))
                                     self.parallel_templates.append(delayed(D420.d420)(self.cf, source_output_path, STG_tables, BKEY, BMAP, Loading_Type, source_name))
+                                    
+                                    self.parallel_templates.append(delayed(D500.d500)(self.cf, source_output_path, source_name, Unified_Gov))
+                                    self.parallel_templates.append(delayed(D501.d501)(self.cf, source_output_path, source_name, Unified_Country))
+                                    self.parallel_templates.append(delayed(D502.d502)(self.cf, source_output_path, source_name, Unified_City))
 
                                     self.parallel_templates.append(delayed(D600.d600)(self.cf, source_output_path, core_Table_mapping, Core_tables))
                                     self.parallel_templates.append(delayed(D607.d607)(self.cf, source_output_path, Core_tables, BMAP_values))

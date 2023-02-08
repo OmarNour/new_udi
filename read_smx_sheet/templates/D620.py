@@ -36,8 +36,7 @@ def d620(cf, source_output_path, Table_mapping, Column_mapping, Core_tables, Loa
 
         SRCI = cf.SI_DB + '.'
         main_src = main_src.replace('#SRCI#', SRCI)
-        main_src_alias = table_maping_row['Main source alias'].upper()
-
+        main_src_alias = str(table_maping_row['Main source alias']).upper()
         main_src_alias_mt = main_src_alias.replace('_ONLINE', '')
         modification_type_exists = funcs.table_has_modification_type_column(stg_tables, main_src_alias_mt)
         if modification_type_exists:

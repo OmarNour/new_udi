@@ -11,7 +11,7 @@ templates_folder_path="/Users/oh255011/Documents/Teradata/new_udi/Templates_form
 # Source Filter:
 ## for all sources: source_names=""
 ## for for certain sources: sources: source_names="TAMWEEN,TAX,EDU,CUSTOMS"
-source_names="CSO"
+source_names="VACCINE"
 
 online_source_t="stg_online"
 offline_source_t="stg_layer"

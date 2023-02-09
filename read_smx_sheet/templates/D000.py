@@ -28,7 +28,7 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
 
         Historization_algorithm = str(table_maping_row['Historization algorithm'])
         f.write(
-            "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active, INPUT_VIEW_DB, TARGET_TABLE_DB, TARGET_VIEW_DB, SRCI_TABLE_DB,STG_TABLE)\n")
+            "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active, INPUT_VIEW_DB, TARGET_TABLE_DB, TARGET_VIEW_DB, SRCI_TABLE_DB,STG_TABLE_NAME)\n")
         f.write(
             "SELECT " + "'" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ", '" + cf.INPUT_VIEW_DB + "', '" + cf.core_table + "', '" + cf.core_view + "', '" + cf.SI_DB + "' ,'" + str(table_maping_row['Mapping group'])+ "'  WHERE '"+process_name+"' NOT IN (SELECT PROCESS_NAME FROM " +cf.GCFR_t + "." + cf.etl_process_table+ " WHERE PROCESS_NAME = '"+process_name+"');\n"
         )
@@ -47,7 +47,7 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
                     active_flag = "0"
                     process_name_condition = str(process_names_condition[count+1]).replace('#process_name#', process_name)
                     f.write(
-                        "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active,STG_TABLE)\n")
+                        "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active,STG_TABLE_NAME)\n")
                     # f.write(
                     #     "VALUES ('" + source_name + "', '" + prcess_type + "', " + process_name_condition + ", '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
                     f.write(
@@ -62,7 +62,7 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
             process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name']) + "_Matching"
             active_flag = "0"
             f.write(
-                "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active,STG_TABLE)\n")
+                "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active,STG_TABLE_NAME)\n")
             f.write(
                 "SELECT " + "'" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ",'"+ str(table_maping_row['Mapping name'])+ "'  WHERE '"+process_name+"' NOT IN (SELECT PROCESS_NAME FROM " +cf.GCFR_t + "." + cf.etl_process_table+ " WHERE PROCESS_NAME = '"+process_name+"');\n"
             )
@@ -87,7 +87,7 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
             process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name']) + "_Matching"
             active_flag = "0"
             f.write(
-                        "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active,STG_TABLE)\n")
+                        "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active,STG_TABLE_NAME)\n")
             # f.write(
             #             "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
             f.write("SELECT " + "'" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ",'"+ str(table_maping_row['Mapping name'])+ "'  WHERE '"+process_name+"' NOT IN (SELECT PROCESS_NAME FROM " +cf.GCFR_t + "." + cf.etl_process_table+ " WHERE PROCESS_NAME = '"+process_name+"');\n"
@@ -97,7 +97,7 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
             process_name = prcess_type + "_" + layer + "_" + str(table_maping_row['Mapping name']) + "_TDMatching"
             active_flag = "0"
             f.write(
-                        "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active,STG_TABLE)\n")
+                        "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE,BKEY_PRTY_DOMAIN_1, RECORD_ID, active,STG_TABLE_NAME)\n")
             # f.write(
             #             "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', " + refresh_cso_flag + ", NULL," + active_flag + ")" + ";\n")
             f.write(
@@ -128,7 +128,7 @@ def d000(cf, source_output_path, source_name, Table_mapping, STG_tables, BKEY):
 
             process_name = "BK_" + str(Key_set_id) + "_" + Table_name + "_" + Column_name + "_" + str(Key_domain_ID)
             f.write(
-                "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID,Input_View_DB,Target_Table_DB,Target_View_DB,Srci_Table_DB,STG_TABLE)\n")
+                "insert into " + cf.GCFR_t + "." + cf.etl_process_table + "(SOURCE_NAME, PROCESS_TYPE, PROCESS_NAME, BASE_TABLE, APPLY_TYPE, RECORD_ID,Input_View_DB,Target_Table_DB,Target_View_DB,Srci_Table_DB,STG_TABLE_NAME)\n")
             # f.write(
             #     "VALUES ('" + source_name + "', '" + prcess_type + "', '" + process_name + "', '" + target_table + "', '" + Historization_algorithm + "', NULL,'"+Input_View_DB+"','"+Target_Table_DB+"','"+Target_View_DB+"','"+Srci_Table_DB+"')" + ";\n")
             f.write(

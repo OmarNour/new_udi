@@ -31,7 +31,7 @@ unified_police_station_sheet = "Unified Police Station"
 # AppName_<Major>.<Minor>.<BuildNo>
 ver_no = "| Build #2.15.1"
 # ################################################################################################
-# What is new : #2.15.0 :
+# What is new : #2.15.1 :
 # Editing D000 script to reflect change column name in ETL_PROCESS table in GCFR from STG_TABLE to STG_TABLE_NAME 
 # ################################################################################################
 # What is new : #2.15.0 :

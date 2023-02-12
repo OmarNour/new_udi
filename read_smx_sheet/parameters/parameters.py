@@ -29,8 +29,10 @@ unified_currency_sheet = "Unified Currency"
 unified_police_station_sheet = "Unified Police Station"
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #2.15.1"
+ver_no = "| Build #2.15.2"
 # ################################################################################################
+# What is new : #2.15.2 :
+# unified scripts to only be generated if the unified sheet contatins data for the source 
 # What is new : #2.15.1 :
 # Editing D000 script to reflect change column name in ETL_PROCESS table in GCFR from STG_TABLE to STG_TABLE_NAME 
 # ################################################################################################

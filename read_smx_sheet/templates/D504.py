@@ -15,10 +15,10 @@ def d504(cf, source_output_path, source_name, df):
         delete_query = f"DELETE FROM {target_table} WHERE SOURCE = '{source_name}';\n"
         f.write(f"--Delete UNIFIED_CURRENCY records for {source_name}\n")
         f.write(delete_query)
-        insert_prefix = f"INSERT INTO {target_table}(SOURCE_TABLE_NAME, DWH_CURRENCY_ID, SOURCE_CURRENCY_ID, CURRENCY_DESCRIPTION_EN, CURRENCY_DESCRIPTION_AR, INTERNATIONL_CURRENCY_CODE, SOURCE, MODIFICATION_TYPE, INS_DTTM) VALUES("
+        insert_prefix = f"INSERT INTO {target_table}(SOURCE_TABLE_NAME, DWH_CURRENCY_ID, SOURCE_CURRENCY_ID, CURRENCY_DESCRIPTION_EN, CURRENCY_DESCRIPTION_AR, INTERNATIONAL_CURRENCY_CODE, SOURCE, MODIFICATION_TYPE, INS_DTTM) VALUES("
         f.write(f"--Insert into UNIFIED_CURRENCY for {source_name}\n")
         for index, row in df.iterrows():
-            script = insert_prefix + f"'{str(row['SOURCE_TABLE_NAME'])}', '{str(row['DWH_CURRENCY_ID'])}', '{str(row['SOURCE_CURRENCY_ID'])}', '{str(row['CURRENCY_DESCRIPTION_EN'])}', '{str(row['CURRENCY_DESCRIPTION_AR'])}', '{str(row['INTERNATIONL_CURRENCY_CODE'])}', '{str(row['SOURCE'])}', 'I', current_timestamp);\n"
+            script = insert_prefix + f"'{str(row['SOURCE_TABLE_NAME'])}', '{str(row['DWH_CURRENCY_ID'])}', '{str(row['SOURCE_CURRENCY_ID'])}', '{str(row['CURRENCY_DESCRIPTION_EN'])}', '{str(row['CURRENCY_DESCRIPTION_AR'])}', '{str(row['INTERNATIONAL_CURRENCY_CODE'])}', '{str(row['SOURCE'])}', 'I', current_timestamp);\n"
             f.write(script)
 
         f.write("\n")

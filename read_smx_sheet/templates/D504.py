@@ -12,7 +12,7 @@ def d504(cf, source_output_path, source_name, df):
         f.write(f"--no UNIFIED_CURRENCY to generate for {source_name} source")
     else:
         target_table  = cf.db_prefix + "T_STG.UNIFIED_CURRENCY"
-        delete_query = f"DELETE FROM {target_table} WHERE SOURCE = '{source_name}';\n"
+        delete_query = f"DELETE FROM {target_table} WHERE SOURCE = '{source_name}';\n\n"
         f.write(f"--Delete UNIFIED_CURRENCY records for {source_name}\n")
         f.write(delete_query)
         insert_prefix = f"INSERT INTO {target_table}(SOURCE_TABLE_NAME, DWH_CURRENCY_ID, SOURCE_CURRENCY_ID, CURRENCY_DESCRIPTION_EN, CURRENCY_DESCRIPTION_AR, INTERNATIONAL_CURRENCY_CODE, SOURCE, MODIFICATION_TYPE, INS_DTTM) VALUES("

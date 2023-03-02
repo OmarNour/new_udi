@@ -12,7 +12,8 @@ def d001(cf, source_output_path, source_name, STG_tables):
         Table_name = STG_tables_row['Table name']
         f.write("insert into " + cf.GCFR_t + "." + cf.SOURCE_TABLES_LKP_table + "(SOURCE_NAME, TABLE_NAME)\n")
         f.write(
-            "SELECT " + "'" + source_name + "', '" + Table_name + "'" + " WHERE  NOT EXISTS (SELECT TABLE_NAME FROM " + cf.GCFR_t + "." + cf.SOURCE_TABLES_LKP_table + " WHERE SOURCE_NAME = " + "'" + source_name + "' );\n"
+            f"SELECT '{source_name}', '{Table_name}' WHERE NOT EXISTS (SELECT TABLE_NAME FROM {cf.GCFR_t}.{cf.SOURCE_TABLES_LKP_table} WHERE SOURCE_NAME = '{source_name}' AND TABLE_NAME = '{Table_name}');\n"
+            # "SELECT " + "'" + source_name + "', '" + Table_name + "'" + " WHERE  NOT EXISTS (SELECT TABLE_NAME FROM " + cf.GCFR_t + "." + cf.SOURCE_TABLES_LKP_table + " WHERE SOURCE_NAME = " + "'" + source_name + "'  );\n"
         )
         # f.write("VALUES ('" + source_name + "', '" + Table_name + "')" + ";\n")
         f.write("\n")

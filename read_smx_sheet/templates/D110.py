@@ -34,10 +34,13 @@ def d110(cf, source_output_path, stg_Table_mapping, STG_tables, Loading_Type):
             Column_name_as_src = '"' + STG_table_columns_row['Column name in source'] + '"'
             Column_name = '"' + STG_table_columns_row['Column name'] + '"'
             column_transformation_rule = str(STG_table_columns_row['Column Transformation Rule'])
+            column_data_type = str(STG_table_columns_row['Data type'])
             # Column_name = (column_transformation_rule + " AS " + Column_name) if column_transformation_rule != "" else  Column_name
 
             if column_transformation_rule != "":
                 Column_name = (column_transformation_rule + " AS " + Column_name)
+            elif 'date' in column_data_type.lower() or 'time' in column_data_type.lower():
+                Column_name = (Column_name_as_src + " AS " + Column_name)
             else:
                 Column_name = ("TRIM(" + Column_name_as_src + ") AS " + Column_name)
 

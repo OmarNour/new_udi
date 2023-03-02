@@ -31,7 +31,7 @@ unified_police_station_sheet = "Unified Police Station"
 # AppName_<Major>.<Minor>.<BuildNo>
 ver_no = "| Build #2.15.3"
 # ################################################################################################
-# What is new : #2.15.2 :
+# What is new : #2.15.3 :
 # Avoid trimming Datetime and Timestamp columns in D110
 # ################################################################################################
 # What is new : #2.15.2 :

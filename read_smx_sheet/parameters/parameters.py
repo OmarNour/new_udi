@@ -29,7 +29,10 @@ unified_currency_sheet = "Unified Currency"
 unified_police_station_sheet = "Unified Police Station"
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #2.15.4"
+ver_no = "| Build #2.15.5"
+# ################################################################################################
+# What is new : #2.15.5 :
+# Optimizing the CTE Statements in D615 to only consider the base tables for the input source
 # ################################################################################################
 # What is new : #2.15.4 :
 # in script D615 while inserting to TRANSFORM_KEY_COL GCFR table, we made sure to insert only the primary keys of the newly added

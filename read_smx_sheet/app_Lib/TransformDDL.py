@@ -99,7 +99,7 @@ def get_lkp_tbl_Cols(Core_tables, tbl_name):
     lkp_tbl_cols_desc = ''
     lkp_tbl_cols_name = ''
     for lkp_tbl_index, lkp_tbl_row in Core_tables[(Core_tables["Table name"] == tbl_name)].iterrows():
-        if lkp_tbl_row['Column name'].endswith('_CD'):
+        if lkp_tbl_row['Column name'].endswith('_CD') and lkp_tbl_row['PK'] == 'Y':
             lkp_tbl_cols_cd = str(lkp_tbl_row['Column name'])
         elif str(lkp_tbl_row['Column name']).upper().endswith('_NAME'):
             lkp_tbl_cols_name = str(lkp_tbl_row['Column name'])

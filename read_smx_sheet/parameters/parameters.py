@@ -31,6 +31,10 @@ unified_police_station_sheet = "Unified Police Station"
 # AppName_<Major>.<Minor>.<BuildNo>
 ver_no = "| Build #2.15.5"
 # ################################################################################################
+# What is new : #2.15.6 :
+# Editing get_lkp_tbl_Cols function in TransformDDL to make sure it only pulls the accurate key in the base lookup tables
+# This has a direct impact when inserting lookup values in script D005
+# ################################################################################################
 # What is new : #2.15.5 :
 # Optimizing the CTE Statements in D615 to only consider the base tables for the input source
 # ################################################################################################

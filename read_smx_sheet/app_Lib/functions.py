@@ -420,7 +420,7 @@ def get_bkey_physical_table(key_set_name,BKEY):
     return physical_table[0]
 
 def get_Staging_Key_Columns(df , tablename ):
-    return list(df[(df['Table name'] == tablename) & (df['PK'] == 'Y')]['Column name'])
+    return list(df[(df['Table name'] == tablename) & (df['PK'].str.upper() == 'Y')]['Column name'])
 
 
 

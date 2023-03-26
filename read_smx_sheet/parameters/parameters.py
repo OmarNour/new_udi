@@ -31,6 +31,9 @@ unified_police_station_sheet = "Unified Police Station"
 # AppName_<Major>.<Minor>.<BuildNo>
 ver_no = "| Build #2.15.5"
 # ################################################################################################
+# What is new : #2.15.7 :
+# Making sure to Generate PK for statging tables in key column transfer whether the 'Y' is capital or small
+# ################################################################################################
 # What is new : #2.15.6 :
 # Editing get_lkp_tbl_Cols function in TransformDDL to make sure it only pulls the accurate key in the base lookup tables
 # This has a direct impact when inserting lookup values in script D005

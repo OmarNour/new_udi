@@ -1000,7 +1000,7 @@ class Pipeline(MyID):
 
     @property
     def query(self):
-        distinct = 'distict' if self.distinct else ''
+        distinct = 'distinct' if self.distinct else ''
         col_mapping = ''
         with_clause = ''
         from_clause = ''

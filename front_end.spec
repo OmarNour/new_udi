@@ -6,8 +6,8 @@ block_cipher = None
 a = Analysis(['C:\\Users\\oh255011\\Documents\\Teradata\\new_udi\\read_smx_sheet\\front_end.py'],
              pathex=['C:\\Users\\oh255011\\Documents\\Teradata\\new_udi'],
              binaries=[],
-             datas=[('C:\\Users\\oh255011\\Anaconda3\\envs\\udi\\Lib\\site-packages\\dask\\dask.yaml', './dask'),
-			 ('C:\\Users\\oh255011\\Anaconda3\\envs\\udi\\Lib\\site-packages\\distributed\\distributed.yaml', './distributed')
+             datas=[('C:\\Users\\oh255011\\Anaconda3\\envs\\new_udi\\Lib\\site-packages\\dask\\dask.yaml', './dask'),
+			 ('C:\\Users\\oh255011\\Anaconda3\\envs\\new_udi\\Lib\\site-packages\\distributed\\distributed.yaml', './distributed')
 			 ,('C:\\Users\\oh255011\\Documents\\Teradata\\new_udi\\read_smx_sheet\\app_Lib\\script_icon.png','.')],
              hiddenimports=[],
              hookspath=[],

@@ -1,14 +1,16 @@
 import os
 import sys
 
-sys.path.append(os.getcwd())
+# sys.path.append(os.getcwd())
 import numpy as np
 import pandas as pd
 # import pyarrow.parquet as pq
 # import pyarrow as pa
 # from pyarrow.formatting import *
 import dask.dataframe as dd
-from read_smx_sheet.app_Lib import manage_directories as md
+import read_smx_sheet.app_Lib.manage_directories as md
+# from read_smx_sheet.app_Lib import manage_directories as md
+# from read_smx_sheet.parameters import parameters as pm
 from read_smx_sheet.parameters import parameters as pm
 import datetime as dt
 import psutil
@@ -295,6 +297,10 @@ def get_smx_files(smx_path, smx_ext, sheets):
 def get_config_file_path():
     config_file_path = md.get_dirs()[1]
     return config_file_path
+
+def get_smx_file_path():
+    smx_file_path = md.get_dirs()[1]
+    return smx_file_path
 
 
 def get_config_file_values(config_file_path=None):

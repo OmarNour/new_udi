@@ -5,7 +5,7 @@ from dask import compute, delayed
 import multiprocessing
 import warnings
 warnings.filterwarnings("ignore")
-from read_smx_sheet.Logging_Decorator import Logging_decorator
+from Logging_Decorator import Logging_decorator
 
 
 

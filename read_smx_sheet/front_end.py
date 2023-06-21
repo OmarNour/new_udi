@@ -1,12 +1,19 @@
 import os
 import sys
 
-sys.path.append(os.getcwd())
-from read_smx_sheet.app_Lib import manage_directories as md, functions as funcs
+# sys.path.append(os.getcwd())
+# from read_smx_sheet.app_Lib import manage_directories as md
+# from read_smx_sheet.app_Lib import funcs
+from read_smx_sheet.app_Lib import manage_directories as md
+from read_smx_sheet.app_Lib import test as ts
+from read_smx_sheet.app_Lib import functions as funcs
+# from read_smx_sheet.app_Lib import manage_directories as md, functions as funcs
 import multiprocessing
 from tkinter import *
 from tkinter import messagebox, filedialog, ttk
 from read_smx_sheet.parameters import parameters as pm
+# from parameters import parameters as pm
+# import generate_scripts as gs
 import read_smx_sheet.generate_scripts as gs
 import datetime as dt
 import traceback
@@ -14,6 +21,10 @@ import time
 import threading
 import random
 
+
+# from udi.functions import start
+from read_smx_sheet.udi.main import start
+from read_smx_sheet.udi.functions import generate_run_id
 
 class FrontEnd:
     def __init__(self):
@@ -53,6 +64,9 @@ class FrontEnd:
         frame_row2_r = Frame(frame_row2, borderwidth="2", relief="ridge")
         frame_row2_r.grid(column=1, row=3, sticky=W + E)
 
+        frame_row4 = Frame(self.root, borderwidth="2", relief="ridge")
+        frame_row4.grid(column=0, row=4)
+
         self.status_label_text = StringVar()
         self.status_label = Label(frame_row2_l)
         self.status_label.grid(column=0, row=0, sticky=W)
@@ -70,6 +84,20 @@ class FrontEnd:
         self.config_file_entry_txt = StringVar()
         self.config_file_entry = Entry(frame_row0, textvariable=self.config_file_entry_txt, width=100)
         config_file_path = os.path.join(funcs.get_config_file_path(), pm.default_config_file_name)
+
+
+
+        
+        # smx_file_label = Label(frame_row4, text="SMX File")
+        # smx_file_label.grid(row=0, column=0, sticky='e')
+
+        # self.smx_file_browse_button = Button(frame_row4, text="...", command=self.browsefunc)
+        # self.smx_file_browse_button.grid(row=0, column=3, sticky='w')
+
+        # self.smx_file_entry_text = StringVar()
+        # self.smx_file_entry = Entry(frame_row4, textvariable=self.smx_file_entry_text, width=100)
+        # smx_file_path = os.path.join(funcs.get_smx_file_path(), pm.default_config_file_name)
+
         try:
             x = open(config_file_path)
         except:
@@ -79,7 +107,7 @@ class FrontEnd:
 
         frame_buttons = Frame(frame_row1, borderwidth="2", relief="ridge")
         frame_buttons.grid(column=1, row=0)
-        self.generate_button = Button(frame_buttons, text="Start", width=12, height=2, command=self.start)
+        self.generate_button = Button(frame_buttons, text="Start", width=12, height=2, command=self.start_new)
         self.generate_button.grid(row=2, column=0)
         # close_button = Button(frame_buttons, text="Abort", width=12, height=1, command=self.close)
         # close_button.grid(row=3, column=0)
@@ -216,6 +244,7 @@ class FrontEnd:
             self.db_prefix = self.config_file_values["db_prefix"]
             self.generate_button.config(state=NORMAL)
             self.change_status_label(self.msg_ready, self.color_msg_ready)
+            # FrontEnd.db_prefix=self.db_prefix
 
         except:
             self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
@@ -353,20 +382,42 @@ class FrontEnd:
         if self.runningthread is not None:
             self.runningthread.terminate()
 
-    def start(self):
-        self.refresh_config_file_values()
-        self.g = gs.GenerateScripts(None, self.config_file_values)
-        self.g.scripts_flag = self.scripts_flag
+    # def start(self):
+    #     self.refresh_config_file_values()
+    #     self.g = gs.GenerateScripts(None, self.config_file_values)
+    #     self.g.scripts_flag = self.scripts_flag
 
-        self.UDI_scripts_generation.config(state=DISABLED)
-        self.Testing_scripts_generation.config(state=DISABLED)
-        self.source_smx_generation.config(state=DISABLED)
+    #     self.UDI_scripts_generation.config(state=DISABLED)
+    #     self.Testing_scripts_generation.config(state=DISABLED)
+    #     self.source_smx_generation.config(state=DISABLED)
 
-        thread1 = GenerateScriptsThread(1, "Thread-1", self)
-        thread1.start()
+    #     thread1 = GenerateScriptsThread(1, "Thread-1", self)
+    #     thread1.start()
 
-        thread2 = GenerateScriptsThread(2, "Thread-2", self, thread1)
-        thread2.start()
+    #     thread2 = GenerateScriptsThread(2, "Thread-2", self, thread1)
+    #     thread2.start()
+
+    def start_new(self):
+        run_id = generate_run_id()
+        print("source name:", self.source_names)
+        print("smx path:", r'{}'.format(self.smx_path))
+        print("output path:", r'{}'.format(self.output_path))
+        test = start(run_id, r'{}'.format(self.smx_path), r'{}'.format(self.output_path), self.source_names, with_scripts=True, with_deploy=False)
+        # test = start(run_id, r'[ACA] SMX_Economic_Units_03-01-2023.xlsx', self.source_names, with_scripts=True, with_deploy=False)
+        
+        # self.refresh_config_file_values()
+        # self.g = gs.GenerateScripts(None, self.config_file_values)
+        # self.g.scripts_flag = self.scripts_flag
+
+        # self.UDI_scripts_generation.config(state=DISABLED)
+        # self.Testing_scripts_generation.config(state=DISABLED)
+        # self.source_smx_generation.config(state=DISABLED)
+
+        # thread1 = GenerateScriptsThread(1, "Thread-1", self)
+        # thread1.start()
+
+        # thread2 = GenerateScriptsThread(2, "Thread-2", self, thread1)
+        # thread2.start()
 
     def generating_indicator(self, thread):
         def r():

@@ -29,7 +29,10 @@ unified_currency_sheet = "Unified Currency"
 unified_police_station_sheet = "Unified Police Station"
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #2.15.5"
+ver_no = "| Build #3.0.0"
+# ################################################################################################
+# What is new : #3.0.0 :
+# Changing the execution method and generating new folder structure for the output 
 # ################################################################################################
 # What is new : #2.15.7 :
 # Making sure to Generate PK for statging tables in key column transfer whether the 'Y' is capital or small

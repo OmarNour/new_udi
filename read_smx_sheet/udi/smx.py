@@ -437,7 +437,10 @@ class SMX:
             @log_error_decorator()
             def extract_bmap_domains(row):
                 data_set = DataSet.get_instance(_key=(self.bmap_set_type.id, row.code_set_id))
-                Domain(data_set_id=data_set.id, domain_code=row.code_domain_id, domain_name=row.code_domain_name)
+                if data_set and row.code_domain_id:
+                    Domain(data_set_id=data_set.id, domain_code=row.code_domain_id, domain_name=row.code_domain_name)
+                else:
+                    logging.error(f"invalid data set or domain ID, processing row:\n{row}")
 
             @log_error_decorator()
             def extract_bmap_values(row):
@@ -518,22 +521,25 @@ class SMX:
                                 srci_t = Table.get_instance(_key=(self.srci_t_schema.id, row.table_name))
                                 srci_col = Column.get_instance(_key=(srci_t.id, row.column_name))
 
-                                bk_process_name = BK_PROCESS_NAME_TEMPLATE.format(set_id=data_set.set_code
-                                                                                  , src_table_name=stg_t.table_name
-                                                                                  , column_name=srci_col.column_name
-                                                                                  , domain_id=srci_col.domain.domain_code
-                                                                                  )
-                                bk_view_name = BK_VIEW_NAME_TEMPLATE.format(view_name=bk_process_name)
-                                bkey_v = Table(schema_id=self.txf_bkey_v_schema.id, table_name=bk_view_name, table_kind='V', source_id=ds.id)
-                                bkey_vl = LayerTable(layer_id=self.txf_bkey_layer.id, table_id=bkey_v.id)
+                                if data_set and stg_t and srci_col:
+                                    bk_process_name = BK_PROCESS_NAME_TEMPLATE.format(set_id=data_set.set_code
+                                                                                      , src_table_name=stg_t.table_name
+                                                                                      , column_name=srci_col.column_name
+                                                                                      , domain_id=srci_col.domain.domain_code
+                                                                                      )
+                                    bk_view_name = BK_VIEW_NAME_TEMPLATE.format(view_name=bk_process_name)
+                                    bkey_v = Table(schema_id=self.txf_bkey_v_schema.id, table_name=bk_view_name, table_kind='V', source_id=ds.id)
+                                    bkey_vl = LayerTable(layer_id=self.txf_bkey_layer.id, table_id=bkey_v.id)
 
-                                bkey_pipeline = Pipeline(src_lyr_table_id=stg_lt.id
-                                                         , tgt_lyr_table_id=domain.data_set.surrogate_table.id
-                                                         , lyr_view_id=bkey_vl.id
-                                                         , domain_id=srci_col.domain.id
-                                                         , name=bk_process_name)
-                                if row.bkey_filter:
-                                    Filter(pipeline_id=bkey_pipeline.id, filter_seq=1, complete_filter_expr=row.bkey_filter)
+                                    bkey_pipeline = Pipeline(src_lyr_table_id=stg_lt.id
+                                                             , tgt_lyr_table_id=domain.data_set.surrogate_table.id
+                                                             , lyr_view_id=bkey_vl.id
+                                                             , domain_id=srci_col.domain.id
+                                                             , name=bk_process_name)
+                                    if row.bkey_filter:
+                                        Filter(pipeline_id=bkey_pipeline.id, filter_seq=1, complete_filter_expr=row.bkey_filter)
+                                else:
+                                    logging.error(f"Invalid key set '{row.key_set_name}', processing row:\n{row}")
 
             @log_error_decorator()
             def extract_srci_view_columns(row):
@@ -1154,8 +1160,8 @@ def generate_metadata_scripts(smx: SMX):
                                                                 TABLE_NAME=single_quotes(table.table_name),
                                                                 IS_LOOKUP=1 if table.is_lkp else 0,
                                                                 IS_HISTORY=1 if table.history_table else 0,
-                                                                START_DATE_COLUMN=single_quotes(table.start_date_col.column_name) if table.history_table else 'NULL',
-                                                                END_DATE_COLUMN=single_quotes(table.end_date_col.column_name) if table.history_table else 'NULL'
+                                                                START_DATE_COLUMN=single_quotes(table.start_date_col.column_name) if table.history_table and table.start_date_col else 'NULL',
+                                                                END_DATE_COLUMN=single_quotes(table.end_date_col.column_name) if table.history_table and table.end_date_col else 'NULL'
                                                                 )
                                   )
 

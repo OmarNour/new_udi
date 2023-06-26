@@ -1,16 +1,20 @@
 import logging
 # from .model import *
-from read_smx_sheet.udi.functions import log_error_decorator, time_elapsed_decorator, create_folder, WriteFile, filter_dataframe, single_quotes, merge_multiple_spaces, parse_data_type
+from functions import log_error_decorator, time_elapsed_decorator, create_folder, WriteFile, filter_dataframe, single_quotes, merge_multiple_spaces, parse_data_type
 import os
 import datetime as dt
-from read_smx_sheet.udi.model import Server, Table, DataSource, DataBaseEngine, Ip, Credential, LayerType, Layer, LayerTable, Schema, DataSetType, Pipeline, DataType, Column, DataSet, Domain, DomainValue, ColumnMapping, Filter, GroupBy, JoinType, JoinWith, JoinOn
-from read_smx_sheet.udi.config import CORE_MODEL_FOLDER_NAME, SHEETS, STG_TECHNICAL_COLS, SRC_SYSTEMS_FOLDER_NAME, DB_NAME, USER, PASSWORD, LAYER_TYPES, LAYERS, CORE_TECHNICAL_COLS, OTHER_SCHEMAS, DS_BKEY, DS_BMAP, UNIFIED_SOURCE_SYSTEMS, INSERT_INTO_SOURCE_SYSTEMS, INSERT_INTO_SOURCE_SYSTEM_TABLES, INSERT_INTO_EDW_TABLES, INSERT_INTO_TRANSFORM_KEYCOL, INSERT_INTO_PROCESS, INSERT_INTO_HISTORY, GRANTS, DDL_VIEW_TEMPLATE, COL_DTYPE_TEMPLATE, BK_PROCESS_NAME_TEMPLATE, QUERY_TEMPLATE, JOIN_CLAUSE_TEMPLATE, SRCI_V_BKEY_TEMPLATE_QUERY, SRCI_V_BMAP_TEMPLATE_QUERY, BK_VIEW_NAME_TEMPLATE, BMAP_PROCESS_NAME_TEMPLATE, BMAP_VIEW_NAME_TEMPLATE, CORE_PROCESS_NAME_TEMPLATE, CORE_VIEW_NAME_TEMPLATE, LOADING_MODE, DELETE_DATABASE_TEMPLATE, DROP_DATABASE_TEMPLATE, MAIN_DB_NAME,MAIN_DATABASE_TEMPLATE, DATABASE_TEMPLATE, DROP_BEFORE_CREATE, DROP_TABLE_TEMPLATE
+from model import Server, Table, DataSource, DataBaseEngine, Ip, Credential, LayerType, Layer, LayerTable, Schema, DataSetType, Pipeline, DataType, Column, DataSet, Domain, DomainValue, ColumnMapping, Filter, GroupBy, JoinType, JoinWith, JoinOn
+from config import CORE_MODEL_FOLDER_NAME, SHEETS, STG_TECHNICAL_COLS, SRC_SYSTEMS_FOLDER_NAME, DB_NAME, USER, PASSWORD, CORE_TECHNICAL_COLS, DS_BKEY, DS_BMAP, UNIFIED_SOURCE_SYSTEMS, INSERT_INTO_SOURCE_SYSTEMS, INSERT_INTO_SOURCE_SYSTEM_TABLES, INSERT_INTO_EDW_TABLES, INSERT_INTO_TRANSFORM_KEYCOL, INSERT_INTO_PROCESS, INSERT_INTO_HISTORY, BK_PROCESS_NAME_TEMPLATE, BK_VIEW_NAME_TEMPLATE, BMAP_PROCESS_NAME_TEMPLATE, BMAP_VIEW_NAME_TEMPLATE, CORE_PROCESS_NAME_TEMPLATE, CORE_VIEW_NAME_TEMPLATE, LOADING_MODE, DELETE_DATABASE_TEMPLATE, DROP_DATABASE_TEMPLATE, DATABASE_TEMPLATE, DROP_BEFORE_CREATE, DROP_TABLE_TEMPLATE
 import pandas as pd
 import numpy as np
+from collections import namedtuple
+
+# # PREFIX = "TEST"
 
 class SMX:
-
-    def __init__(self, path, run_id, output_path):
+    def __init__(self, path, run_id, output_path, db_prefix):
+        self.LAYER_TYPES, self.LAYERS, self.MAIN_DB_NAME, self.MAIN_DATABASE_TEMPLATE, self.OTHER_SCHEMAS, self.GRANTS = self.set_configs(db_prefix)
+        self.PREFIX = db_prefix
         self.run_id = run_id
         # self.run_id = str(generate_run_id())
         print(f"Run started with ID: {self.run_id}")
@@ -39,6 +43,71 @@ class SMX:
         self.data = {}
         self.init_model()
 
+    def set_configs(self, db_prefix):
+        PREFIX = db_prefix
+        LayerDtl = namedtuple("LayerDetail", "type level v_db t_db")
+        LAYER_TYPES = ['META', 'SRC', 'STG', 'SK', 'SRCI', 'CORE']  # Important: DO NOT CHANGE THE ORDER OF THIS LIST!
+        LAYERS = {
+            'META': LayerDtl(LAYER_TYPES[0], 0, f'{PREFIX}_ETL', f'{PREFIX}_ETL')
+            , 'SRC': LayerDtl(LAYER_TYPES[1], 0, f'{PREFIX}V_STG_ONLINE', 'STG_ONLINE')
+            , 'STG': LayerDtl(LAYER_TYPES[2], 1, f'{PREFIX}V_STG', f'{PREFIX}T_STG')
+            , 'TXF_BKEY': LayerDtl(LAYER_TYPES[3], 2, f'{PREFIX}V_INP', '')
+            , 'TXF_BMAP': LayerDtl(LAYER_TYPES[3], 2, f'{PREFIX}V_INP', '')
+            , 'BKEY': LayerDtl(LAYER_TYPES[3], 3, f'{PREFIX}V_UTLFW', f'{PREFIX}T_UTLFW')
+            , 'BMAP': LayerDtl(LAYER_TYPES[3], 3, f'{PREFIX}V_UTLFW', f'{PREFIX}T_UTLFW')
+            , 'SRCI': LayerDtl(LAYER_TYPES[4], 4, f'{PREFIX}V_SRCI', f'{PREFIX}T_SRCI')
+            , 'TXF_CORE': LayerDtl(LAYER_TYPES[4], 5, f'{PREFIX}V_INP', '')
+            , 'CORE': LayerDtl(LAYER_TYPES[5], 6, f'{PREFIX}V_BASE', f'{PREFIX}T_BASE')
+        }
+
+        MAIN_DB_NAME = f"{PREFIX}_EDWH"
+        MAIN_DATABASE_TEMPLATE = f"""
+        CREATE DATABASE {MAIN_DB_NAME}
+        AS PERMANENT = 5000e6, -- 5GB
+            SPOOL = 1000e6; -- 1GB
+        """
+        OTHER_SCHEMAS = [f"{PREFIX}_ETL"]
+
+        GRANTS = f"""
+        GRANT CREATE PROCEDURE ON {PREFIX}_ETL TO DBC WITH GRANT OPTION;
+        GRANT CREATE FUNCTION ON {PREFIX}_ETL TO DBC WITH GRANT OPTION;
+        GRANT EXECUTE PROCEDURE ON {PREFIX}_ETL TO DBC WITH GRANT OPTION;
+        GRANT EXECUTE FUNCTION ON {PREFIX}_ETL TO DBC WITH GRANT OPTION;
+
+        GRANT SELECT ON STG_ONLINE TO {PREFIX}V_STG_ONLINE WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}T_STG TO {PREFIX}V_STG WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}T_UTLFW TO {PREFIX}V_UTLFW WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}V_UTLFW TO {PREFIX}V_SRCI WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}T_UTLFW TO {PREFIX}V_SRCI WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}V_STG TO {PREFIX}V_SRCI WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}T_STG TO {PREFIX}V_SRCI WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}T_STG TO {PREFIX}V_INP WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}T_SRCI TO {PREFIX}V_INP WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}T_SRCI TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}V_SRCI TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT CREATE TABLE ON {PREFIX}T_SRCI TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT DROP TABLE ON {PREFIX}T_SRCI TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}T_BASE TO {PREFIX}V_BASE WITH GRANT OPTION;
+
+        GRANT SELECT ON DBC TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}V_INP TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}T_UTLFW TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT INSERT ON {PREFIX}T_UTLFW TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}T_BASE TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT DELETE ON {PREFIX}T_BASE TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT UPDATE ON {PREFIX}T_BASE TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT INSERT ON {PREFIX}T_BASE TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}V_BASE TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}V_STG_ONLINE TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT SELECT ON {PREFIX}T_STG TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT DELETE ON {PREFIX}T_STG TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT UPDATE ON {PREFIX}T_STG TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT INSERT ON {PREFIX}T_STG TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT EXECUTE PROCEDURE ON {PREFIX}_ETL TO {PREFIX}_ETL WITH GRANT OPTION;
+        GRANT EXECUTE FUNCTION ON {PREFIX}_ETL TO {PREFIX}_ETL WITH GRANT OPTION;
+        """
+        return LAYER_TYPES, LAYERS, MAIN_DB_NAME, MAIN_DATABASE_TEMPLATE, OTHER_SCHEMAS, GRANTS
+
 
     def __del__(self):
         print("I am a destructor")
@@ -63,17 +132,17 @@ class SMX:
         Ip(server_id=self.server.id, ip='localhost')
         Credential(db_engine_id=self.db_engine.id, user_name=USER, password=PASSWORD)
         # print(self.conn)
-        [LayerType(type_name=lt) for lt in LAYER_TYPES]
-        for layer_key, layer_value in LAYERS.items():
+        [LayerType(type_name=lt) for lt in self.LAYER_TYPES]
+        for layer_key, layer_value in self.LAYERS.items():
             layer_type = LayerType.get_instance(_key=layer_value.type)
             Layer(type_id=layer_type.id, layer_name=layer_key, abbrev=layer_key, layer_level=layer_value.level)
             if layer_value.t_db:
-                Schema(db_id=self.db_engine.id, schema_name=layer_value.t_db, _override=1)
+                Schema(db_id=self.db_engine.id, schema_name=layer_value.t_db, main_db_name=self.MAIN_DB_NAME, _override=1)
             if layer_value.v_db:
-                Schema(db_id=self.db_engine.id, schema_name=layer_value.v_db, _override=1)
+                Schema(db_id=self.db_engine.id, schema_name=layer_value.v_db, main_db_name=self.MAIN_DB_NAME, _override=1)
 
-        for other_schema in OTHER_SCHEMAS:
-            Schema(db_id=self.db_engine.id, schema_name=other_schema, _override=1)
+        for other_schema in self.OTHER_SCHEMAS:
+            Schema(db_id=self.db_engine.id, schema_name=other_schema, main_db_name=self.MAIN_DB_NAME, _override=1)
 
         DataSetType(name=DS_BKEY)
         DataSetType(name=DS_BMAP)
@@ -91,24 +160,24 @@ class SMX:
         self.txf_core_layer = Layer.get_instance(_key='TXF_CORE')
         self.core_layer = Layer.get_instance(_key='CORE')
 
-        self.meta_t_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['META'].t_db))
-        self.src_t_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['SRC'].t_db))
-        self.stg_t_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['STG'].t_db))
-        self.bmap_t_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['BMAP'].t_db))
-        self.bkey_t_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['BKEY'].t_db))
-        self.srci_t_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['SRCI'].t_db))
-        self.core_t_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['CORE'].t_db))
+        self.meta_t_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['META'].t_db))
+        self.src_t_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['SRC'].t_db))
+        self.stg_t_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['STG'].t_db))
+        self.bmap_t_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['BMAP'].t_db))
+        self.bkey_t_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['BKEY'].t_db))
+        self.srci_t_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['SRCI'].t_db))
+        self.core_t_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['CORE'].t_db))
 
-        self.meta_v_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['META'].v_db))
-        self.src_v_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['SRC'].v_db))
-        self.stg_v_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['STG'].v_db))
-        self.bmap_v_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['BMAP'].v_db))
-        self.bkey_v_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['BKEY'].v_db))
-        self.txf_bkey_v_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['TXF_BKEY'].v_db))
-        self.txf_bmap_v_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['TXF_BMAP'].v_db))
-        self.srci_v_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['SRCI'].v_db))
-        self.txf_core_v_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['TXF_CORE'].v_db))
-        self.core_v_schema = Schema.get_instance(_key=(self.db_engine.id, LAYERS['CORE'].v_db))
+        self.meta_v_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['META'].v_db))
+        self.src_v_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['SRC'].v_db))
+        self.stg_v_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['STG'].v_db))
+        self.bmap_v_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['BMAP'].v_db))
+        self.bkey_v_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['BKEY'].v_db))
+        self.txf_bkey_v_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['TXF_BKEY'].v_db))
+        self.txf_bmap_v_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['TXF_BMAP'].v_db))
+        self.srci_v_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['SRCI'].v_db))
+        self.txf_core_v_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['TXF_CORE'].v_db))
+        self.core_v_schema = Schema.get_instance(_key=(self.db_engine.id, self.LAYERS['CORE'].v_db))
 
     @log_error_decorator()
     @time_elapsed_decorator
@@ -1034,7 +1103,7 @@ def generate_schemas_ddl(smx: SMX):
     db_create_file = WriteFile(smx.current_scripts_path, "create_schemas", "sql")
     db_drop_file = WriteFile(smx.current_scripts_path, "drop_schemas", "sql")
 
-    db_create_file.write(MAIN_DATABASE_TEMPLATE + "\n")
+    db_create_file.write(smx.MAIN_DATABASE_TEMPLATE + "\n")
     for schema in Schema.get_all_instances():
         ddl = schema.ddl
         delete_schema_ddl = DELETE_DATABASE_TEMPLATE.format(db_name=schema.schema_name)
@@ -1043,13 +1112,13 @@ def generate_schemas_ddl(smx: SMX):
             db_drop_file.write(delete_schema_ddl + "\n" + drop_schema_ddl + "\n\n")
             db_create_file.write(ddl + "\n")
 
-    db_drop_file.write(DROP_DATABASE_TEMPLATE.format(db_name=MAIN_DB_NAME) + "\n")
+    db_drop_file.write(DROP_DATABASE_TEMPLATE.format(db_name=self.MAIN_DB_NAME) + "\n")
 
     db_create_file.close()
     db_drop_file.close()
 
     grants_file = WriteFile(smx.current_scripts_path, "grants", "sql")
-    grants_file.write(GRANTS)
+    grants_file.write(smx.GRANTS)
     grants_file.close()
 
 

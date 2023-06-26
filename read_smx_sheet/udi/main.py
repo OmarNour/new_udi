@@ -1,12 +1,12 @@
 # from .smx import *
-from read_smx_sheet.udi.model import MyID
-from read_smx_sheet.udi.functions import time_elapsed_decorator
-from read_smx_sheet.udi.smx import SMX, generate_scripts, generate_metadata_scripts
+from model import MyID
+from functions import time_elapsed_decorator
+from smx import SMX, generate_scripts, generate_metadata_scripts
 import logging
 
 @time_elapsed_decorator
-def start(run_id, smx_path: str, output_path: str, source_name: str | list | None, with_scripts=True, with_deploy=False):
-    smx = SMX(smx_path, run_id, output_path)
+def start(run_id, db_prefix, smx_path: str, output_path: str, source_name: str | list | None, with_scripts=True, with_deploy=False):
+    smx = SMX(smx_path, run_id, output_path, db_prefix)
     print(smx)
     
     

@@ -1,7 +1,7 @@
 # from .functions import *
-from read_smx_sheet.udi.functions import log_error_decorator, upper_string_in_list, list_to_string
+from functions import log_error_decorator, upper_string_in_list, list_to_string
 import functools
-from read_smx_sheet.udi.config import cls_keys, JOIN_TYPES, ALPHABETS, DDL_VIEW_TEMPLATE, COL_DTYPE_TEMPLATE, CREATE_REPLACE, FROM_TEMPLATE, PI_TEMPLATE, DDL_TABLE_TEMPLATE, CAST_DTYPE_TEMPLATE, DS_BKEY, QUERY_TEMPLATE, CAST_DTYPE_TEMPLATE, GROUP_BY_TEMPLATE, CAST_DTYPE_TEMPLATE, COL_MAPPING_TEMPLATE, SRCI_V_BKEY_TEMPLATE_QUERY, SRCI_V_BKEY_TEMPLATE_QUERY, WHERE_TEMPLATE, DS_BMAP, SRCI_V_BMAP_TEMPLATE_QUERY, JOIN_CLAUSE_TEMPLATE
+from config import cls_keys, JOIN_TYPES, ALPHABETS, DDL_VIEW_TEMPLATE, COL_DTYPE_TEMPLATE, CREATE_REPLACE, FROM_TEMPLATE, PI_TEMPLATE, DDL_TABLE_TEMPLATE, CAST_DTYPE_TEMPLATE, DS_BKEY, QUERY_TEMPLATE, CAST_DTYPE_TEMPLATE, GROUP_BY_TEMPLATE, CAST_DTYPE_TEMPLATE, COL_MAPPING_TEMPLATE, SRCI_V_BKEY_TEMPLATE_QUERY, WHERE_TEMPLATE, DS_BMAP, SRCI_V_BMAP_TEMPLATE_QUERY, JOIN_CLAUSE_TEMPLATE
 import re
 class Meta(type):
     """
@@ -352,12 +352,17 @@ class Credential(MyID):
 
 
 class Schema(MyID):
-    def __init__(self, db_id, schema_name: str, is_tmp: int = 0, notes: str = None, **kwargs):
+    def __init__(self, db_id, schema_name: str, main_db_name: str, is_tmp: int = 0, notes: str = None, **kwargs):
         super().__init__(**kwargs)
         self._schema_name = schema_name
+        self._main_db_name = main_db_name
         self._db_id = db_id
         self.is_tmp = is_tmp
         self.notes = notes
+
+    @property
+    def main_db_name(self):
+        return self._main_db_name
 
     @property
     def schema_name(self):
@@ -383,7 +388,7 @@ class Schema(MyID):
 
     @property
     def ddl(self) -> str:
-        return DATABASE_TEMPLATE.format(db_name=self.schema_name, main_db_name=MAIN_DB_NAME)
+        return DATABASE_TEMPLATE.format(db_name=self.schema_name, main_db_name=main_db_name)
 
     @property
     def layers(self) -> []:

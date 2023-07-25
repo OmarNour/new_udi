@@ -109,21 +109,6 @@ class SMX:
         return LAYER_TYPES, LAYERS, MAIN_DB_NAME, MAIN_DATABASE_TEMPLATE, OTHER_SCHEMAS, GRANTS
 
 
-    def __del__(self):
-        print("I am a destructor")
-        # logger = logging.getLogger()
-        # for handler in list(logger.handlers):
-        #     print(handler)
-        #     logger.removeHandler(handler) 
-        #     handler.close()
-            
-        
-        # logger.close()
-        
-        # logging.shutdown()
-
-
-
 
     @log_error_decorator()
     def init_model(self):

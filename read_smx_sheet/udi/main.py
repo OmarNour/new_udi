@@ -3,14 +3,15 @@ from udi.model import *
 from udi.functions import time_elapsed_decorator
 from udi.smx import SMX, generate_scripts, generate_metadata_scripts
 import logging
+import time
+from datetime import datetime
 
 @time_elapsed_decorator
 def start(run_id, db_prefix, smx_path: str, output_path: str, source_name: str | list | None, with_scripts=True, with_deploy=False):
+    # start_time = time.perf_counter()
+    start_time = datetime.now()
     smx = SMX(smx_path, run_id, output_path, db_prefix)
-    print(smx)
-    
-    
-    
+    # print(smx)
     smx.parse_file()
     smx.populate_model(source_name=source_name)
 
@@ -28,6 +29,12 @@ def start(run_id, db_prefix, smx_path: str, output_path: str, source_name: str |
         cls_instances_cout = eval(f"{class_name}.count_instances()")
         class_count = f'{class_name} count: {cls_instances_cout}\n'
         myid_summary += class_count
+
+    # end_time = time.perf_counter()
+    end_time = datetime.now()
+
+    time_elapsed = end_time-start_time
+    myid_summary += f"Time Elapsed: {time_elapsed}\n"
 
     logging.info(myid_summary)
     # open_folder()

@@ -383,8 +383,8 @@ class FrontEnd:
         if self.runningthread is not None:
             self.runningthread.terminate()
 
-    # def start(self):
-    #     self.refresh_config_file_values()
+    def start_new(self):
+        self.refresh_config_file_values()
     #     self.g = gs.GenerateScripts(None, self.config_file_values)
     #     self.g.scripts_flag = self.scripts_flag
 
@@ -392,13 +392,13 @@ class FrontEnd:
     #     self.Testing_scripts_generation.config(state=DISABLED)
     #     self.source_smx_generation.config(state=DISABLED)
 
-    #     thread1 = GenerateScriptsThread(1, "Thread-1", self)
-    #     thread1.start()
+        thread1 = GenerateScriptsThread(1, "Thread-1", self)
+        thread1.start()
 
-    #     thread2 = GenerateScriptsThread(2, "Thread-2", self, thread1)
-    #     thread2.start()
+        thread2 = GenerateScriptsThread(2, "Thread-2", self, thread1)
+        thread2.start()
 
-    def start_new(self):
+    def generate_code(self):
         run_id = generate_run_id()
         print("source name:", self.source_names)
         print("smx path:", r'{}'.format(self.smx_path))
@@ -417,26 +417,34 @@ class FrontEnd:
         # self.Testing_scripts_generation.config(state=DISABLED)
         # self.source_smx_generation.config(state=DISABLED)
 
-        # thread1 = GenerateScriptsThread(1, "Thread-1", self)
-        # thread1.start()
+        thread1 = GenerateScriptsThread(1, "Thread-1", self)
+        thread1.start()
 
-        # thread2 = GenerateScriptsThread(2, "Thread-2", self, thread1)
-        # thread2.start()
+        thread2 = GenerateScriptsThread(2, "Thread-2", self, thread1)
+        thread2.start()
 
     def generating_indicator(self, thread):
         def r():
             return random.randint(0, 255)
-
+        
+        start_time = dt.datetime.now()
         while thread.is_alive():
-            elapsed_time = dt.datetime.now() - self.g.start_time
-            msg = self.msg_generating + str(elapsed_time)
-            # color_list = ["white", "black", "red", "green", "blue", "cyan", "yellow", "magenta"]
-            # color = random.choice(color_list)
+            # elapsed_time = dt.datetime.now() - start_time
+            msg = self.msg_generating + str(dt.datetime.now() - start_time)
+            # msg = 'Running..'
+            color_list = ["white", "black", "red", "green", "blue", "cyan", "yellow", "magenta"]
+            color = random.choice(color_list)
             color = '#%02X%02X%02X' % (r(), r(), r())
             self.change_status_label(msg, color)
 
-        message = self.g.error_message if self.g.error_message != "" else self.msg_done + str(self.g.elapsed_time)
-        color = self.color_msg_done_with_error if self.g.error_message != "" else self.color_msg_done
+
+
+        # TODO: change success and color messages based on state 
+
+        # message = self.g.error_message if self.g.error_message != "" else self.msg_done + str(self.g.elapsed_time)
+        # color = self.color_msg_done_with_error if self.g.error_message != "" else self.color_msg_done
+        message = self.msg_done + str(dt.datetime.now() - start_time)
+        color = self.color_msg_done
         self.change_status_label(message, color)
 
     def display_server_info(self, thread):
@@ -458,7 +466,8 @@ class GenerateScriptsThread(threading.Thread):
 
     def run(self):
         if self.threadID == 1:
-            self.FrontEndC.generate_scripts_thread()
+            # self.FrontEndC.generate_scripts_thread()
+            self.FrontEndC.generate_code()
         if self.threadID == 2:
             self.FrontEndC.generating_indicator(self.thread)
         if self.threadID == 0:

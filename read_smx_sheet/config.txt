@@ -7,25 +7,26 @@
 smx_path="/Users/oh255011/Documents/Teradata/SMX/SMX/[ACA] SMX_Economic_Units_03-01-2023.xlsx"
 unified_path = "/Users/oh255011/Documents/Teradata/SMX/UNIFIED/UNIFIED.xlsx"
 home_output_folder="/Users/oh255011/Documents/Teradata/SMX/UDI_OUTPUT"
-templates_folder_path="/Users/oh255011/Documents/Teradata/new_udi/Templates_format"
-
-
-
-# Source Filter:
-## for all sources: source_names=""
-## for for certain sources: sources: source_names="TAMWEEN,TAX,EDU,CUSTOMS"
-source_names="NEW_COLLECTIONS"
-
 online_source_t="stg_online"
 offline_source_t="stg_layer"
 staging_view_db="DEV_STG_ONLINE"
+db_prefix="GPROD1"
+source_names="NEW_COLLECTIONS"
+
+
+
+
+templates_folder_path="/Users/oh255011/Documents/Teradata/new_udi/Templates_format"
+# Source Filter:
+## for all sources: source_names=""
+## for for certain sources: sources: source_names="TAMWEEN,TAX,EDU,CUSTOMS"
+
 
 etl_process_table="ETL_PROCESS"
 SOURCE_TABLES_LKP_table="SOURCE_TABLES_LKP"
 SOURCE_NAME_LKP_table="SOURCE_NAME_LKP"
 history_tbl="HISTORY"
 
-db_prefix="GPROD1"
 scripts_flag = "All"
 gcfr_ctl_Id=1
 gcfr_stream_key=1

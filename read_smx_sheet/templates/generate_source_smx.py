@@ -1,4 +1,4 @@
-from read_smx_sheet.Logging_Decorator import Logging_decorator
+from Logging_Decorator import Logging_decorator
 import pandas as pd
 
 

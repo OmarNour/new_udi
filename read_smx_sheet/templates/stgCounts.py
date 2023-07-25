@@ -1,7 +1,7 @@
-from read_smx_sheet.app_Lib import functions as funcs
-from read_smx_sheet.Logging_Decorator import Logging_decorator
-from read_smx_sheet.parameters import parameters as pm
-from read_smx_sheet.app_Lib import TransformDDL as TDDL
+from app_Lib import functions as funcs
+from Logging_Decorator import Logging_decorator
+from parameters import parameters as pm
+from app_Lib import TransformDDL as TDDL
 
 
 @Logging_decorator

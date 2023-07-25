@@ -1,19 +1,19 @@
 import os, sys, subprocess
 sys.path.append(os.getcwd())
-from read_smx_sheet.app_Lib import manage_directories as md, functions as funcs
+from app_Lib import manage_directories as md, functions as funcs
 from dask import compute, delayed, config
 from dask.diagnostics import ProgressBar
-from read_smx_sheet.templates import D110, D300, D320, D200, D330, D400, D610, D640, D609 , D005
-from read_smx_sheet.templates import testing_script_01, testing_script_02
-from read_smx_sheet.templates import PROCESS_CHECK_TEST_SHEET, CSO_TEST_SHEET, NULLS_TEST_SHEET, DUP_TEST_SHEET
-from read_smx_sheet.templates import BMAP_DUP_CD_TEST_SHEET,BMAP_DUP_DESC_TEST_SHEET,BMAP_NULL_TEST_SHEET
-from read_smx_sheet.templates import DATA_SRC_TEST_SHEET, BMAP_CHECK_TEST_SHEET , BMAP_UNMATCHED_TEST_SHEET
-from read_smx_sheet.templates import HIST_STRT_END_NULL_TEST_SHEET, HIST_DUP_TEST_SHEET ,HIST_STRT_GRT_END_TEST_SHEET,HIST_TIME_GAP_TEST_SHEET
-from read_smx_sheet.templates import HIST_STRT_NULL_TEST_SHEET, RI_TEST_SHEET, compare_testing_inputview
-from read_smx_sheet.templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340,D215 , D004, D500, D501, D502, D503, D504, D505
-from read_smx_sheet.templates import generate_source_smx
-from read_smx_sheet.templates import dataValidation,stgCounts
-from read_smx_sheet.parameters import parameters as pm
+from templates import D110, D300, D320, D200, D330, D400, D610, D640, D609 , D005
+from templates import testing_script_01, testing_script_02
+from templates import PROCESS_CHECK_TEST_SHEET, CSO_TEST_SHEET, NULLS_TEST_SHEET, DUP_TEST_SHEET
+from templates import BMAP_DUP_CD_TEST_SHEET,BMAP_DUP_DESC_TEST_SHEET,BMAP_NULL_TEST_SHEET
+from templates import DATA_SRC_TEST_SHEET, BMAP_CHECK_TEST_SHEET , BMAP_UNMATCHED_TEST_SHEET
+from templates import HIST_STRT_END_NULL_TEST_SHEET, HIST_DUP_TEST_SHEET ,HIST_STRT_GRT_END_TEST_SHEET,HIST_TIME_GAP_TEST_SHEET
+from templates import HIST_STRT_NULL_TEST_SHEET, RI_TEST_SHEET, compare_testing_inputview
+from templates import D410, D415, D003, D630, D420, D210, D608, D615, D000, gcfr, D620, D001, D600, D607, D002, D340,D215 , D004, D500, D501, D502, D503, D504, D505
+from templates import generate_source_smx
+from templates import dataValidation,stgCounts
+from parameters import parameters as pm
 import traceback
 import datetime as dt
 import shutil

@@ -1,5 +1,5 @@
 import functools
-from read_smx_sheet.app_Lib import functions as funcs
+from app_Lib import functions as funcs
 import traceback
 
 

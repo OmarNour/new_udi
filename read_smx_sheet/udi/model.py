@@ -1,7 +1,7 @@
 # from .functions import *
-from functions import log_error_decorator, upper_string_in_list, list_to_string
+from udi.functions import log_error_decorator, upper_string_in_list, list_to_string
 import functools
-from config import cls_keys, JOIN_TYPES, ALPHABETS, DDL_VIEW_TEMPLATE, COL_DTYPE_TEMPLATE, CREATE_REPLACE, FROM_TEMPLATE, PI_TEMPLATE, DDL_TABLE_TEMPLATE, CAST_DTYPE_TEMPLATE, DS_BKEY, QUERY_TEMPLATE, CAST_DTYPE_TEMPLATE, GROUP_BY_TEMPLATE, CAST_DTYPE_TEMPLATE, COL_MAPPING_TEMPLATE, SRCI_V_BKEY_TEMPLATE_QUERY, WHERE_TEMPLATE, DS_BMAP, SRCI_V_BMAP_TEMPLATE_QUERY, JOIN_CLAUSE_TEMPLATE
+from udi.config import cls_keys, JOIN_TYPES, ALPHABETS, DDL_VIEW_TEMPLATE, COL_DTYPE_TEMPLATE, CREATE_REPLACE, FROM_TEMPLATE, PI_TEMPLATE, DDL_TABLE_TEMPLATE, CAST_DTYPE_TEMPLATE, DS_BKEY, QUERY_TEMPLATE, CAST_DTYPE_TEMPLATE, GROUP_BY_TEMPLATE, CAST_DTYPE_TEMPLATE, COL_MAPPING_TEMPLATE, SRCI_V_BKEY_TEMPLATE_QUERY, WHERE_TEMPLATE, DS_BMAP, SRCI_V_BMAP_TEMPLATE_QUERY, JOIN_CLAUSE_TEMPLATE
 import re
 class Meta(type):
     """
@@ -684,8 +684,9 @@ class DomainValue(MyID):
 
     @property
     def description(self):
-        return self._description.lower()
-
+        if isinstance(self._description, str): 
+            return self._description.lower()
+        return self._description
     @property
     def domain(self) -> Domain:
         return Domain.get_instance(_id=self._domain_id)

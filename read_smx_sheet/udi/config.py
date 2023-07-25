@@ -8,7 +8,6 @@ from collections import namedtuple
 # import os
 
 # config_file_path = os.path.join(funcs.get_config_file_path(), pm.default_config_file_name)
-# from test import omar
 
 
 # source_name = "NEW_COLLECTIONS"
@@ -79,11 +78,12 @@ STG_TECHNICAL_COLS = [TechColumn('MODIFICATION_TYPE', 'CHAR(1)', 0, 0, 0, 0, 1, 
 SHEETS = ['stg_tables', 'system', 'data_type', 'bkey', 'bmap'
     , 'bmap_values', 'core_tables', 'column_mapping', 'table_mapping'
     , 'supplements']
-UNIFIED_SOURCE_SYSTEMS = ['UNIFIED_GOV',
+UNIFIED_SOURCE_SYSTEMS = ['UNIFIED_GOVERNORATE',
                           'UNIFIED_CITY',
                           'UNIFIED_POLICE_STATION',
                           'UNIFIED_DISTRICT',
-                          'UNIFIED_COUNTRY']
+                          'UNIFIED_COUNTRY', 
+                          'UNIFIED_CURRENCY']
 DS_BKEY = 'BKEY'
 DS_BMAP = 'BMAP'
 # LayerDtl = namedtuple("LayerDetail", "type level v_db t_db")

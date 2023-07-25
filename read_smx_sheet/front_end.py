@@ -4,17 +4,17 @@ import sys
 # sys.path.append(os.getcwd())
 # from read_smx_sheet.app_Lib import manage_directories as md
 # from read_smx_sheet.app_Lib import funcs
-from read_smx_sheet.app_Lib import manage_directories as md
-from read_smx_sheet.app_Lib import test as ts
-from read_smx_sheet.app_Lib import functions as funcs
+from app_Lib import manage_directories as md
+from app_Lib import test as ts
+from app_Lib import functions as funcs
 # from read_smx_sheet.app_Lib import manage_directories as md, functions as funcs
 import multiprocessing
 from tkinter import *
 from tkinter import messagebox, filedialog, ttk
-from read_smx_sheet.parameters import parameters as pm
+from parameters import parameters as pm
 # from parameters import parameters as pm
 # import generate_scripts as gs
-import read_smx_sheet.generate_scripts as gs
+import generate_scripts as gs
 import datetime as dt
 import traceback
 import time
@@ -23,8 +23,8 @@ import random
 
 
 # from udi.functions import start
-from read_smx_sheet.udi.main import start
-from read_smx_sheet.udi.functions import generate_run_id
+from udi.main import start
+from udi.functions import generate_run_id, open_folder
 
 class FrontEnd:
     def __init__(self):
@@ -237,10 +237,11 @@ class FrontEnd:
     def get_config_file_values(self):
         try:
             self.config_file_values = funcs.get_config_file_values(self.config_file_entry_txt.get())
-            self.smx_path = self.config_file_values["smx_path"]
-            self.output_path = self.config_file_values["output_path"]
+            self.smx_path = r"{}".format(self.config_file_values["smx_path"])
+            self.output_path = r"{}".format(self.config_file_values["output_path"])
             source_names = self.config_file_values["source_names"]
-            self.source_names = "All" if source_names is None else source_names
+            # self.source_names = "All" if source_names is None else source_names
+            # self.source_names = "" if source_names is None else source_names
             self.db_prefix = self.config_file_values["db_prefix"]
             self.generate_button.config(state=NORMAL)
             self.change_status_label(self.msg_ready, self.color_msg_ready)
@@ -402,7 +403,10 @@ class FrontEnd:
         print("source name:", self.source_names)
         print("smx path:", r'{}'.format(self.smx_path))
         print("output path:", r'{}'.format(self.output_path))
-        test = start(run_id, r'{}'.format(self.smx_path), r'{}'.format(self.output_path), self.source_names, with_scripts=True, with_deploy=False)
+        print("db_prefix:", r'{}'.format(self.db_prefix))
+        # start(run_id, r'{}'.format(self.db_prefix), r'{}'.format(self.smx_path), r'{}'.format(self.output_path), self.source_names, with_scripts=True, with_deploy=False)
+        start(run_id, self.db_prefix, self.smx_path, self.output_path, self.source_names, with_scripts=True, with_deploy=False)
+        open_folder(self.output_path)
         # test = start(run_id, r'[ACA] SMX_Economic_Units_03-01-2023.xlsx', self.source_names, with_scripts=True, with_deploy=False)
         
         # self.refresh_config_file_values()

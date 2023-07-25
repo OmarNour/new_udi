@@ -29,7 +29,10 @@ unified_currency_sheet = "Unified Currency"
 unified_police_station_sheet = "Unified Police Station"
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #3.1.0"
+ver_no = "| Build #3.2.0"
+# ################################################################################################
+# What is new : #3.2.0 :
+# Run on all sources when no source is given by the user and generate summary report in the log file
 # ################################################################################################
 # What is new : #3.1.0 :
 # Capturing the database prefix from the configuration file 

@@ -1,7 +1,7 @@
 # from .smx import *
-from model import MyID
-from functions import time_elapsed_decorator
-from smx import SMX, generate_scripts, generate_metadata_scripts
+from udi.model import *
+from udi.functions import time_elapsed_decorator
+from udi.smx import SMX, generate_scripts, generate_metadata_scripts
 import logging
 
 @time_elapsed_decorator
@@ -23,13 +23,15 @@ def start(run_id, db_prefix, smx_path: str, output_path: str, source_name: str |
         # generate_fake_data()
 
     myid_summary = "\n\nSummary:\n######################\n\n"
+    # logging.info(myid_summary)
     for class_name in MyID.get_all_classes_instances().keys():
         cls_instances_cout = eval(f"{class_name}.count_instances()")
         class_count = f'{class_name} count: {cls_instances_cout}\n'
         myid_summary += class_count
 
     logging.info(myid_summary)
-    return smx.current_scripts_path
+    # open_folder()
+    # return smx.current_scripts_path
 
 
 # Press the green button in the gutter to run the script.

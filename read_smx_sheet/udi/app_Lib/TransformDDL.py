@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import read_smx_sheet.app_Lib.functions as funcs
+import app_Lib.functions as funcs
 
 
 def get_sub_query(cf, subquery, src_layer, main_src):

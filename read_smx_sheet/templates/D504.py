@@ -1,6 +1,6 @@
-from read_smx_sheet.app_Lib import functions as funcs
-from read_smx_sheet.app_Lib import TransformDDL
-from read_smx_sheet.Logging_Decorator import Logging_decorator
+from app_Lib import functions as funcs
+from app_Lib import TransformDDL
+from Logging_Decorator import Logging_decorator
 @Logging_decorator
 def d504(cf, source_output_path, source_name, df):
 

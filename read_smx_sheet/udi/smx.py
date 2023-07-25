@@ -1,10 +1,10 @@
 import logging
 # from .model import *
-from functions import log_error_decorator, time_elapsed_decorator, create_folder, WriteFile, filter_dataframe, single_quotes, merge_multiple_spaces, parse_data_type
+from udi.functions import log_error_decorator, time_elapsed_decorator, create_folder, WriteFile, filter_dataframe, single_quotes, merge_multiple_spaces, parse_data_type
 import os
 import datetime as dt
-from model import Server, Table, DataSource, DataBaseEngine, Ip, Credential, LayerType, Layer, LayerTable, Schema, DataSetType, Pipeline, DataType, Column, DataSet, Domain, DomainValue, ColumnMapping, Filter, GroupBy, JoinType, JoinWith, JoinOn
-from config import CORE_MODEL_FOLDER_NAME, SHEETS, STG_TECHNICAL_COLS, SRC_SYSTEMS_FOLDER_NAME, DB_NAME, USER, PASSWORD, CORE_TECHNICAL_COLS, DS_BKEY, DS_BMAP, UNIFIED_SOURCE_SYSTEMS, INSERT_INTO_SOURCE_SYSTEMS, INSERT_INTO_SOURCE_SYSTEM_TABLES, INSERT_INTO_EDW_TABLES, INSERT_INTO_TRANSFORM_KEYCOL, INSERT_INTO_PROCESS, INSERT_INTO_HISTORY, BK_PROCESS_NAME_TEMPLATE, BK_VIEW_NAME_TEMPLATE, BMAP_PROCESS_NAME_TEMPLATE, BMAP_VIEW_NAME_TEMPLATE, CORE_PROCESS_NAME_TEMPLATE, CORE_VIEW_NAME_TEMPLATE, LOADING_MODE, DELETE_DATABASE_TEMPLATE, DROP_DATABASE_TEMPLATE, DATABASE_TEMPLATE, DROP_BEFORE_CREATE, DROP_TABLE_TEMPLATE
+from udi.model import Server, Table, DataSource, DataBaseEngine, Ip, Credential, LayerType, Layer, LayerTable, Schema, DataSetType, Pipeline, DataType, Column, DataSet, Domain, DomainValue, ColumnMapping, Filter, GroupBy, JoinType, JoinWith, JoinOn
+from udi.config import CORE_MODEL_FOLDER_NAME, SHEETS, STG_TECHNICAL_COLS, SRC_SYSTEMS_FOLDER_NAME, DB_NAME, USER, PASSWORD, CORE_TECHNICAL_COLS, DS_BKEY, DS_BMAP, UNIFIED_SOURCE_SYSTEMS, INSERT_INTO_SOURCE_SYSTEMS, INSERT_INTO_SOURCE_SYSTEM_TABLES, INSERT_INTO_EDW_TABLES, INSERT_INTO_TRANSFORM_KEYCOL, INSERT_INTO_PROCESS, INSERT_INTO_HISTORY, BK_PROCESS_NAME_TEMPLATE, BK_VIEW_NAME_TEMPLATE, BMAP_PROCESS_NAME_TEMPLATE, BMAP_VIEW_NAME_TEMPLATE, CORE_PROCESS_NAME_TEMPLATE, CORE_VIEW_NAME_TEMPLATE, LOADING_MODE, DELETE_DATABASE_TEMPLATE, DROP_DATABASE_TEMPLATE, DATABASE_TEMPLATE, DROP_BEFORE_CREATE, DROP_TABLE_TEMPLATE
 import pandas as pd
 import numpy as np
 from collections import namedtuple

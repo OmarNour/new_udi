@@ -13,8 +13,8 @@ offline_source_t="stg_layer"
 staging_view_db="DEV_STG_ONLINE"
 db_prefix="GDEV1"
 
+##source_names="NAFEZA,INVESTMENT,VAT"
 source_names="NEW_COLLECTIONS"
-##source_names="NEW_COLLECTIONS,INSURANCE"
 ##source_names=""
 
 

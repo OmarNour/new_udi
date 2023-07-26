@@ -30,15 +30,22 @@ class SMX:
         
         create_folder(self.metadata_scripts)
         separator = "**********************************************************************************"
+        file_handler = logging.FileHandler(os.path.join(self.log_error_path, self.log_file_name))
+        # print("file handler:", file_handler.formatter)
+        # print("file handler:", file_handler.baseFilename)
+        
+        # try:
+        #     print("beforeeeeeeeeeeeeeeeeeeeeeee")
         logging.basicConfig(encoding='utf-8'
                             , level=logging.DEBUG
                             , format=f"[%(levelname)s] %(message)s\n{separator}\n"
-                            , handlers=[logging.FileHandler(os.path.join(self.log_error_path, self.log_file_name))
+                            , handlers=[file_handler
                                         # ,logging.StreamHandler()
                                         ]
                             )
-        
 
+        # print("file handler:", file_handler.formatter)
+        # print("file handler:", file_handler.baseFilename)
 
 
         logging.info(f"Run ID {self.run_id}, started at {dt.datetime.now()}\n")

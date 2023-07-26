@@ -37,12 +37,12 @@ def start(run_id, db_prefix, smx_path: str, output_path: str, source_name: str |
     time_elapsed = end_time-start_time
     myid_summary += f"Time Elapsed: {time_elapsed}\n"
 
-    del smx
+    # del smx
+    logging.info(myid_summary)
 
-
-
-    # logging.info(myid_summary)
-
+    # remove all logger handlers
+    logging.getLogger().handlers = []
+    # logging.shutdown()
 
     # open_folder()
     # return smx.current_scripts_path

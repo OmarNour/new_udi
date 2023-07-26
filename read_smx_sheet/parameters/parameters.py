@@ -29,7 +29,10 @@ unified_currency_sheet = "Unified Currency"
 unified_police_station_sheet = "Unified Police Station"
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #3.4.0"
+ver_no = "| Build #3.5.0"
+# ################################################################################################
+# What is new : #3.5.0 :
+# removing logging handlers at the end of the program execution to run smoothly afterwards
 # ################################################################################################
 # What is new : #3.4.0 :
 # deleting MyID class instances after the first program run

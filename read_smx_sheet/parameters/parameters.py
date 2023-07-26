@@ -29,7 +29,10 @@ unified_currency_sheet = "Unified Currency"
 unified_police_station_sheet = "Unified Police Station"
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #3.3.0"
+ver_no = "| Build #3.4.0"
+# ################################################################################################
+# What is new : #3.4.0 :
+# deleting MyID class instances after the first program run
 # ################################################################################################
 # What is new : #3.3.0 :
 # Adding threading to avoid locking the UDI while using it

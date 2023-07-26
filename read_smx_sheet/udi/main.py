@@ -24,19 +24,26 @@ def start(run_id, db_prefix, smx_path: str, output_path: str, source_name: str |
         # generate_fake_data()
 
     myid_summary = "\n\nSummary:\n######################\n\n"
-    # logging.info(myid_summary)
     for class_name in MyID.get_all_classes_instances().keys():
         cls_instances_cout = eval(f"{class_name}.count_instances()")
         class_count = f'{class_name} count: {cls_instances_cout}\n'
         myid_summary += class_count
 
-    # end_time = time.perf_counter()
+    # reset class instances
+    MyID.reset_class_variable()
+
     end_time = datetime.now()
 
     time_elapsed = end_time-start_time
     myid_summary += f"Time Elapsed: {time_elapsed}\n"
 
-    logging.info(myid_summary)
+    del smx
+
+
+
+    # logging.info(myid_summary)
+
+
     # open_folder()
     # return smx.current_scripts_path
 

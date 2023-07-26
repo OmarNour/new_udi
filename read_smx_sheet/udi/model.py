@@ -62,6 +62,15 @@ class MyID(metaclass=Meta):
     __ids = {}
     __next_id = 1
 
+    
+    @classmethod
+    def reset_class_variable(cls):
+        cls.__instances = {}
+        cls.ids = {}
+        cls.__next_id = 1
+    
+
+
     def __init__(self, *args, **kwargs):
         """
         This method assigns a unique ID to the instance and stores the key passed in the kwargs dictionary.
@@ -835,7 +844,7 @@ class LayerTable(MyID):
                     for dv in domain.values:
                         src_code = str(dv.source_key).replace("'", "''")
                         edw_code = dv.edw_key
-                        desc = dv.description.replace("'", "''")
+                        desc = str(dv.description).replace("'", "''")
                         dml += f"""insert into {schema_name}.{table_name}\n({columns})\nvalues ('{src_code}', {domain_code}, {set_code}, {edw_code}, '{desc}' );\n"""
         return dml
 

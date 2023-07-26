@@ -17,7 +17,7 @@ class SMX:
         self.PREFIX = db_prefix
         self.run_id = run_id
         # self.run_id = str(generate_run_id())
-        print(f"Run started with ID: {self.run_id}")
+        # print(f"Run started with ID: {self.run_id}")
         # self.path = smx_path
         self.path = path
         # self.current_scripts_path = os.path.join(scripts_path, self.run_id)
@@ -25,7 +25,9 @@ class SMX:
         self.metadata_scripts = os.path.join(self.current_scripts_path, "metadata")
         self.log_error_path = self.current_scripts_path
         self.log_file_name = f"{self.run_id}.log"
+        # print("log file:", self.log_file_name)
         create_folder(self.current_scripts_path)
+        
         create_folder(self.metadata_scripts)
         separator = "**********************************************************************************"
         logging.basicConfig(encoding='utf-8'
@@ -35,6 +37,10 @@ class SMX:
                                         # ,logging.StreamHandler()
                                         ]
                             )
+        
+
+
+
         logging.info(f"Run ID {self.run_id}, started at {dt.datetime.now()}\n")
 
         self.xls = None
@@ -42,6 +48,8 @@ class SMX:
         # self.reserved_words = {}
         self.data = {}
         self.init_model()
+
+
 
     def set_configs(self, db_prefix):
         PREFIX = db_prefix
@@ -112,7 +120,12 @@ class SMX:
 
     @log_error_decorator()
     def init_model(self):
-        self.server = Server(server_name='TDVM')
+        
+        try:
+            self.server = Server(server_name='TDVM')
+        except Exception as e:
+            print(e)
+        # print("I am hereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         self.db_engine = DataBaseEngine(server_id=self.server.id, name=DB_NAME)
         Ip(server_id=self.server.id, ip='localhost')
         Credential(db_engine_id=self.db_engine.id, user_name=USER, password=PASSWORD)
@@ -1110,8 +1123,10 @@ def generate_schemas_ddl(smx: SMX):
 @log_error_decorator()
 @time_elapsed_decorator
 def generate_scripts(smx: SMX):
+    # print(smx.__dict__.keys())
     source_dict: dict = {}
     core_model_path = os.path.join(smx.current_scripts_path, CORE_MODEL_FOLDER_NAME)
+    
     # core_model_path = os.path.join(smx.path, CORE_MODEL_FOLDER_NAME)
     src_systems_path = os.path.join(smx.current_scripts_path, SRC_SYSTEMS_FOLDER_NAME)
     # src_systems_path = os.path.join(smx.path, SRC_SYSTEMS_FOLDER_NAME)

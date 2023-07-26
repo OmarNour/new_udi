@@ -85,23 +85,12 @@ class FrontEnd:
         self.config_file_entry = Entry(frame_row0, textvariable=self.config_file_entry_txt, width=100)
         config_file_path = os.path.join(funcs.get_config_file_path(), pm.default_config_file_name)
 
-
-
-        
-        # smx_file_label = Label(frame_row4, text="SMX File")
-        # smx_file_label.grid(row=0, column=0, sticky='e')
-
-        # self.smx_file_browse_button = Button(frame_row4, text="...", command=self.browsefunc)
-        # self.smx_file_browse_button.grid(row=0, column=3, sticky='w')
-
-        # self.smx_file_entry_text = StringVar()
-        # self.smx_file_entry = Entry(frame_row4, textvariable=self.smx_file_entry_text, width=100)
-        # smx_file_path = os.path.join(funcs.get_smx_file_path(), pm.default_config_file_name)
-
         try:
             x = open(config_file_path)
         except:
             config_file_path = ""
+        
+        
         self.config_file_entry.insert(END, config_file_path)
         self.config_file_entry.grid(row=0, column=1)
 
@@ -346,21 +335,32 @@ class FrontEnd:
     def generate_scripts_thread(self):
         try:
             config_file_path = self.config_file_entry_txt.get()
+            print("config_file_path:", config_file_path)
             x = open(config_file_path)
             try:
                 self.enable_disable_fields(DISABLED)
-                self.g.generate_scripts()
+                # self.g.generate_scripts()
+                print("source name:", self.source_names)
+                print("smx path:", r'{}'.format(self.smx_path))
+                print("output path:", r'{}'.format(self.output_path))
+                print("db_prefix:", r'{}'.format(self.db_prefix))
+                
+                run_id = generate_run_id()
+                print("run id:",run_id)
+                start(run_id, self.db_prefix, self.smx_path, self.output_path, self.source_names, with_scripts=True, with_deploy=False)
+                open_folder(self.output_path)
                 self.enable_disable_fields(NORMAL)
                 self.UDI_scripts_generation.config(state=NORMAL)
                 self.Testing_scripts_generation.config(state=NORMAL)
                 self.source_smx_generation.config(state=NORMAL)
 
-                print("Total Elapsed time: ", self.g.elapsed_time, "\n")
+                # print("Total Elapsed time: ", self.g.elapsed_time, "\n")
             except Exception as error:
                 try:
-                    error_messager = self.g.error_message
-                except:
+                    error_messager = "Error"
+                except Exception as e:
                     error_messager = error
+                
                 self.change_status_label(error_messager, self.color_error_messager)
                 self.generate_button.config(state=NORMAL)
                 self.config_file_entry.config(state=NORMAL)
@@ -368,7 +368,7 @@ class FrontEnd:
                 self.Testing_scripts_generation.config(state=NORMAL)
                 self.source_smx_generation.config(state=NORMAL)
                 traceback.print_exc()
-        except:
+        except Exception as e:
             self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
 
     def destroyer(self):
@@ -388,25 +388,26 @@ class FrontEnd:
     #     self.g = gs.GenerateScripts(None, self.config_file_values)
     #     self.g.scripts_flag = self.scripts_flag
 
-    #     self.UDI_scripts_generation.config(state=DISABLED)
-    #     self.Testing_scripts_generation.config(state=DISABLED)
-    #     self.source_smx_generation.config(state=DISABLED)
+        self.UDI_scripts_generation.config(state=DISABLED)
+        self.Testing_scripts_generation.config(state=DISABLED)
+        self.source_smx_generation.config(state=DISABLED)
 
         thread1 = GenerateScriptsThread(1, "Thread-1", self)
         thread1.start()
 
         thread2 = GenerateScriptsThread(2, "Thread-2", self, thread1)
         thread2.start()
+        
 
-    def generate_code(self):
-        run_id = generate_run_id()
-        print("source name:", self.source_names)
-        print("smx path:", r'{}'.format(self.smx_path))
-        print("output path:", r'{}'.format(self.output_path))
-        print("db_prefix:", r'{}'.format(self.db_prefix))
-        # start(run_id, r'{}'.format(self.db_prefix), r'{}'.format(self.smx_path), r'{}'.format(self.output_path), self.source_names, with_scripts=True, with_deploy=False)
-        start(run_id, self.db_prefix, self.smx_path, self.output_path, self.source_names, with_scripts=True, with_deploy=False)
-        open_folder(self.output_path)
+    # def generate_code(self):
+    #     run_id = generate_run_id()
+    #     print("source name:", self.source_names)
+    #     print("smx path:", r'{}'.format(self.smx_path))
+    #     print("output path:", r'{}'.format(self.output_path))
+    #     print("db_prefix:", r'{}'.format(self.db_prefix))
+    #     # start(run_id, r'{}'.format(self.db_prefix), r'{}'.format(self.smx_path), r'{}'.format(self.output_path), self.source_names, with_scripts=True, with_deploy=False)
+    #     start(run_id, self.db_prefix, self.smx_path, self.output_path, self.source_names, with_scripts=True, with_deploy=False)
+    #     open_folder(self.output_path)
         # test = start(run_id, r'[ACA] SMX_Economic_Units_03-01-2023.xlsx', self.source_names, with_scripts=True, with_deploy=False)
         
         # self.refresh_config_file_values()
@@ -417,11 +418,11 @@ class FrontEnd:
         # self.Testing_scripts_generation.config(state=DISABLED)
         # self.source_smx_generation.config(state=DISABLED)
 
-        thread1 = GenerateScriptsThread(1, "Thread-1", self)
-        thread1.start()
+        # thread1 = GenerateScriptsThread(1, "Thread-1", self)
+        # thread1.start()
 
-        thread2 = GenerateScriptsThread(2, "Thread-2", self, thread1)
-        thread2.start()
+        # thread2 = GenerateScriptsThread(2, "Thread-2", self, thread1)
+        # thread2.start()
 
     def generating_indicator(self, thread):
         def r():
@@ -466,8 +467,8 @@ class GenerateScriptsThread(threading.Thread):
 
     def run(self):
         if self.threadID == 1:
-            # self.FrontEndC.generate_scripts_thread()
-            self.FrontEndC.generate_code()
+            self.FrontEndC.generate_scripts_thread()
+            # self.FrontEndC.generate_code()
         if self.threadID == 2:
             self.FrontEndC.generating_indicator(self.thread)
         if self.threadID == 0:

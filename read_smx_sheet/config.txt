@@ -13,15 +13,14 @@ smx_path="C:/Users/oh255011/Documents/Teradata/new_udi/read_smx_sheet/[ACA] SMX_
 home_output_folder="C:/Users/oh255011/Documents/Teradata/SMX/UDI_OUTPUT"
 
 
-## 3- online_source_t, offline_source_t: layer 0 physical tables schema, which schema is selected depends on the
+## 3- source_layer0: layer 0 physical tables schema, which schema is selected depends on the
 ## SMX configuration whether the source is configured as an "online" or "offline" source
 ## layer 0: First layer or the entry point of the pipeline
-online_source_t="stg_online"
-offline_source_t="stg_layer"
+source_layer0="dev_stg_layer"
 
 ## 4- db_prefix: The prefix used in all pipeline layers, metadata tables and core layer.
 ## Note that the db_prefix is not used only in layer 0 physical tables.
-db_prefix="GDEV1"
+db_prefix="GDEVP1"
 
 # 5- source_names: the name of the data source
 ## for all sources: source_names=""

@@ -8,12 +8,12 @@ from udi.config import CORE_MODEL_FOLDER_NAME, SHEETS, STG_TECHNICAL_COLS, SRC_S
 import pandas as pd
 import numpy as np
 from collections import namedtuple
-
+import re
 # # PREFIX = "TEST"
 
 class SMX:
-    def __init__(self, path, run_id, output_path, db_prefix):
-        self.LAYER_TYPES, self.LAYERS, self.MAIN_DB_NAME, self.MAIN_DATABASE_TEMPLATE, self.OTHER_SCHEMAS, self.GRANTS = self.set_configs(db_prefix)
+    def __init__(self, path, run_id, output_path, db_prefix, source_layer0):
+        self.LAYER_TYPES, self.LAYERS, self.MAIN_DB_NAME, self.MAIN_DATABASE_TEMPLATE, self.OTHER_SCHEMAS, self.GRANTS = self.set_configs(db_prefix, source_layer0)
         self.PREFIX = db_prefix
         self.run_id = run_id
         # self.run_id = str(generate_run_id())
@@ -58,13 +58,13 @@ class SMX:
 
 
 
-    def set_configs(self, db_prefix):
+    def set_configs(self, db_prefix, source_layer0):
         PREFIX = db_prefix
         LayerDtl = namedtuple("LayerDetail", "type level v_db t_db")
         LAYER_TYPES = ['META', 'SRC', 'STG', 'SK', 'SRCI', 'CORE']  # Important: DO NOT CHANGE THE ORDER OF THIS LIST!
         LAYERS = {
             'META': LayerDtl(LAYER_TYPES[0], 0, f'{PREFIX}_ETL', f'{PREFIX}_ETL')
-            , 'SRC': LayerDtl(LAYER_TYPES[1], 0, f'{PREFIX}V_STG_ONLINE', 'STG_ONLINE')
+            , 'SRC': LayerDtl(LAYER_TYPES[1], 0, f'{PREFIX}V_{re.findall("stg.*", source_layer0)[0]}', source_layer0)
             , 'STG': LayerDtl(LAYER_TYPES[2], 1, f'{PREFIX}V_STG', f'{PREFIX}T_STG')
             , 'TXF_BKEY': LayerDtl(LAYER_TYPES[3], 2, f'{PREFIX}V_INP', '')
             , 'TXF_BMAP': LayerDtl(LAYER_TYPES[3], 2, f'{PREFIX}V_INP', '')

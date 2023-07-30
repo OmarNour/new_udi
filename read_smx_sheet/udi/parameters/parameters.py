@@ -29,7 +29,11 @@ unified_currency_sheet = "Unified Currency"
 unified_police_station_sheet = "Unified Police Station"
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #3.5.0"
+ver_no = "| Build #3.5.1"
+# ################################################################################################
+# What is new : #3.5.1:
+# changing layer 0 physical table schema to be the exact user input in source_layer0 parameter in the
+# configuration file
 # ################################################################################################
 # What is new : #3.5.0 :
 # removing logging handlers at the end of the program execution to run smoothly afterwards

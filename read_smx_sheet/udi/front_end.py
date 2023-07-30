@@ -21,10 +21,10 @@ import time
 import threading
 import random
 
-
 # from udi.functions import start
 from udi.main import start
 from udi.functions import generate_run_id, open_folder
+
 
 class FrontEnd:
     def __init__(self):
@@ -89,8 +89,7 @@ class FrontEnd:
             x = open(config_file_path)
         except:
             config_file_path = ""
-        
-        
+
         self.config_file_entry.insert(END, config_file_path)
         self.config_file_entry.grid(row=0, column=1)
 
@@ -115,7 +114,7 @@ class FrontEnd:
         self.get_config_file_values()
         frame_config_file_values_entry_width = 84
 
-        read_from_smx_label = Label(frame_config_file_values, text="SMXs Folder")
+        read_from_smx_label = Label(frame_config_file_values, text="SMX File")
         read_from_smx_label.grid(row=0, column=0, sticky='e')
 
         self.text_field_read_from_smx = StringVar()
@@ -229,14 +228,14 @@ class FrontEnd:
             self.smx_path = r"{}".format(self.config_file_values["smx_path"])
             self.output_path = r"{}".format(self.config_file_values["output_path"])
             self.source_names = self.config_file_values["source_names"]
-            # self.source_names = "All" if source_names is None else source_names
-            # self.source_names = "" if source_names is None else source_names
             self.db_prefix = self.config_file_values["db_prefix"]
+            self.source_layer0 = self.config_file_values["source_layer0"]
             self.generate_button.config(state=NORMAL)
             self.change_status_label(self.msg_ready, self.color_msg_ready)
             # FrontEnd.db_prefix=self.db_prefix
 
-        except:
+        except Exception as e:
+            print(e)
             self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
             self.generate_button.config(state=DISABLED)
             self.smx_path = ""
@@ -344,10 +343,11 @@ class FrontEnd:
                 print("smx path:", r'{}'.format(self.smx_path))
                 print("output path:", r'{}'.format(self.output_path))
                 print("db_prefix:", r'{}'.format(self.db_prefix))
-                
+
                 run_id = generate_run_id()
-                print("run id:",run_id)
-                start(run_id, self.db_prefix, self.smx_path, self.output_path, self.source_names, with_scripts=True, with_deploy=False)
+                print("run id:", run_id)
+                start(run_id, self.source_layer0, self.db_prefix, self.smx_path, self.output_path, self.source_names, with_scripts=True,
+                      with_deploy=False)
                 open_folder(self.output_path)
                 self.enable_disable_fields(NORMAL)
                 self.UDI_scripts_generation.config(state=NORMAL)
@@ -360,7 +360,7 @@ class FrontEnd:
                     error_messager = "Error"
                 except Exception as e:
                     error_messager = error
-                
+
                 self.change_status_label(error_messager, self.color_error_messager)
                 self.generate_button.config(state=NORMAL)
                 self.config_file_entry.config(state=NORMAL)
@@ -385,8 +385,8 @@ class FrontEnd:
 
     def start_new(self):
         self.refresh_config_file_values()
-    #     self.g = gs.GenerateScripts(None, self.config_file_values)
-    #     self.g.scripts_flag = self.scripts_flag
+        #     self.g = gs.GenerateScripts(None, self.config_file_values)
+        #     self.g.scripts_flag = self.scripts_flag
 
         self.UDI_scripts_generation.config(state=DISABLED)
         self.Testing_scripts_generation.config(state=DISABLED)
@@ -397,7 +397,6 @@ class FrontEnd:
 
         thread2 = GenerateScriptsThread(2, "Thread-2", self, thread1)
         thread2.start()
-        
 
     # def generate_code(self):
     #     run_id = generate_run_id()
@@ -408,26 +407,26 @@ class FrontEnd:
     #     # start(run_id, r'{}'.format(self.db_prefix), r'{}'.format(self.smx_path), r'{}'.format(self.output_path), self.source_names, with_scripts=True, with_deploy=False)
     #     start(run_id, self.db_prefix, self.smx_path, self.output_path, self.source_names, with_scripts=True, with_deploy=False)
     #     open_folder(self.output_path)
-        # test = start(run_id, r'[ACA] SMX_Economic_Units_03-01-2023.xlsx', self.source_names, with_scripts=True, with_deploy=False)
-        
-        # self.refresh_config_file_values()
-        # self.g = gs.GenerateScripts(None, self.config_file_values)
-        # self.g.scripts_flag = self.scripts_flag
+    # test = start(run_id, r'[ACA] SMX_Economic_Units_03-01-2023.xlsx', self.source_names, with_scripts=True, with_deploy=False)
 
-        # self.UDI_scripts_generation.config(state=DISABLED)
-        # self.Testing_scripts_generation.config(state=DISABLED)
-        # self.source_smx_generation.config(state=DISABLED)
+    # self.refresh_config_file_values()
+    # self.g = gs.GenerateScripts(None, self.config_file_values)
+    # self.g.scripts_flag = self.scripts_flag
 
-        # thread1 = GenerateScriptsThread(1, "Thread-1", self)
-        # thread1.start()
+    # self.UDI_scripts_generation.config(state=DISABLED)
+    # self.Testing_scripts_generation.config(state=DISABLED)
+    # self.source_smx_generation.config(state=DISABLED)
 
-        # thread2 = GenerateScriptsThread(2, "Thread-2", self, thread1)
-        # thread2.start()
+    # thread1 = GenerateScriptsThread(1, "Thread-1", self)
+    # thread1.start()
+
+    # thread2 = GenerateScriptsThread(2, "Thread-2", self, thread1)
+    # thread2.start()
 
     def generating_indicator(self, thread):
         def r():
             return random.randint(0, 255)
-        
+
         start_time = dt.datetime.now()
         while thread.is_alive():
             # elapsed_time = dt.datetime.now() - start_time
@@ -438,9 +437,7 @@ class FrontEnd:
             color = '#%02X%02X%02X' % (r(), r(), r())
             self.change_status_label(msg, color)
 
-
-
-        # TODO: change success and color messages based on state 
+        # TODO: change success and color messages based on state
 
         # message = self.g.error_message if self.g.error_message != "" else self.msg_done + str(self.g.elapsed_time)
         # color = self.color_msg_done_with_error if self.g.error_message != "" else self.color_msg_done

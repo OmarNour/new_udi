@@ -373,11 +373,11 @@ def get_config_file_values(config_file_path=None):
         param_dic['core_table'] = db_prefix + "T_BASE"
         param_dic['core_view'] = db_prefix + "V_BASE"
 
-        online_source_t = param_dic['online_source_t']
-        offline_source_t = param_dic['offline_source_t']
+        # source_layer0 = param_dic['source_layer0']
+        # offline_source_t = param_dic['offline_source_t']
 
-        param_dic['online_source_v'] = db_prefix + "V_" + online_source_t
-        param_dic['offline_source_v'] = db_prefix + "V_" + offline_source_t
+        # param_dic['online_source_v'] = db_prefix + "V_" + online_source_t
+        # param_dic['offline_source_v'] = db_prefix + "V_" + offline_source_t
 
         try:
             staging_view_db = param_dic['staging_view_db']

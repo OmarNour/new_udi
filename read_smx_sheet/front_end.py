@@ -229,11 +229,13 @@ class FrontEnd:
             self.output_path = r"{}".format(self.config_file_values["output_path"])
             self.source_names = self.config_file_values["source_names"]
             self.db_prefix = self.config_file_values["db_prefix"]
+            self.source_layer0 = self.config_file_values["source_layer0"]
             self.generate_button.config(state=NORMAL)
             self.change_status_label(self.msg_ready, self.color_msg_ready)
             # FrontEnd.db_prefix=self.db_prefix
 
         except:
+            print("hello")
             self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
             self.generate_button.config(state=DISABLED)
             self.smx_path = ""
@@ -344,7 +346,7 @@ class FrontEnd:
 
                 run_id = generate_run_id()
                 print("run id:", run_id)
-                start(run_id, self.db_prefix, self.smx_path, self.output_path, self.source_names, with_scripts=True,
+                start(run_id, self.source_layer0, self.db_prefix, self.smx_path, self.output_path, self.source_names, with_scripts=True,
                       with_deploy=False)
                 open_folder(self.output_path)
                 self.enable_disable_fields(NORMAL)

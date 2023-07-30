@@ -7,10 +7,10 @@ import time
 from datetime import datetime
 
 @time_elapsed_decorator
-def start(run_id, db_prefix, smx_path: str, output_path: str, source_name: str | list | None, with_scripts=True, with_deploy=False):
+def start(run_id, source_layer0, db_prefix, smx_path: str, output_path: str, source_name: str | list | None, with_scripts=True, with_deploy=False):
     # start_time = time.perf_counter()
     start_time = datetime.now()
-    smx = SMX(smx_path, run_id, output_path, db_prefix)
+    smx = SMX(smx_path, run_id, output_path, db_prefix, source_layer0)
     # print(smx)
     smx.parse_file()
     smx.populate_model(source_name=source_name)

@@ -1,16 +1,9 @@
 import os
-import sys
 
-# sys.path.append(os.getcwd())
 import numpy as np
 import pandas as pd
-# import pyarrow.parquet as pq
-# import pyarrow as pa
-# from pyarrow.formatting import *
 import dask.dataframe as dd
 import app_Lib.manage_directories as md
-# from read_smx_sheet.app_Lib import manage_directories as md
-# from read_smx_sheet.parameters import parameters as pm
 from parameters import parameters as pm
 import datetime as dt
 import psutil
@@ -197,8 +190,6 @@ def wait_for_processes_to_finish(processes_numbers, processes_run_status, proces
                 try:
                     processes_numbers.remove(p_no)
                     count_finished_processes += 1
-                    # print('-----------------------------------------------------------')
-                    # print('\nProcess no.', p_no, 'finished, total finished', count_finished_processes, 'out of', no_of_subprocess)
                     print(count_finished_processes, 'out of', no_of_subprocess, 'finished.\t', processes_names[p_no])
                 except:
                     pass
@@ -213,11 +204,7 @@ def xstr(s):
 def save_to_parquet(pq_df, dataset_root_path, partition_cols=None, string_columns=None):
     if not pq_df.empty:
 
-        # all_object_columns = df.select_dtypes(include='object').columns
-        # print(all_object_columns)
-
         if string_columns is None:
-            # string_columns = df.columns
             string_columns = pq_df.select_dtypes(include='object').columns
 
         for i in string_columns:
@@ -228,10 +215,6 @@ def save_to_parquet(pq_df, dataset_root_path, partition_cols=None, string_column
         pq.write_to_dataset(partial_results_table, root_path=dataset_root_path, partition_cols=partition_cols,
                             use_dictionary=False
                             )
-        # flavor = 'spark'
-        # print("{:,}".format(len(df.index)), 'records inserted into', dataset_root_path, 'in', datetime.datetime.now() - start_time)
-
-
 def read_all_from_parquet(dataset, columns, use_threads, filter=None):
     try:
         df = pq.read_table(dataset,
@@ -306,7 +289,6 @@ def get_smx_file_path():
 def get_config_file_values(config_file_path=None):
     separator = "$$$"
     parameters = ""
-    # config_file_path = os.path.dirname(sys.modules['__main__'].__file__)
     if config_file_path is None:
         try:
             config_file_path = get_config_file_path()
@@ -397,8 +379,6 @@ def get_config_file_values(config_file_path=None):
 
 def server_info():
     cpu_per = psutil.cpu_percent(interval=0.5, percpu=False)
-    # cpu_ghz = psutil.cpu_freq()
-    # io = psutil.disk_io_counters()
     mem_per = psutil.virtual_memory()[2]
 
     return (cpu_per, mem_per)

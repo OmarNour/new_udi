@@ -1,26 +1,17 @@
 import os
 import sys
 
-# sys.path.append(os.getcwd())
-# from read_smx_sheet.app_Lib import manage_directories as md
-# from read_smx_sheet.app_Lib import funcs
 from app_Lib import manage_directories as md
-from app_Lib import test as ts
 from app_Lib import functions as funcs
-# from read_smx_sheet.app_Lib import manage_directories as md, functions as funcs
 import multiprocessing
 from tkinter import *
-from tkinter import messagebox, filedialog, ttk
+from tkinter import filedialog, ttk
 from parameters import parameters as pm
-# from parameters import parameters as pm
-# import generate_scripts as gs
 import datetime as dt
 import traceback
-import time
 import threading
 import random
 
-# from udi.functions import start
 from main import start
 from functions import generate_run_id, open_folder
 
@@ -231,7 +222,6 @@ class FrontEnd:
             self.source_layer0 = self.config_file_values["source_layer0"]
             self.generate_button.config(state=NORMAL)
             self.change_status_label(self.msg_ready, self.color_msg_ready)
-            # FrontEnd.db_prefix=self.db_prefix
 
         except Exception as e:
             print(e)
@@ -316,8 +306,6 @@ class FrontEnd:
         for i, task in enumerate(tasks):
             self.progress_var.set(i)
             i += 1
-            # time.sleep(1 / 60)
-            # compute(task)
             self.root.update_idletasks()
 
     def enable_disable_fields(self, f_state):
@@ -337,7 +325,6 @@ class FrontEnd:
             x = open(config_file_path)
             try:
                 self.enable_disable_fields(DISABLED)
-                # self.g.generate_scripts()
                 print("source name:", self.source_names)
                 print("smx path:", r'{}'.format(self.smx_path))
                 print("output path:", r'{}'.format(self.output_path))
@@ -353,7 +340,6 @@ class FrontEnd:
                 self.Testing_scripts_generation.config(state=NORMAL)
                 self.source_smx_generation.config(state=NORMAL)
 
-                # print("Total Elapsed time: ", self.g.elapsed_time, "\n")
             except Exception as error:
                 try:
                     error_messager = "Error"
@@ -384,9 +370,6 @@ class FrontEnd:
 
     def start_new(self):
         self.refresh_config_file_values()
-        #     self.g = gs.GenerateScripts(None, self.config_file_values)
-        #     self.g.scripts_flag = self.scripts_flag
-
         self.UDI_scripts_generation.config(state=DISABLED)
         self.Testing_scripts_generation.config(state=DISABLED)
         self.source_smx_generation.config(state=DISABLED)
@@ -397,49 +380,17 @@ class FrontEnd:
         thread2 = GenerateScriptsThread(2, "Thread-2", self, thread1)
         thread2.start()
 
-    # def generate_code(self):
-    #     run_id = generate_run_id()
-    #     print("source name:", self.source_names)
-    #     print("smx path:", r'{}'.format(self.smx_path))
-    #     print("output path:", r'{}'.format(self.output_path))
-    #     print("db_prefix:", r'{}'.format(self.db_prefix))
-    #     # start(run_id, r'{}'.format(self.db_prefix), r'{}'.format(self.smx_path), r'{}'.format(self.output_path), self.source_names, with_scripts=True, with_deploy=False)
-    #     start(run_id, self.db_prefix, self.smx_path, self.output_path, self.source_names, with_scripts=True, with_deploy=False)
-    #     open_folder(self.output_path)
-    # test = start(run_id, r'[ACA] SMX_Economic_Units_03-01-2023.xlsx', self.source_names, with_scripts=True, with_deploy=False)
-
-    # self.refresh_config_file_values()
-    # self.g = gs.GenerateScripts(None, self.config_file_values)
-    # self.g.scripts_flag = self.scripts_flag
-
-    # self.UDI_scripts_generation.config(state=DISABLED)
-    # self.Testing_scripts_generation.config(state=DISABLED)
-    # self.source_smx_generation.config(state=DISABLED)
-
-    # thread1 = GenerateScriptsThread(1, "Thread-1", self)
-    # thread1.start()
-
-    # thread2 = GenerateScriptsThread(2, "Thread-2", self, thread1)
-    # thread2.start()
-
     def generating_indicator(self, thread):
         def r():
             return random.randint(0, 255)
 
         start_time = dt.datetime.now()
         while thread.is_alive():
-            # elapsed_time = dt.datetime.now() - start_time
             msg = self.msg_generating + str(dt.datetime.now() - start_time)
-            # msg = 'Running..'
-            color_list = ["white", "black", "red", "green", "blue", "cyan", "yellow", "magenta"]
-            color = random.choice(color_list)
             color = '#%02X%02X%02X' % (r(), r(), r())
             self.change_status_label(msg, color)
 
         # TODO: change success and color messages based on state
-
-        # message = self.g.error_message if self.g.error_message != "" else self.msg_done + str(self.g.elapsed_time)
-        # color = self.color_msg_done_with_error if self.g.error_message != "" else self.color_msg_done
         message = self.msg_done + str(dt.datetime.now() - start_time)
         color = self.color_msg_done
         self.change_status_label(message, color)
@@ -464,7 +415,6 @@ class GenerateScriptsThread(threading.Thread):
     def run(self):
         if self.threadID == 1:
             self.FrontEndC.generate_scripts_thread()
-            # self.FrontEndC.generate_code()
         if self.threadID == 2:
             self.FrontEndC.generating_indicator(self.thread)
         if self.threadID == 0:

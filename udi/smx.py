@@ -16,26 +16,17 @@ class SMX:
         self.LAYER_TYPES, self.LAYERS, self.MAIN_DB_NAME, self.MAIN_DATABASE_TEMPLATE, self.OTHER_SCHEMAS, self.GRANTS = self.set_configs(db_prefix, source_layer0)
         self.PREFIX = db_prefix
         self.run_id = run_id
-        # self.run_id = str(generate_run_id())
-        # print(f"Run started with ID: {self.run_id}")
-        # self.path = smx_path
         self.path = path
-        # self.current_scripts_path = os.path.join(scripts_path, self.run_id)
         self.current_scripts_path = os.path.join(output_path)
         self.metadata_scripts = os.path.join(self.current_scripts_path, "metadata")
         self.log_error_path = self.current_scripts_path
         self.log_file_name = f"{self.run_id}.log"
-        # print("log file:", self.log_file_name)
         create_folder(self.current_scripts_path)
         
         create_folder(self.metadata_scripts)
         separator = "**********************************************************************************"
         file_handler = logging.FileHandler(os.path.join(self.log_error_path, self.log_file_name))
-        # print("file handler:", file_handler.formatter)
-        # print("file handler:", file_handler.baseFilename)
-        
-        # try:
-        #     print("beforeeeeeeeeeeeeeeeeeeeeeee")
+
         logging.basicConfig(encoding='utf-8'
                             , level=logging.DEBUG
                             , format=f"[%(levelname)s] %(message)s\n{separator}\n"
@@ -44,15 +35,10 @@ class SMX:
                                         ]
                             )
 
-        # print("file handler:", file_handler.formatter)
-        # print("file handler:", file_handler.baseFilename)
-
-
         logging.info(f"Run ID {self.run_id}, started at {dt.datetime.now()}\n")
 
         self.xls = None
         self._source_systems = []
-        # self.reserved_words = {}
         self.data = {}
         self.init_model()
 
@@ -132,11 +118,9 @@ class SMX:
             self.server = Server(server_name='TDVM')
         except Exception as e:
             print(e)
-        # print("I am hereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         self.db_engine = DataBaseEngine(server_id=self.server.id, name=DB_NAME)
         Ip(server_id=self.server.id, ip='localhost')
         Credential(db_engine_id=self.db_engine.id, user_name=USER, password=PASSWORD)
-        # print(self.conn)
         [LayerType(type_name=lt) for lt in self.LAYER_TYPES]
         for layer_key, layer_value in self.LAYERS.items():
             layer_type = LayerType.get_instance(_key=layer_value.type)
@@ -345,28 +329,6 @@ class SMX:
                                       )
                     else:
                         logging.error(f"Invalid column '{row.column_name}', processing row:\n{row}")
-
-            # @log_error_decorator()
-            # def extract_stg_view_columns(row):
-            #     if row.natural_key == '':
-            #         stg_t = Table.get_instance(_key=(self.stg_t_schema.id, row.table_name))
-            #         stg_col = Column.get_instance(_key=(stg_t.id, row.column_name))
-            #
-            #         stg_v = Table.get_instance(_key=(self.stg_v_schema.id, row.table_name))
-            #         stg_lv = LayerTable.get_instance(_key=(self.stg_layer.id, stg_v.id))
-            #
-            #         pipeline = Pipeline.get_instance(_key=stg_lv.id)
-            #
-            #         if stg_col:
-            #             ColumnMapping(pipeline_id=pipeline.id
-            #                           , col_seq=0
-            #                           , src_col_id=stg_col.id
-            #                           , tgt_col_id=stg_col.id
-            #                           , src_col_trx=None
-            #                           )
-            #         else:
-            #             logging.error(f"Invalid column '{row.column_name}', processing row:\n{row}")
-
             @log_error_decorator()
             def extract_core_columns(row):
                 if row.column_name != '':
@@ -389,8 +351,6 @@ class SMX:
                         mandatory = 1 if (row.mandatory.upper() == 'Y' or pk) else 0
                         precision = data_type_lst[1].split(sep=')')[0] if len(data_type_lst) > 1 else None
 
-                        # if is_start_date and not pk:
-                        #     logging.error(f"Start date column '{row.column_name}', should be primary key as well!, processing row:\n{row}")
                         unicode = False
                         if core_table.is_lkp:
                             unicode = True
@@ -503,7 +463,6 @@ class SMX:
                     if valid_ds:
                         if set_table and row.code_set_id and surrogate_table:
                             DataSet(set_type_id=self.bmap_set_type.id, set_code=row.code_set_id, set_table_id=set_table.id, surrogate_table_id=surrogate_table.id)
-                            # set_table.is_lkp = True
                             surrogate_table.is_bmap = True
                         else:
                             logging.error(f"Invalid set table '{row.code_set_name}' or surrogate table '{row.physical_table}', processing row:\n{row}")
@@ -752,9 +711,6 @@ class SMX:
 
                 @log_error_decorator()
                 def column_mapping(_row):
-                    # 'column_name', 'mapped_to_table', 'mapped_to_column', 'transformation_rule', 'transformation_type'
-                    # transformation_type: COPY, SQL, CONST
-
                     tgt_col: Column
                     transformation_type = _row.transformation_type.upper()
                     if transformation_type not in ('COPY', 'SQL', 'CONST'):
@@ -1061,9 +1017,6 @@ class SMX:
 
         add_technical_columns(stg_tables, STG_TECHNICAL_COLS)
         add_technical_columns(core_tables, CORE_TECHNICAL_COLS)
-        # map_technical_columns(stg_tables)
-        # map_technical_columns(core_tables)
-
 
 @log_error_decorator()
 def layer_table_scripts(row):
@@ -1165,11 +1118,7 @@ def generate_scripts(smx: SMX):
     layer_tables_df[['out_path']].drop_duplicates().apply(lambda row: create_folder(row.out_path), axis=1)
 
     if not layer_tables_df.empty:
-        # print('start generating scripts!')
         layer_tables_df.apply(layer_table_scripts, axis=1)
-        # layer_tables_df.swifter.apply(layer_table_scripts, axis=1)
-        # layer_tables_df.parallel_apply(layer_table_scripts, axis=1)
-
 
 @log_error_decorator()
 @time_elapsed_decorator
@@ -1307,12 +1256,6 @@ def deploy():
         db.conn = db.get_connection()
 
         if db.conn:
-            # for schema in db.schemas:
-            #     db.execute(schema.ddl)
-            # grants = string_to_list(GRANTS, ';')
-            # for grant in grants:
-            #     db.execute(grant)
-
             for schema in db.schemas:
                 for table in schema.kind_T_tables:
                     if DROP_BEFORE_CREATE:

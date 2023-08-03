@@ -27,9 +27,9 @@ exe = EXE(pyz,
           a.datas,
           [],
           name='generate_smx_scripts',
-          debug=True,
+          debug=False,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
           runtime_tmpdir=None,
-          console=True )
+          console=False )

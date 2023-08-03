@@ -1,27 +1,6 @@
-# [Test]
 from collections import namedtuple
-# from front_end import FrontEnd
-# from app_Lib.functions import get_config_file_path, get_config_file_values
-# from smx.views import test
-# import app_Lib.functions as funcs
-# from parameters import parameters as pm
-# import os
-
-# config_file_path = os.path.join(funcs.get_config_file_path(), pm.default_config_file_name)
-
-
-# source_name = "NEW_COLLECTIONS"
-# smx_path = "/Users/omarnour/Downloads/ACA- Production Citizen SMX.xlsx"
-# smx_path = "/Users/omarnour/Downloads/SALES_SMX18May2023.xlsx"
-# smx_path = "/Users/oh255011/Downloads/SALES_SMX21May2023.xlsx"
 smx_path = r"/Users/oh255011/Documents/Teradata/SMX/[ACA] SMX_Economic_Units_03-01-2023.xlsx"
-# smx_path = "/Users/omarnour/Downloads/SALES_SMX02APRL2023.xlsx"
-# smx_path = "/Users/omarnour/Downloads/Production_Citizen_SMX.xlsx"
-# smx_path = "/Users/omarnour/Downloads/[ACA] SMX_Economic_Units_03-01-2023.xlsx"
-# smx_path = "/Users/omarnour/Downloads/Wasl Schema v1.7.xlsx"
-
 pickle_path = "pickled_objs"
-# scripts_path = "/Users/oh255011/Downloads/smx_scripts"
 scripts_path = "smx_scripts"
 DB_NAME = 'teradata'
 HOST = 'localhost'
@@ -90,22 +69,6 @@ DS_BMAP = 'BMAP'
 JoinTypes = namedtuple("JoinTypes", "code name")
 JOIN_TYPES = [JoinTypes(code='ij', name='inner join'), JoinTypes(code='lj', name='left join'),
               JoinTypes(code='rj', name='right join'), JoinTypes(code='fj', name='full outer join')]
-# LAYER_TYPES = ['META', 'SRC', 'STG', 'SK', 'SRCI', 'CORE']  # Important: DO NOT CHANGE THE ORDER OF THIS LIST!
-# PREFIX = 'GDEV1'
-# PREFIX = FrontEnd.db_prefix
-# LAYERS = {
-#     'META': LayerDtl(LAYER_TYPES[0], 0, f'{PREFIX}_ETL', f'{PREFIX}_ETL')
-#     , 'SRC': LayerDtl(LAYER_TYPES[1], 0, f'{PREFIX}V_STG_ONLINE', 'STG_ONLINE')
-#     , 'STG': LayerDtl(LAYER_TYPES[2], 1, f'{PREFIX}V_STG', f'{PREFIX}T_STG')
-#     , 'TXF_BKEY': LayerDtl(LAYER_TYPES[3], 2, f'{PREFIX}V_INP', '')
-#     , 'TXF_BMAP': LayerDtl(LAYER_TYPES[3], 2, f'{PREFIX}V_INP', '')
-#     , 'BKEY': LayerDtl(LAYER_TYPES[3], 3, f'{PREFIX}V_UTLFW', f'{PREFIX}T_UTLFW')
-#     , 'BMAP': LayerDtl(LAYER_TYPES[3], 3, f'{PREFIX}V_UTLFW', f'{PREFIX}T_UTLFW')
-#     , 'SRCI': LayerDtl(LAYER_TYPES[4], 4, f'{PREFIX}V_SRCI', f'{PREFIX}T_SRCI')
-#     , 'TXF_CORE': LayerDtl(LAYER_TYPES[4], 5, f'{PREFIX}V_INP', '')
-#     , 'CORE': LayerDtl(LAYER_TYPES[5], 6, f'{PREFIX}V_BASE', f'{PREFIX}T_BASE')
-# }
-
 
 NUMBERS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 ALPHABETS = ['a', 'b', 'c', 'd', 'e', 'f', 'g'
@@ -160,28 +123,11 @@ LOADING_MODE = 'ONLINE'
 DELETE_DATABASE_TEMPLATE = """DELETE DATABASE {db_name} ALL;"""
 DROP_DATABASE_TEMPLATE = """DROP DATABASE {db_name};"""
 
-# MAIN_DB_NAME = f"{PREFIX}_EDWH"
-
-# MAIN_DATABASE_TEMPLATE = f"""
-# CREATE DATABASE {MAIN_DB_NAME}
-# AS PERMANENT = 5000e6, -- 5GB
-#     SPOOL = 1000e6; -- 1GB
-# """
-
-# DATABASE_TEMPLATE = """
-# CREATE DATABASE {db_name} from {main_db_name}
-# AS PERMANENT = 60e6, -- 60MB
-#     SPOOL = 120e6; -- 120MB
-# """
 DATABASE_TEMPLATE = """
 CREATE DATABASE {db_name} from {main_db_name}
 AS TEST = 60e6, -- 60MB
     SPOOL = 120e6; -- 120MB
 """
-# OTHER_SCHEMAS = [f"{PREFIX}_ETL"]
-# OTHER_SCHEMAS = [DATABASE_TEMPLATE.format(db_name=f"{PREFIX}P_FF")
-#     , DATABASE_TEMPLATE.format(db_name=f"{PREFIX}P_PP")]
-##################### Metadata ####################
 INSERT_INTO_SOURCE_SYSTEMS = """
 INSERT INTO {meta_db}.SOURCE_SYSTEMS (
     SOURCE_NAME,LOADING_MODE, REJECTION_TABLE_NAME, BUSINESS_RULES_TABLE_NAME
@@ -218,44 +164,5 @@ VALUES
     ({PROCESS_NAME}, {HISTORY_COLUMN});
 """
 
-# GRANTS = f"""
-# GRANT CREATE PROCEDURE ON {PREFIX}_ETL TO DBC WITH GRANT OPTION;
-# GRANT CREATE FUNCTION ON {PREFIX}_ETL TO DBC WITH GRANT OPTION;
-# GRANT EXECUTE PROCEDURE ON {PREFIX}_ETL TO DBC WITH GRANT OPTION;
-# GRANT EXECUTE FUNCTION ON {PREFIX}_ETL TO DBC WITH GRANT OPTION;
-
-# GRANT SELECT ON STG_ONLINE TO {PREFIX}V_STG_ONLINE WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}T_STG TO {PREFIX}V_STG WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}T_UTLFW TO {PREFIX}V_UTLFW WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}V_UTLFW TO {PREFIX}V_SRCI WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}T_UTLFW TO {PREFIX}V_SRCI WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}V_STG TO {PREFIX}V_SRCI WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}T_STG TO {PREFIX}V_SRCI WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}T_STG TO {PREFIX}V_INP WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}T_SRCI TO {PREFIX}V_INP WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}T_SRCI TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}V_SRCI TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT CREATE TABLE ON {PREFIX}T_SRCI TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT DROP TABLE ON {PREFIX}T_SRCI TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}T_BASE TO {PREFIX}V_BASE WITH GRANT OPTION;
-
-# GRANT SELECT ON DBC TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}V_INP TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}T_UTLFW TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT INSERT ON {PREFIX}T_UTLFW TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}T_BASE TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT DELETE ON {PREFIX}T_BASE TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT UPDATE ON {PREFIX}T_BASE TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT INSERT ON {PREFIX}T_BASE TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}V_BASE TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}V_STG_ONLINE TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT SELECT ON {PREFIX}T_STG TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT DELETE ON {PREFIX}T_STG TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT UPDATE ON {PREFIX}T_STG TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT INSERT ON {PREFIX}T_STG TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT EXECUTE PROCEDURE ON {PREFIX}_ETL TO {PREFIX}_ETL WITH GRANT OPTION;
-# GRANT EXECUTE FUNCTION ON {PREFIX}_ETL TO {PREFIX}_ETL WITH GRANT OPTION;
-# """
-
 if __name__ == '__main__':
-    print(OTHER_SCHEMAS)
+    pass

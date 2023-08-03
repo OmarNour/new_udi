@@ -6,12 +6,9 @@ import sys, subprocess
 import pandas as pd
 import traceback
 import functools
-from functools import lru_cache
 from datetime import datetime
-# from pandasql import sqldf
 import configparser
 import concurrent.futures
-import time
 import multiprocessing
 import re
 
@@ -84,11 +81,7 @@ def list_to_string(_list, separator=None, quotes=0):
 
 
 def single_quotes(string):
-    return "'%s'" % string  # .replace("'", '"')
-
-
-# def single_quotes(string):
-#     return "'%s'" % string
+    return "'%s'" % string
 
 
 def time_elapsed_decorator(function):
@@ -125,15 +118,10 @@ def log_error_decorator():
     def decorator(function):
         @functools.wraps(function)
         def wrapper(*args, **kwargs):
-            # cf = args[0]
-            # source_output_path = args[1]
-            # file_name = get_file_name(__file__)
             try:
                 return function(*args, **kwargs)
             except:
-                # print(traceback.format_exc()) if error_log_path is None else None
                 error_detailed = f"""\n\nFunction Name: {function.__name__}\n\nargs: {args}\n\nkwargs: {kwargs}\n\nError: {traceback.format_exc()}"""
-                # TemplateLogError(error_log_path, '', file_name, error_detailed).log_error()
                 logging.critical(error_detailed)
 
         return wrapper
@@ -199,7 +187,6 @@ def parse_data_type(data_type_precision: str):
     data_type = data_type_lst[0]
     precision = data_type_lst[1].split(sep=')')[0] if len(data_type_lst) > 1 else None
     return data_type, precision
-
 
 
 if __name__ == '__main__':

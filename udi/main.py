@@ -8,20 +8,16 @@ from datetime import datetime
 
 @time_elapsed_decorator
 def start(run_id, source_layer0, db_prefix, smx_path: str, output_path: str, source_name: str | list | None, with_scripts=True, with_deploy=False):
-    # start_time = time.perf_counter()
     start_time = datetime.now()
     smx = SMX(smx_path, run_id, output_path, db_prefix, source_layer0)
-    # print(smx)
     smx.parse_file()
     smx.populate_model(source_name=source_name)
 
     if with_scripts:
-        # generate_schemas_ddl(smx)
         generate_scripts(smx)
         generate_metadata_scripts(smx)
         if with_deploy:
             deploy()
-        # generate_fake_data()
 
     myid_summary = "\n\nSummary:\n######################\n\n"
     for class_name in MyID.get_all_classes_instances().keys():
@@ -37,16 +33,10 @@ def start(run_id, source_layer0, db_prefix, smx_path: str, output_path: str, sou
     time_elapsed = end_time-start_time
     myid_summary += f"Time Elapsed: {time_elapsed}\n"
 
-    # del smx
     logging.info(myid_summary)
 
     # remove all logger handlers
     logging.getLogger().handlers = []
-    # logging.shutdown()
-
-    # open_folder()
-    # return smx.current_scripts_path
-
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':

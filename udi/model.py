@@ -1,4 +1,3 @@
-# from .functions import *
 from functions import log_error_decorator, upper_string_in_list, list_to_string
 import functools
 from config import cls_keys, JOIN_TYPES, ALPHABETS, DDL_VIEW_TEMPLATE, COL_DTYPE_TEMPLATE, CREATE_REPLACE, FROM_TEMPLATE, PI_TEMPLATE, DDL_TABLE_TEMPLATE, CAST_DTYPE_TEMPLATE, DS_BKEY, QUERY_TEMPLATE, CAST_DTYPE_TEMPLATE, GROUP_BY_TEMPLATE, CAST_DTYPE_TEMPLATE, COL_MAPPING_TEMPLATE, SRCI_V_BKEY_TEMPLATE_QUERY, WHERE_TEMPLATE, DS_BMAP, SRCI_V_BMAP_TEMPLATE_QUERY, JOIN_CLAUSE_TEMPLATE
@@ -112,7 +111,6 @@ class MyID(metaclass=Meta):
             return cls.__instances[cls.__name__].values()
         except KeyError:
             return []
-            # print(f"No instances found for {cls.__name__}")
 
     @classmethod
     def count_instances(cls):
@@ -122,7 +120,6 @@ class MyID(metaclass=Meta):
             return 0
 
     @classmethod
-    # @lru_cache
     def get_instance(cls, _key=None, _id: int = None):
         """
         This method is used to retrieve an instance from the __instances dictionary using either the key or the ID of the instance.
@@ -177,8 +174,6 @@ class MyID(metaclass=Meta):
                 raise ValueError(error_message)
 
         else:
-            # create a new instance of the class
-            # print(f"create a new instance of the class {cls.__name__}")
             instance = super().__new__(cls)
             cls.__set_instance(key, instance)
 
@@ -243,7 +238,6 @@ class DataBaseEngine(MyID):
         self._name = name
         self._reserved_words = None
         [JoinType(code=x.code, name=x.name) for x in JOIN_TYPES]
-        # print("JoinType count:", len(JoinType.get_all_instances()))
 
     @property
     def name(self):
@@ -569,10 +563,6 @@ class Table(MyID):
 
         return (self._ddl.strip() + ';\n') if self._ddl is not None else None
 
-    # @ddl.setter
-    # def ddl(self, view_ddl):
-    #     self._ddl = view_ddl
-
     @property
     def layers(self) -> []:
         lt: LayerTable
@@ -705,7 +695,6 @@ class DomainValue(MyID):
             return self.__edw_keys[self.domain.data_set.set_table.id][edw_key] == desc.lower()
         except:
             return True
-
 
 class Column(MyID):
     def __init__(self, table_id: int, column_name: str
@@ -967,30 +956,11 @@ class Pipeline(MyID):
         j: JoinWith
         return [j for j in JoinWith.get_all_instances() if j.pipeline.id == self.id]
 
-    # @property
-    # def all_source_tables(self) -> []:
-    #     j: JoinWith
-    #     _tables = [self.src_lyr_table.table]
-    #     for j in self.join_with:
-    #         _tables.append(j.master_lyr_table.table)
-    #         _tables.append(j.with_lyr_table.table)
-    #
-    #     return list(set(_tables))
-
     @property
     def technical_cols(self) -> []:
         col: Column
         if self.src_lyr_table:
             return [col for col in self.src_lyr_table.table.columns if col.is_technical_col]
-
-    # @property
-    # def all_source_aliases(self) -> []:
-    #     j: JoinWith
-    #     _aliases = [self.src_table_alias]
-    #     for j in self.join_with:
-    #         _aliases.append(j.master_alias)
-    #         _aliases.append(j.with_alias)
-    #     return list(set(_aliases))
 
     def add_new_alias(self, alias: str, table: Table) -> None:
         self._aliases[alias.lower()] = table.id
@@ -1001,17 +971,6 @@ class Pipeline(MyID):
             return Table.get_instance(_id=table_id)
         except KeyError:
             return None
-
-    # @property
-    # def all_src_cols(self) -> []:
-    #     # to get all columns from all source tables in this pipeline!
-    #     table: Table
-    #     col: Column
-    #     columns = []
-    #     cols_in_tables = [table.columns for table in self.all_source_tables]
-    #     for cols_in_table in cols_in_tables:
-    #         columns.extend(cols_in_table)
-    #     return [col.column_name for col in columns]
 
     @property
     def query(self):
@@ -1161,8 +1120,6 @@ class JoinOn(MyID):
         self._join_with_id = join_with_id
         self._complete_join_on_expr = complete_join_on_expr
 
-        # assert self.valid_join_on_expr, 'Invalid join on expression!'
-
         super().__init__(*args, **kwargs)
 
     @functools.cached_property
@@ -1172,20 +1129,6 @@ class JoinOn(MyID):
     @property
     def complete_join_on_expr(self):
         return self._complete_join_on_expr
-    # @property
-    # def valid_join_on_expr(self) -> bool:
-    #     col: Column
-    #     if self._complete_join_on_expr:
-    #         # master_table_alias = (self.join_with.master_alias + '.') if self.join_with.master_alias else ''
-    #         # with_table_alias = (self.join_with.with_alias + '.') if self.join_with.with_alias else ''
-    #         _extra_words = self.join_with.pipeline.all_src_cols \
-    #                        + self.join_with.pipeline.all_source_aliases \
-    #                        + [table.table_name for table in self.join_with.pipeline.all_source_tables]
-    #
-    #         return self.join_with.pipeline.tgt_lyr_table.table.schema.db_engine.valid_trx(trx=self._complete_join_on_expr
-    #                                                                                       , extra_words=_extra_words)
-    #     return True
-
 
 class ColumnMapping(MyID):
     """
@@ -1223,10 +1166,6 @@ class ColumnMapping(MyID):
                 self.src_table_alias = self.pipeline.src_table_alias
 
             assert self.src_table_alias, alias_error_msg
-        # assert self.valid_src_col_trx, "Invalid source column transformation!"
-        # assert tgt_col_id is not None \
-        #        and (src_col_id is not None or src_col_trx is not None) \
-        #        and col_seq is not None, "tgt_col_id, src_col_id & col_seq are all mandatory!"
         assert self.valid_tgt_col, "Invalid target column, make sure all target columns are related to one table!"
 
         if not self.constant_value:
@@ -1245,34 +1184,16 @@ class ColumnMapping(MyID):
     def src_col(self) -> Column:
         return Column.get_instance(_id=self._src_col_id)
 
-    # @property
-    # def valid_src_col_trx(self) -> bool:
-    #     col: Column
-    #     if self._src_col_trx:
-    #         _extra_words = self.pipeline.all_src_cols + \
-    #                        [self.pipeline.src_lyr_table.table.table_name]
-    #         return self.pipeline.src_lyr_table.table.schema.db_engine.valid_trx(trx=self._src_col_trx
-    #                                                                             , extra_words=_extra_words)
-    #     return True
-
     @property
     def src_col_trx(self):
-        # alias = ''
-        # _src_col_trx = '(' + str(self._src_col_trx) + ')' if self._src_col_trx else f"{self.src_table_alias}.{self.src_col.column_name}" if self.src_col else 'NULL'
-
         if self._src_col_trx:
             _src_col_trx = '(' + str(self._src_col_trx) + ')'
         elif self.src_col:
             _src_col_trx = f"{self.src_table_alias}.{self.src_col.column_name}"
         else:
             _src_col_trx = 'NULL'
-        # if self.src_col:
-        #     if self.pipeline.src_lyr_table.table.id == self.src_col.table.id:
-        #         alias = self.pipeline.src_table_alias + '.'
-
         if self.pipeline.domain or self.tgt_col.domain:
             _src_col_trx = f"trim({_src_col_trx})"
-            # print(_src_col_trx)
 
         if self.tgt_col.domain:
 
@@ -1295,11 +1216,8 @@ class ColumnMapping(MyID):
                                                                  , cast=source_key_cast
                                                                  , domain_id=self.tgt_col.domain.domain_code)
 
-        # for col_name in sorted(self.pipeline.all_src_cols, key=len, reverse=True):
-        #     _src_col_trx = _src_col_trx.replace(col_name, f"{alias}{col_name}")
 
         return str(_src_col_trx)
-        # return self._src_col_trx if self._src_col_trx else f"{alias}{self.src_col.column_name}"
 
     @property
     def valid_tgt_col(self) -> bool:
@@ -1311,21 +1229,12 @@ class Filter(MyID):
                  , pipeline_id: int
                  , filter_seq: int
                  , col_id: int = None
-                 , is_not: bool = False
-                 , fn_value_if_null: str = None
-                 , fn_trim: bool = False
-                 , fn_trim_trailing: str = None
-                 , fn_trim_leading: str = None
-                 , fn_substr: [] = None
-                 , operator_id: int = None  # =, <>, in, not in, like, not like, exists, not exists
-                 , value: str = None
                  , complete_filter_expr: str = None
                  , *args, **kwargs):
         self._pipeline_id = pipeline_id
         self.filter_seq = filter_seq
         self._complete_filter_expr = complete_filter_expr
         self._col_id = col_id
-        # assert self.valid_filter_expr, 'Invalid filter expression!'
         super().__init__(*args, **kwargs)
 
     @functools.cached_property
@@ -1336,17 +1245,6 @@ class Filter(MyID):
     def column(self) -> Column:
         return Column.get_instance(_id=self._col_id)
 
-    # @property
-    # def valid_filter_expr(self) -> bool:
-    #     col: Column
-    #     if self._complete_filter_expr:
-    #         _extra_words = self.pipeline.all_src_cols \
-    #                        + self.pipeline.all_source_aliases \
-    #                        + [table.table_name for table in self.pipeline.all_source_tables]
-    #         return self.pipeline.src_lyr_table.table.schema.db_engine.valid_trx(trx=self._complete_filter_expr
-    #                                                                             , extra_words=_extra_words)
-    #     return True
-
     @property
     def filter_expr(self):
         return self._complete_filter_expr
@@ -1356,15 +1254,6 @@ class OrFilter(MyID):
     def __init__(self
                  , filter_id: int
                  , col_id: int
-                 , is_not: bool
-                 , fn_value_if_null: bool
-                 , fn_trim: bool
-                 , fn_trim_trailing: str
-                 , fn_trim_leading: str
-                 , fn_substr: []
-                 , operator_id: int  # =, <>, in, not in, like, not like
-                 , value: str
-                 , complete_filter_expr: str = None
                  , *args, **kwargs):
         super().__init__(*args, **kwargs)
 

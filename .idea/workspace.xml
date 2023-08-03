@@ -6,23 +6,111 @@
   <component name="ChangeListManager">
     <list default="true" id="cfd54bcf-042a-4160-8e25-9e932f102a9a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Templates_format/D215.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Templates_format/compareSTGCountsAccepted.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Templates_format/compareSTGcountsALL.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Templates_format/dataValidationALL.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Templates_format/dataValidationAccepted.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/build/front_end/Analysis-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/front_end/Analysis-00.toc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/front_end/EXE-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/front_end/EXE-00.toc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/front_end/PKG-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/front_end/PKG-00.toc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/front_end/PYZ-00.pyz" beforeDir="false" afterPath="$PROJECT_DIR$/build/front_end/PYZ-00.pyz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/front_end/PYZ-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/front_end/PYZ-00.toc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/front_end/generate_smx_scripts.pkg" beforeDir="false" afterPath="$PROJECT_DIR$/build/front_end/generate_smx_scripts.pkg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/front_end/warn-front_end.txt" beforeDir="false" afterPath="$PROJECT_DIR$/build/front_end/warn-front_end.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/front_end/xref-front_end.html" beforeDir="false" afterPath="$PROJECT_DIR$/build/front_end/xref-front_end.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read_smx_sheet/app_Lib/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_smx_sheet/app_Lib/functions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read_smx_sheet/config.txt" beforeDir="false" afterPath="$PROJECT_DIR$/read_smx_sheet/config.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read_smx_sheet/front_end.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_smx_sheet/front_end.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read_smx_sheet/parameters/parameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_smx_sheet/parameters/parameters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read_smx_sheet/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_smx_sheet/test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/app_Lib/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_smx_sheet/udi/app_Lib/functions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/front_end.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_smx_sheet/udi/front_end.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_smx_sheet/udi/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/parameters/parameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_smx_sheet/udi/parameters/parameters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/smx.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_smx_sheet/udi/smx.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front_end.spec" beforeDir="false" afterPath="$PROJECT_DIR$/front_end.spec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/Hashed replacements" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/Logging_Decorator.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/ReadSMX.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/ReadSmxFolder.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/[ACA] SMX_Economic_Units_03-01-2023.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/app_Lib/TransformDDL.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/app_Lib/functions.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/app_Lib/manage_directories.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/app_Lib/script_icon.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/app_Lib/test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/config.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/front_end.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/generate_scripts.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/logging.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/parameters/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/parameters/parameters.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/BMAP_CHECK_TEST_SHEET.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/BMAP_DUP_CD_TEST_SHEET.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/BMAP_DUP_DESC_TEST_SHEET.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/BMAP_NULL_TEST_SHEET.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/BMAP_UNMATCHED_TEST_SHEET.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/CSO_TEST_SHEET.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D000.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D001.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D002.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D003.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D004.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D005.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D110.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D200.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D210.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D215.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D300.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D320.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D330.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D340.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D400.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D410.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D415.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D420.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D500.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D501.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D502.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D503.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D504.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D505.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D600.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D607.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D608.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D609.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D610.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D615.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D620.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D630.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/D640.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/DATA_SRC_TEST_SHEET.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/DUP_TEST_SHEET.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/HIST_DUP_TEST_SHEET.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/HIST_STRT_END_NULL_TEST_SHEET.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/HIST_STRT_GRT_END_TEST_SHEET.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/HIST_STRT_NULL_TEST_SHEET.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/HIST_TIME_GAP_TEST_SHEET.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/NULLS_TEST_SHEET.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/PROCESS_CHECK_TEST_SHEET.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/RI_TEST_SHEET.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/compare_testing_inputview.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/dataValidation.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/gcfr.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/generate_source_smx.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/stgCounts.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/testing_script_01.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/testing_script_02.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/templates/upsertDeleteTest.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/app_Lib/TransformDDL.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/app_Lib/functions.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/app_Lib/manage_directories.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/app_Lib/script_icon.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/app_Lib/test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/config.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/front_end.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/functions.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/model.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/parameters/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/parameters/parameters.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/smx.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/read_smx_sheet/udi/test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.txt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,6 +132,9 @@
     </hideBySeverity>
   </component>
   <component name="ProjectId" id="2THcO3nA3Sk8YGBYF8pIjM1Qx8x" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -52,11 +143,12 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "C:/Users/oh255011/Documents/Teradata/new_udi/read_smx_sheet/udi"
+    "last_opened_file_path": "C:/Users/oh255011/Documents/Teradata/new_udi"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\oh255011\Documents\Teradata\new_udi" />
       <recent name="C:\Users\oh255011\Documents\Teradata\new_udi\read_smx_sheet\udi" />
     </key>
   </component>

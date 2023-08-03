@@ -3,13 +3,13 @@
 block_cipher = None
 
 
-a = Analysis(['C:\\Users\\oh255011\\Documents\\Teradata\\new_udi\\read_smx_sheet\\udi\\front_end.py'],
+a = Analysis(['C:\\Users\\oh255011\\Documents\\Teradata\\new_udi\\udi\\front_end.py'],
              # pathex=['C:\\Users\\oh255011\\Documents\\Teradata\\new_udi'],
-             pathex=['C:\\Users\\oh255011\\Documents\\Teradata\\new_udi\\read_smx_sheet'],
+             pathex=['C:\\Users\\oh255011\\Documents\\Teradata\\new_udi\\udi'],
              binaries=[],
              datas=[('C:\\Users\\oh255011\\Anaconda3\\envs\\new_udi\\Lib\\site-packages\\dask\\dask.yaml', './dask'),
 			 ('C:\\Users\\oh255011\\Anaconda3\\envs\\new_udi\\Lib\\site-packages\\distributed\\distributed.yaml', './distributed')
-			 ,('C:\\Users\\oh255011\\Documents\\Teradata\\new_udi\\read_smx_sheet\\app_Lib\\script_icon.png','.')],
+			 ,('C:\\Users\\oh255011\\Documents\\Teradata\\new_udi\\udi\\app_Lib\\script_icon.png','.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -27,9 +27,9 @@ exe = EXE(pyz,
           a.datas,
           [],
           name='generate_smx_scripts',
-          debug=False,
+          debug=True,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
           runtime_tmpdir=None,
-          console=False )
+          console=True )

@@ -12,20 +12,19 @@
       <change beforePath="$PROJECT_DIR$/build/front_end/PYZ-00.pyz" beforeDir="false" afterPath="$PROJECT_DIR$/build/front_end/PYZ-00.pyz" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/front_end/PYZ-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/front_end/PYZ-00.toc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/front_end/generate_smx_scripts.pkg" beforeDir="false" afterPath="$PROJECT_DIR$/build/front_end/generate_smx_scripts.pkg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/front_end/warn-front_end.txt" beforeDir="false" afterPath="$PROJECT_DIR$/build/front_end/warn-front_end.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/front_end/xref-front_end.html" beforeDir="false" afterPath="$PROJECT_DIR$/build/front_end/xref-front_end.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/front_end.spec" beforeDir="false" afterPath="$PROJECT_DIR$/front_end.spec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/udi/app_Lib/TransformDDL.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/udi/app_Lib/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/udi/app_Lib/functions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/udi/app_Lib/manage_directories.py" beforeDir="false" afterPath="$PROJECT_DIR$/udi/app_Lib/manage_directories.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/udi/app_Lib/test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/udi/app_Lib/functions.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/udi/app_Lib/manage_directories.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/udi/app_Lib/script_icon.png" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/udi/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/udi/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/udi/front_end.py" beforeDir="false" afterPath="$PROJECT_DIR$/udi/front_end.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/udi/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/udi/functions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/udi/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/udi/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/udi/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/udi/model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/udi/parameters/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/udi/parameters/parameters.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/udi/smx.py" beforeDir="false" afterPath="$PROJECT_DIR$/udi/smx.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/udi/test.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,13 +57,17 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "C:/Users/oh255011/Documents/Teradata/new_udi"
+    "last_opened_file_path": "C:/Users/oh255011/Documents/Teradata/new_udi/udi"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\oh255011\Documents\Teradata\new_udi\udi" />
       <recent name="C:\Users\oh255011\Documents\Teradata\new_udi" />
       <recent name="C:\Users\oh255011\Documents\Teradata\new_udi\read_smx_sheet\udi" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\oh255011\Documents\Teradata\new_udi\udi\images" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />

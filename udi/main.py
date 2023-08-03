@@ -3,7 +3,6 @@ from model import *
 from functions import time_elapsed_decorator
 from smx import SMX, generate_scripts, generate_metadata_scripts
 import logging
-import time
 from datetime import datetime
 
 @time_elapsed_decorator

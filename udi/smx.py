@@ -1,5 +1,4 @@
 import logging
-# from .model import *
 from functions import log_error_decorator, time_elapsed_decorator, create_folder, WriteFile, filter_dataframe, single_quotes, merge_multiple_spaces, parse_data_type
 import os
 import datetime as dt
@@ -9,7 +8,6 @@ import pandas as pd
 import numpy as np
 from collections import namedtuple
 import re
-# # PREFIX = "TEST"
 
 class SMX:
     def __init__(self, path, run_id, output_path, db_prefix, source_layer0):

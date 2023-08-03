@@ -11,6 +11,7 @@ import configparser
 import concurrent.futures
 import multiprocessing
 import re
+import psutil
 
 try:
     import cPickle as pickle
@@ -30,6 +31,117 @@ class WriteFile:
 
     def close(self):
         self.f.close()
+
+def get_dirs():
+    if getattr(sys, 'frozen', False):
+        bundle_dir = sys._MEIPASS
+    else:
+        # we are running in a normal Python environment
+        bundle_dir = os.path.dirname(os.path.abspath(__file__))
+    cwd = os.getcwd()
+    return bundle_dir, cwd
+
+def string_to_dict(sting_dict, separator=' '):
+    if sting_dict:
+        # ex: Firstname="Sita" Lastname="Sharma" Age=22 Phone=1234567890
+        return eval("dict(%s)" % ','.join(sting_dict.split(separator)))
+
+
+def get_config_file_path():
+    config_file_path = get_dirs()[1]
+    return config_file_path
+
+
+def get_config_file_values(config_file_path=None):
+    separator = "$$$"
+    parameters = ""
+    if config_file_path is None:
+        try:
+            config_file_path = get_config_file_path()
+            config_file = open(config_file_path + "/" + default_config_file_name, "r")
+        except:
+            config_file_path = input("Enter config.txt path please:")
+            config_file = open(config_file_path + "/" + default_config_file_name, "r")
+    else:
+        try:
+            config_file = open(config_file_path, "r")
+        except:
+            config_file = None
+
+    if config_file:
+        for i in config_file.readlines():
+            line = i.strip()
+            if line != "":
+                if line[0] != '#':
+                    parameters = parameters + line + separator
+
+        param_dic = string_to_dict(parameters, separator)
+
+        source_names = param_dic['source_names'].split(',')
+        source_names = None if source_names[0] == "" and len(source_names) > 0 else source_names
+        param_dic['source_names'] = source_names
+
+        ################################################################################################
+        dt_now = dt.datetime.now()
+        dt_folder = dt_now.strftime("%Y") + "_" + \
+                    dt_now.strftime("%b").upper() + "_" + \
+                    dt_now.strftime("%d") + "_" + \
+                    dt_now.strftime("%H") + "_" + \
+                    dt_now.strftime("%M") + "_" + \
+                    dt_now.strftime("%S")
+        param_dic['output_path'] = param_dic["home_output_folder"] + "/" + dt_folder
+
+        db_prefix = param_dic['db_prefix']
+
+        param_dic['T_STG'] = db_prefix + "T_STG"
+        param_dic['t_WRK'] = db_prefix + "T_WRK"
+        param_dic['v_stg'] = db_prefix + "V_STG"
+        param_dic['v_base'] = db_prefix + "V_BASE"
+        param_dic['INPUT_VIEW_DB'] = db_prefix + "V_INP"
+
+        param_dic['MACRO_DB'] = db_prefix + "M_GCFR"
+        param_dic['UT_DB'] = db_prefix + "P_UT"
+        param_dic['UTLFW_v'] = db_prefix + "V_UTLFW"
+        param_dic['UTLFW_t'] = db_prefix + "T_UTLFW"
+
+        param_dic['TMP_DB'] = db_prefix + "T_TMP"
+        param_dic['APPLY_DB'] = db_prefix + "P_PP"
+        param_dic['base_DB'] = db_prefix + "T_BASE"
+
+        param_dic['SI_DB'] = db_prefix + "T_SRCI"
+        param_dic['SI_VIEW'] = db_prefix + "V_SRCI"
+
+        param_dic['GCFR_t'] = db_prefix + "t_GCFR"
+        param_dic['GCFR_V'] = db_prefix + "V_GCFR"
+        param_dic['keycol_override_base'] = db_prefix + "T_GCFR.GCFR_TRANSFORM_KEYCOL_OVERRIDE"
+        param_dic['M_GCFR'] = db_prefix + "M_GCFR"
+        param_dic['P_UT'] = db_prefix + "P_UT"
+
+        param_dic['core_table'] = db_prefix + "T_BASE"
+        param_dic['core_view'] = db_prefix + "V_BASE"
+
+        try:
+            staging_view_db = param_dic['staging_view_db']
+        except:
+            staging_view_db = ''
+
+        if staging_view_db is not None and staging_view_db != "":
+            staging_view_db = db_prefix + "V_" + staging_view_db
+        else:
+            staging_view_db = ''
+        param_dic['staging_view_db'] = staging_view_db
+    else:
+        param_dic = {}
+    return param_dic
+
+def get_server_info():
+    cpu_per = psutil.cpu_percent(interval=0.5, percpu=False)
+    mem_per = psutil.virtual_memory()[2]
+
+    return (cpu_per, mem_per)
+
+
+
 
 
 def upper_string_in_list(_list: list) -> list:

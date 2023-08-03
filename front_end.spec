@@ -9,7 +9,7 @@ a = Analysis(['C:\\Users\\oh255011\\Documents\\Teradata\\new_udi\\udi\\front_end
              binaries=[],
              datas=[('C:\\Users\\oh255011\\Anaconda3\\envs\\new_udi\\Lib\\site-packages\\dask\\dask.yaml', './dask'),
 			 ('C:\\Users\\oh255011\\Anaconda3\\envs\\new_udi\\Lib\\site-packages\\distributed\\distributed.yaml', './distributed')
-			 ,('C:\\Users\\oh255011\\Documents\\Teradata\\new_udi\\udi\\app_Lib\\script_icon.png','.')],
+			 ,('C:\\Users\\oh255011\\Documents\\Teradata\\new_udi\\udi\\images\\script_icon.png','.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],

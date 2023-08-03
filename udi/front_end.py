@@ -1,27 +1,23 @@
 import os
 import sys
-
-from app_Lib import manage_directories as md
-from app_Lib import functions as funcs
 import multiprocessing
 from tkinter import *
 from tkinter import filedialog, ttk
-from parameters import parameters as pm
 import datetime as dt
 import traceback
 import threading
 import random
 
 from main import start
-from functions import generate_run_id, open_folder
-
+from functions import generate_run_id, open_folder, get_dirs, get_config_file_path, get_config_file_values, get_server_info
+from config import ver_no, default_config_file_name
 
 class FrontEnd:
     def __init__(self):
         self.root = Tk()
-        img_icon = PhotoImage(file=os.path.join(md.get_dirs()[0], 'script_icon.png'))
+        img_icon = PhotoImage(file=os.path.join(get_dirs()[0], 'script_icon.png'))
         self.root.tk.call('wm', 'iconphoto', self.root._w, img_icon)
-        self.root.wm_title("SMX Scripts Builder " + pm.ver_no)
+        self.root.wm_title("SMX Scripts Builder " + ver_no)
         self.root.resizable(width="false", height="false")
         self.msg_no_config_file = "No Config File Found!"
         self.color_msg_no_config_file = "red"
@@ -73,7 +69,7 @@ class FrontEnd:
 
         self.config_file_entry_txt = StringVar()
         self.config_file_entry = Entry(frame_row0, textvariable=self.config_file_entry_txt, width=100)
-        config_file_path = os.path.join(funcs.get_config_file_path(), pm.default_config_file_name)
+        config_file_path = os.path.join(get_config_file_path(), default_config_file_name)
 
         try:
             x = open(config_file_path)
@@ -102,6 +98,7 @@ class FrontEnd:
         frame_radiobuttons_values.grid(column=1, row=5, sticky="W")
 
         self.get_config_file_values()
+
         frame_config_file_values_entry_width = 84
 
         read_from_smx_label = Label(frame_config_file_values, text="SMX File")
@@ -214,7 +211,7 @@ class FrontEnd:
 
     def get_config_file_values(self):
         try:
-            self.config_file_values = funcs.get_config_file_values(self.config_file_entry_txt.get())
+            self.config_file_values = get_config_file_values(self.config_file_entry_txt.get())
             self.smx_path = r"{}".format(self.config_file_values["smx_path"])
             self.output_path = r"{}".format(self.config_file_values["output_path"])
             self.source_names = self.config_file_values["source_names"]
@@ -289,7 +286,7 @@ class FrontEnd:
 
     def browsefunc(self):
         current_file = self.config_file_entry_txt.get()
-        filename = filedialog.askopenfilename(initialdir=md.get_dirs()[1])
+        filename = filedialog.askopenfilename(initialdir=get_dirs()[1])
         filename = current_file if filename == "" else filename
         self.config_file_entry.delete(0, END)
         self.config_file_entry.insert(END, filename)
@@ -398,7 +395,7 @@ class FrontEnd:
     def display_server_info(self, thread):
         color = "blue"
         while True:
-            server_info = funcs.server_info()
+            server_info = get_server_info()
             msg = "CPU " + str(server_info[0]) + "%" + " Memory " + str(server_info[1]) + "%"
             self.change_server_info_label(msg, color)
 

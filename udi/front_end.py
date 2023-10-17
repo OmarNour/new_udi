@@ -15,7 +15,7 @@ from config import ver_no, default_config_file_name
 class FrontEnd:
     def __init__(self):
         self.root = Tk()
-        img_icon = PhotoImage(file=os.path.join(get_dirs()[0], 'script_icon.png'))
+        img_icon = PhotoImage(file=os.path.join(get_dirs()[0], 'images', 'script_icon.png'))
         self.root.tk.call('wm', 'iconphoto', self.root._w, img_icon)
         self.root.wm_title("SMX Scripts Builder " + ver_no)
         self.root.resizable(width="false", height="false")
@@ -276,7 +276,11 @@ class FrontEnd:
 
         self.entry_field_source_names.config(state=NORMAL)
         self.entry_field_source_names.delete(0, END)
-        self.entry_field_source_names.insert(END, self.source_names)
+        try:
+            self.entry_field_source_names.insert(END, self.source_names)
+        # when all sources so, text will be too long for the field
+        except:
+            self.entry_field_source_names.insert(END, "ALL")
         self.entry_field_source_names.config(state=DISABLED)
 
         self.entry_db_prefix.config(state=NORMAL)

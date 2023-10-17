@@ -166,7 +166,10 @@ VALUES
 """
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #3.5.1"
+ver_no = "| Build #3.5.2"
+# ################################################################################################
+# What is new : #3.5.2:
+# fixing issue in Tkinter when all sources are selected
 # ################################################################################################
 # What is new : #3.5.1:
 # changing layer 0 physical table schema to be the exact user input in source_layer0 parameter in the

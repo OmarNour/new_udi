@@ -174,15 +174,29 @@ class SMX:
             self.parse_sheet(sheet)
 
         if 'supplements' in self.data.keys():
-            reserved_words_df = self.data['supplements'].applymap(lambda x: x.lower())
-            self.db_engine.reserved_words = reserved_words_df[reserved_words_df['reserved_words_source'] == self.db_engine.name]['reserved_words'].unique().tolist()
+            reserved_words_df = self.data['supplements'].copy()
+
+            if 'reserved_words_source' in reserved_words_df.columns:
+                reserved_words_df['reserved_words_source'] = reserved_words_df['reserved_words_source'].astype(str).str.lower().str.strip()
+
+            if 'reserved_words' in reserved_words_df.columns:
+                reserved_words_df['reserved_words'] = reserved_words_df['reserved_words'].astype(str).str.lower().str.strip()
+
+            self.db_engine.reserved_words = (
+                reserved_words_df[
+                    reserved_words_df['reserved_words_source'] == self.db_engine.name.lower()
+                ]['reserved_words']
+                .dropna()
+                .unique()
+                .tolist()
+            )
 
     @log_error_decorator()
     def parse_sheet(self, sheet):
         sheet_name = sheet.replace('  ', ' ').replace(' ', '_').lower()
         if sheet_name in SHEETS:
             df = self.xls.parse(sheet, encoding='utf-8').replace(np.nan, value='', regex=True)
-            df = df.applymap(lambda x: x.replace('\ufeff', '').replace('`', '').strip() if type(x) is str else int(x) if type(x) is float else x)
+            df = df.apply(lambda x: x.replace('\ufeff', '').replace('`', '').strip() if type(x) is str else int(x) if type(x) is float else x)
             df.drop_duplicates()
             df.columns = [c.replace('  ', ' ').replace(' ', '_').lower() for c in df]
             self.data[sheet_name] = df

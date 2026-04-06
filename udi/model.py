@@ -696,6 +696,7 @@ class DomainValue(MyID):
         except:
             return True
 
+
 class Column(MyID):
     def __init__(self, table_id: int, column_name: str
                  , is_pk: int = 0, mandatory: int = 0
@@ -1129,6 +1130,7 @@ class JoinOn(MyID):
     @property
     def complete_join_on_expr(self):
         return self._complete_join_on_expr
+
 
 class ColumnMapping(MyID):
     """

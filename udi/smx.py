@@ -1,13 +1,14 @@
 import logging
-from functions import log_error_decorator, time_elapsed_decorator, create_folder, WriteFile, filter_dataframe, single_quotes, merge_multiple_spaces, parse_data_type
+from functions import log_error_decorator, time_elapsed_decorator, create_folder, WriteFile, single_quotes, merge_multiple_spaces, parse_data_type
 import os
 import datetime as dt
 from model import Server, Table, DataSource, DataBaseEngine, Ip, Credential, LayerType, Layer, LayerTable, Schema, DataSetType, Pipeline, DataType, Column, DataSet, Domain, DomainValue, ColumnMapping, Filter, GroupBy, JoinType, JoinWith, JoinOn
 from config import CORE_MODEL_FOLDER_NAME, SHEETS, STG_TECHNICAL_COLS, SRC_SYSTEMS_FOLDER_NAME, DB_NAME, USER, PASSWORD, CORE_TECHNICAL_COLS, DS_BKEY, DS_BMAP, UNIFIED_SOURCE_SYSTEMS, INSERT_INTO_SOURCE_SYSTEMS, INSERT_INTO_SOURCE_SYSTEM_TABLES, INSERT_INTO_EDW_TABLES, INSERT_INTO_TRANSFORM_KEYCOL, INSERT_INTO_PROCESS, INSERT_INTO_HISTORY, BK_PROCESS_NAME_TEMPLATE, BK_VIEW_NAME_TEMPLATE, BMAP_PROCESS_NAME_TEMPLATE, BMAP_VIEW_NAME_TEMPLATE, CORE_PROCESS_NAME_TEMPLATE, CORE_VIEW_NAME_TEMPLATE, LOADING_MODE, DELETE_DATABASE_TEMPLATE, DROP_DATABASE_TEMPLATE, DATABASE_TEMPLATE, DROP_BEFORE_CREATE, DROP_TABLE_TEMPLATE
-import pandas as pd
-import numpy as np
+import duckdb
 from collections import namedtuple
 import re
+from types import SimpleNamespace
+from openpyxl import load_workbook
 
 class SMX:
     def __init__(self, path, run_id, output_path, db_prefix, source_layer0):
@@ -38,8 +39,73 @@ class SMX:
         self.xls = None
         self._source_systems = []
         self.data = {}
+        self.duckdb_con = duckdb.connect(database=':memory:')
         self.init_model()
 
+    def _normalize_value(self, value):
+        if value is None:
+            return ''
+        if isinstance(value, str):
+            return value.replace('\ufeff', '').replace('`', '').strip()
+        if isinstance(value, float) and value.is_integer():
+            return int(value)
+        return value
+
+    def _register_rows(self, table_name, rows, columns):
+        clean_columns = [col for col in columns if col]
+        if not clean_columns:
+            self.duckdb_con.execute(f'CREATE OR REPLACE TABLE "{table_name}" AS SELECT * FROM (SELECT 1) WHERE 1 = 0')
+            return
+
+        cols_ddl = ', '.join([f'"{col}" VARCHAR' for col in clean_columns])
+        self.duckdb_con.execute(f'CREATE OR REPLACE TABLE "{table_name}" ({cols_ddl})')
+
+        if not rows:
+            return
+
+        insert_cols_sql = ', '.join([f'"{col}"' for col in clean_columns])
+        values_sql = ', '.join(['?'] * len(clean_columns))
+        insert_sql = f'INSERT INTO "{table_name}" ({insert_cols_sql}) VALUES ({values_sql})'
+        all_rows_values = []
+        for row in rows:
+            row_values = []
+            for col in clean_columns:
+                val = row.get(col, '')
+                row_values.append(None if val is None else str(val))
+            all_rows_values.append(tuple(row_values))
+        self.duckdb_con.executemany(insert_sql, all_rows_values)
+
+    def _table_exists(self, table_name):
+        return self.duckdb_con.execute(
+            "SELECT COUNT(*) FROM information_schema.tables WHERE lower(table_name) = lower(?)",
+            [table_name]
+        ).fetchone()[0] > 0
+
+    def _sql_list(self, table_name, column_name, where_clause='', params=None, distinct=False):
+        params = params or []
+        distinct_sql = 'DISTINCT ' if distinct else ''
+        query = f'SELECT {distinct_sql}"{column_name}" AS val FROM "{table_name}" {where_clause}'
+        return [row[0] for row in self.duckdb_con.execute(query, params).fetchall()]
+
+    def _sql_rows(self, table_name, columns, where_clause='', params=None, distinct=False):
+        params = params or []
+        distinct_sql = 'DISTINCT ' if distinct else ''
+        cols_sql = ', '.join([f'"{col}"' for col in columns])
+        query = f'SELECT {distinct_sql}{cols_sql} FROM "{table_name}" {where_clause}'
+        rows = self.duckdb_con.execute(query, params).fetchall()
+        normalized_rows = []
+        for row in rows:
+            row_dict = {}
+            for idx, col in enumerate(columns):
+                value = row[idx]
+                row_dict[col] = '' if value is None else value
+            normalized_rows.append(SimpleNamespace(**row_dict))
+        return normalized_rows
+
+    def _in_clause(self, values):
+        if not values:
+            return 'IN (NULL)', []
+        return f"IN ({','.join(['?'] * len(values))})", values
 
 
     def set_configs(self, db_prefix, source_layer0):
@@ -169,23 +235,44 @@ class SMX:
     @log_error_decorator()
     @time_elapsed_decorator
     def parse_file(self):
-        self.xls = pd.ExcelFile(self.path)
-        for sheet in self.xls.sheet_names:
+        self.xls = load_workbook(self.path, data_only=True, read_only=True)
+        for sheet in self.xls.sheetnames:
             self.parse_sheet(sheet)
 
-        if 'supplements' in self.data.keys():
-            reserved_words_df = self.data['supplements'].applymap(lambda x: x.lower())
-            self.db_engine.reserved_words = reserved_words_df[reserved_words_df['reserved_words_source'] == self.db_engine.name]['reserved_words'].unique().tolist()
+        if self._table_exists('supplements'):
+            self.db_engine.reserved_words = self._sql_list(
+                table_name='supplements',
+                column_name='reserved_words',
+                where_clause='WHERE lower("reserved_words_source") = lower(?)',
+                params=[self.db_engine.name],
+                distinct=True
+            )
 
     @log_error_decorator()
     def parse_sheet(self, sheet):
         sheet_name = sheet.replace('  ', ' ').replace(' ', '_').lower()
         if sheet_name in SHEETS:
-            df = self.xls.parse(sheet, encoding='utf-8').replace(np.nan, value='', regex=True)
-            df = df.applymap(lambda x: x.replace('\ufeff', '').replace('`', '').strip() if type(x) is str else int(x) if type(x) is float else x)
-            df.drop_duplicates()
-            df.columns = [c.replace('  ', ' ').replace(' ', '_').lower() for c in df]
-            self.data[sheet_name] = df
+            ws = self.xls[sheet]
+            raw_rows = list(ws.iter_rows(values_only=True))
+            if not raw_rows:
+                return
+            headers = [str(c).replace('  ', ' ').replace(' ', '_').lower().strip() if c is not None else '' for c in raw_rows[0]]
+            seen = set()
+            rows = []
+            for data_row in raw_rows[1:]:
+                row_dict = {}
+                for idx, col_name in enumerate(headers):
+                    if not col_name:
+                        continue
+                    value = data_row[idx] if idx < len(data_row) else ''
+                    row_dict[col_name] = self._normalize_value(value)
+                row_key = tuple((k, row_dict.get(k, '')) for k in headers if k)
+                if row_key in seen:
+                    continue
+                seen.add(row_key)
+                rows.append(row_dict)
+            self.data[sheet_name] = sheet_name
+            self._register_rows(sheet_name, rows, headers)
 
     @property
     def sheet_names(self):
@@ -327,6 +414,7 @@ class SMX:
                                       )
                     else:
                         logging.error(f"Invalid column '{row.column_name}', processing row:\n{row}")
+            
             @log_error_decorator()
             def extract_core_columns(row):
                 if row.column_name != '':
@@ -810,14 +898,17 @@ class SMX:
                         if row.filter_criterion:
                             Filter(pipeline_id=core_pipeline.id, filter_seq=1, complete_filter_expr=row.filter_criterion)
 
-                        if 'column_mapping' in self.data.keys():
-                            column_mapping_df = filter_dataframe(self.data['column_mapping'], 'mapping_name', row.mapping_name)
-                            if not column_mapping_df.empty:
-                                column_mapping_df[['column_name'
-                                    , 'mapped_to_table'
-                                    , 'mapped_to_column'
-                                    , 'transformation_rule'
-                                    , 'transformation_type']].drop_duplicates().apply(column_mapping, axis=1)
+                        if self._table_exists('column_mapping'):
+                            column_mapping_rows = self._sql_rows(
+                                table_name='column_mapping',
+                                columns=['column_name', 'mapped_to_table', 'mapped_to_column', 'transformation_rule', 'transformation_type'],
+                                where_clause='WHERE lower("mapping_name") = lower(?)',
+                                params=[row.mapping_name],
+                                distinct=True
+                            )
+                            if column_mapping_rows:
+                                for cm_row in column_mapping_rows:
+                                    column_mapping(cm_row)
                             else:
                                 logging.error(f"No column mapping found for {row.mapping_name}, processing row:\n{row}")
 
@@ -834,98 +925,205 @@ class SMX:
                     _source_names = source_name if isinstance(source_name, list) else [source_name]
                     _source_names.extend(UNIFIED_SOURCE_SYSTEMS)
 
-                system_df = filter_dataframe(self.data['system'], 'schema', _source_names)
-                stg_tables_df = filter_dataframe(self.data['stg_tables'], 'schema', _source_names)
+                if _source_names:
+                    system_in_clause, system_params = self._in_clause([s.lower() for s in _source_names])
+                    system_where = f'WHERE lower("schema") {system_in_clause}'
+                else:
+                    system_params = []
+                    system_where = ''
+                system_rows = self._sql_rows(
+                    table_name='system',
+                    columns=['schema'],
+                    where_clause=system_where,
+                    params=system_params,
+                    distinct=True
+                )
+                stg_rows_all = self._sql_rows(
+                    table_name='stg_tables',
+                    columns=['schema', 'table_name', 'data_type', 'mandatory', 'natural_key', 'pk', 'key_set_name', 'key_domain_name', 'code_set_name', 'code_domain_name', 'column_name', 'column_transformation_rule', 'bkey_filter'],
+                    where_clause=system_where,
+                    params=system_params,
+                    distinct=False
+                )
 
-                if system_df.empty or stg_tables_df.empty:
+                if not system_rows or not stg_rows_all:
                     logging.error("Please make sure there are data in both 'System' and 'Stg Tables' sheets!")
                 else:
-                    table_mapping_df = pd.DataFrame()
-                    if 'table_mapping' in self.data.keys():
-                        table_mapping_df = filter_dataframe(filter_dataframe(self.data['table_mapping'], 'source', _source_names), 'layer', 'CORE')
-                        _core_tables = [i for i in set(table_mapping_df['target_table_name'].values.tolist()) if i]
+                    table_mapping_rows = []
+                    if self._table_exists('table_mapping'):
+                        table_mapping_rows = self._sql_rows(
+                            table_name='table_mapping',
+                            columns=['target_table_name', 'source', 'main_source', 'main_source_alias', 'filter_criterion', 'mapping_name', 'join', 'historization_algorithm', 'historization_columns', 'layer'],
+                            where_clause=f'WHERE lower("source") {system_in_clause} AND upper("layer") = ?' if _source_names else 'WHERE upper("layer") = ?',
+                            params=system_params + ['CORE'],
+                            distinct=True
+                        )
+                        _core_tables = [row.target_table_name for row in table_mapping_rows if row.target_table_name]
+                        history_tables_lst = list(set([row.target_table_name for row in table_mapping_rows if str(row.historization_algorithm).upper() == 'HISTORY' and row.target_table_name]))
 
-                        history_core_tables_df = filter_dataframe(table_mapping_df, 'historization_algorithm', 'HISTORY')
-                        if not history_core_tables_df.empty:
-                            history_tables_lst = history_core_tables_df['target_table_name'].drop_duplicates().tolist()
+                    key_domain_values = list(set([row.key_domain_name for row in stg_rows_all if row.key_domain_name]))
+                    bkey_rows = []
+                    if self._table_exists('bkey') and key_domain_values:
+                        key_domain_clause, key_domain_params = self._in_clause([str(v).lower() for v in key_domain_values])
+                        bkey_rows = self._sql_rows(
+                            table_name='bkey',
+                            columns=['physical_table', 'key_set_name', 'key_set_id', 'key_domain_id', 'key_domain_name'],
+                            where_clause=f'WHERE lower("key_domain_name") {key_domain_clause}',
+                            params=key_domain_params,
+                            distinct=False
+                        )
+                        _core_tables_bkey = [row.key_set_name for row in bkey_rows if row.key_set_name]
 
-                    bkey_df = pd.DataFrame()
-                    if 'bkey' in self.data.keys():
-                        bkey_df = filter_dataframe(self.data['bkey'], 'key_domain_name', [i for i in set(stg_tables_df['key_domain_name'].values.tolist()) if i])
-                        _core_tables_bkey = [i for i in set(bkey_df['key_set_name'].values.tolist()) if i]
-
-                    bmap_df = pd.DataFrame()
-                    bmap_values_df = pd.DataFrame()
-                    if 'bmap' in self.data.keys():
-                        bmap_df = filter_dataframe(self.data['bmap'], 'code_domain_name', [i for i in set(stg_tables_df['code_domain_name'].values.tolist()) if i])
-                        _core_tables_bmap = [i for i in set(bmap_df['code_set_name'].values.tolist()) if i]
-                        if 'bmap_values' in self.data.keys():
-                            bmap_values_df = filter_dataframe(self.data['bmap_values'], 'code_domain_id', [i for i in set(bmap_df['code_domain_id'].values.tolist()) if i])
+                    bmap_rows = []
+                    bmap_values_rows = []
+                    code_domain_values = list(set([row.code_domain_name for row in stg_rows_all if row.code_domain_name]))
+                    if self._table_exists('bmap') and code_domain_values:
+                        code_domain_clause, code_domain_params = self._in_clause([str(v).lower() for v in code_domain_values])
+                        bmap_rows = self._sql_rows(
+                            table_name='bmap',
+                            columns=['physical_table', 'code_set_name', 'code_set_id', 'code_domain_id', 'code_domain_name'],
+                            where_clause=f'WHERE lower("code_domain_name") {code_domain_clause}',
+                            params=code_domain_params,
+                            distinct=False
+                        )
+                        _core_tables_bmap = [row.code_set_name for row in bmap_rows if row.code_set_name]
+                        if self._table_exists('bmap_values'):
+                            bmap_domain_ids = list(set([row.code_domain_id for row in bmap_rows if row.code_domain_id]))
+                            if bmap_domain_ids:
+                                bmap_domain_clause, bmap_domain_params = self._in_clause(bmap_domain_ids)
+                                bmap_values_rows = self._sql_rows(
+                                    table_name='bmap_values',
+                                    columns=['code_set_name', 'code_domain_id', 'edw_code', 'source_code', 'description'],
+                                    where_clause=f'WHERE "code_domain_id" {bmap_domain_clause}',
+                                    params=bmap_domain_params,
+                                    distinct=False
+                                )
 
                     all_core_tables = list(set(_core_tables + _core_tables_bkey + _core_tables_bmap))
-                    core_tables_df = pd.DataFrame()
-
-                    if 'core_tables' in self.data.keys():
-                        core_tables_df = filter_dataframe(self.data['core_tables'], 'table_name', all_core_tables)
+                    core_tables_rows = []
+                    if self._table_exists('core_tables') and all_core_tables:
+                        core_tables_clause, core_tables_params = self._in_clause([str(v).lower() for v in all_core_tables])
+                        core_tables_rows = self._sql_rows(
+                            table_name='core_tables',
+                            columns=['table_name', 'column_name', 'data_type', 'pk', 'mandatory', 'historization_key'],
+                            where_clause=f'WHERE lower("table_name") {core_tables_clause}',
+                            params=core_tables_params,
+                            distinct=False
+                        )
 
                     ####################################################  End DFs  ####################################################
                     ####################################################  Begin   ####################################################
-                    system_df.drop_duplicates().apply(extract_system, axis=1)
-                    stg_tables_df[['data_type']].drop_duplicates().apply(extract_data_types, axis=1)
-                    if not core_tables_df.empty:
-                        core_tables_df[['data_type']].drop_duplicates().apply(extract_data_types, axis=1)
+                    for row in system_rows:
+                        extract_system(row)
+                    for row in self._sql_rows('stg_tables', ['data_type'], system_where, system_params, distinct=True):
+                        extract_data_types(row)
+                    if core_tables_rows:
+                        for row in [SimpleNamespace(data_type=v) for v in list(set([r.data_type for r in core_tables_rows if r.data_type]))]:
+                            extract_data_types(row)
 
                     int_data_type = DataType.get_instance(_key=(self.db_engine.id, 'INTEGER'))
                     vchar_data_type = DataType.get_instance(_key=(self.db_engine.id, 'VARCHAR'))
                     timestamp_data_type = DataType.get_instance(_key=(self.db_engine.id, 'TIMESTAMP'))
 
-                    if not core_tables_df.empty:
-                        core_tables_df[['table_name']].drop_duplicates().apply(extract_core_tables, axis=1)
+                    if core_tables_rows:
+                        for row in [SimpleNamespace(table_name=v) for v in list(set([r.table_name for r in core_tables_rows if r.table_name]))]:
+                            extract_core_tables(row)
 
-                    if not bkey_df.empty:
-                        bkey_df[['physical_table']].drop_duplicates().apply(extract_bkey_tables, axis=1)
+                    if bkey_rows:
+                        for row in [SimpleNamespace(physical_table=v) for v in list(set([r.physical_table for r in bkey_rows if r.physical_table]))]:
+                            extract_bkey_tables(row)
 
-                    if not bmap_df.empty:
-                        bmap_df[['physical_table']].drop_duplicates().apply(extract_bmap_tables, axis=1)
+                    if bmap_rows:
+                        for row in [SimpleNamespace(physical_table=v) for v in list(set([r.physical_table for r in bmap_rows if r.physical_table]))]:
+                            extract_bmap_tables(row)
 
-                    stg_tables_df[['schema', 'table_name']].drop_duplicates().apply(extract_stg_tables, axis=1)
+                    for row in self._sql_rows('stg_tables', ['schema', 'table_name'], system_where, system_params, distinct=True):
+                        extract_stg_tables(row)
                     ##########################  Start bkey & bmaps   #####################
-                    if not bkey_df.empty:
-                        bkey_df[['key_set_name', 'key_set_id', 'physical_table']].drop_duplicates().apply(extract_bkey_datasets, axis=1)
-                        bkey_df[['key_set_id', 'key_domain_id', 'key_domain_name']].drop_duplicates().apply(extract_bkey_domains, axis=1)
+                    if bkey_rows:
+                        first_by_key_set_id = {}
+                        for r in bkey_rows:
+                            if r.key_set_id and r.key_set_id not in first_by_key_set_id:
+                                first_by_key_set_id[r.key_set_id] = r
+                        for key_set_id, r in first_by_key_set_id.items():
+                            extract_bkey_datasets(SimpleNamespace(
+                                key_set_name=r.key_set_name,
+                                key_set_id=r.key_set_id,
+                                physical_table=r.physical_table
+                            ))
 
-                    if not bmap_df.empty:
-                        bmap_df[['code_set_name', 'code_set_id', 'physical_table']].drop_duplicates().apply(extract_bmap_datasets, axis=1)
+                        seen_domain_keys = set()
+                        for r in bkey_rows:
+                            if not r.key_set_id or not r.key_domain_id:
+                                continue
+                            domain_key = (r.key_set_id, r.key_domain_id)
+                            if domain_key in seen_domain_keys:
+                                continue
+                            seen_domain_keys.add(domain_key)
+                            extract_bkey_domains(SimpleNamespace(
+                                key_set_id=r.key_set_id,
+                                key_domain_id=r.key_domain_id,
+                                key_domain_name=r.key_domain_name
+                            ))
+
+                    if bmap_rows:
+                        first_by_code_set_id = {}
+                        for r in bmap_rows:
+                            if r.code_set_id and r.code_set_id not in first_by_code_set_id:
+                                first_by_code_set_id[r.code_set_id] = r
+                        for code_set_id, r in first_by_code_set_id.items():
+                            extract_bmap_datasets(SimpleNamespace(
+                                code_set_name=r.code_set_name,
+                                code_set_id=r.code_set_id,
+                                physical_table=r.physical_table
+                            ))
 
                     bmaps_data_sets = DataSetType.get_instance(_key=DS_BMAP).data_sets
 
-                    if not bmap_df.empty:
-                        bmap_df[['code_set_id', 'code_domain_id', 'code_domain_name']].drop_duplicates().apply(extract_bmap_domains, axis=1)
+                    if bmap_rows:
+                        seen_domain_keys = set()
+                        for r in bmap_rows:
+                            if not r.code_set_id or not r.code_domain_id:
+                                continue
+                            domain_key = (r.code_set_id, r.code_domain_id)
+                            if domain_key in seen_domain_keys:
+                                continue
+                            seen_domain_keys.add(domain_key)
+                            extract_bmap_domains(SimpleNamespace(
+                                code_set_id=r.code_set_id,
+                                code_domain_id=r.code_domain_id,
+                                code_domain_name=r.code_domain_name
+                            ))
 
-                    if not bmap_values_df.empty:
-                        bmap_values_df[['code_set_name', 'code_domain_id', 'edw_code', 'source_code', 'description']].drop_duplicates().apply(extract_bmap_values, axis=1)
+                    if bmap_values_rows:
+                        for row in bmap_values_rows:
+                            extract_bmap_values(row)
                     ##########################  End bkey & bmaps     #####################
 
-                    stg_tables_df[['table_name', 'column_name', 'data_type', 'mandatory', 'natural_key', 'pk',
-                                   'key_set_name', 'key_domain_name', 'code_set_name', 'code_domain_name']].drop_duplicates().apply(extract_stg_srci_table_columns, axis=1)
+                    for row in self._sql_rows('stg_tables', ['table_name', 'column_name', 'data_type', 'mandatory', 'natural_key', 'pk',
+                                   'key_set_name', 'key_domain_name', 'code_set_name', 'code_domain_name'], system_where, system_params, distinct=True):
+                        extract_stg_srci_table_columns(row)
 
-                    stg_tables_df[['schema', 'table_name', 'natural_key', 'column_name', 'column_transformation_rule']].drop_duplicates().apply(extract_src_view_columns, axis=1)
+                    for row in self._sql_rows('stg_tables', ['schema', 'table_name', 'natural_key', 'column_name', 'column_transformation_rule'], system_where, system_params, distinct=True):
+                        extract_src_view_columns(row)
                     # stg_tables_df[['schema', 'table_name', 'natural_key', 'column_name']].drop_duplicates().apply(extract_stg_view_columns, axis=1)
 
                     ##########################  Start bkey & bmap TXF view  #####################
-                    stg_tables_df[['schema', 'table_name', 'natural_key', 'column_name'
-                        , 'key_set_name', 'key_domain_name', 'bkey_filter']].drop_duplicates().apply(extract_bkey_views, axis=1)
+                    for row in self._sql_rows('stg_tables', ['schema', 'table_name', 'natural_key', 'column_name'
+                        , 'key_set_name', 'key_domain_name', 'bkey_filter'], system_where, system_params, distinct=True):
+                        extract_bkey_views(row)
 
                     # stg_tables_df[['schema', 'column_name'
                     #     , 'code_set_name', 'code_domain_name']].drop_duplicates().apply(extract_bmap_views, axis=1)
 
                     ##########################  End bkey TXF view    #####################
-                    stg_tables_df[['schema', 'table_name', 'column_name', 'natural_key'
-                        , 'key_set_name', 'key_domain_name', 'code_set_name', 'code_domain_name']].drop_duplicates().apply(extract_srci_view_columns, axis=1)
+                    for row in self._sql_rows('stg_tables', ['schema', 'table_name', 'column_name', 'natural_key'
+                        , 'key_set_name', 'key_domain_name', 'code_set_name', 'code_domain_name'], system_where, system_params, distinct=True):
+                        extract_srci_view_columns(row)
                     ##########################      Start Core TXF view     #####################
-                    if not core_tables_df.empty:
-                        core_tables_df[['table_name', 'column_name', 'data_type', 'pk'
-                            , 'mandatory', 'historization_key']].drop_duplicates().apply(extract_core_columns, axis=1)
+                    if core_tables_rows:
+                        for row in [SimpleNamespace(table_name=r.table_name, column_name=r.column_name, data_type=r.data_type, pk=r.pk, mandatory=r.mandatory, historization_key=r.historization_key) for r in core_tables_rows]:
+                            extract_core_columns(row)
                         table: Table
                         col: Column
                         invalid_history_tables = []
@@ -950,15 +1148,12 @@ class SMX:
                         if invalid_lookup_tables:
                             logging.error(f"These are invalid lookup tables, {invalid_lookup_tables}.\nCODE & DESC columns should follow the pattern <table_name>_CD & <table_name>_DESC")
 
-                    if not table_mapping_df.empty:
-                        table_mapping_df[
-                            [
-                                'target_table_name', 'source'
-                                , 'main_source', 'main_source_alias'
-                                , 'filter_criterion', 'mapping_name', 'join'
-                                , 'historization_algorithm', 'historization_columns'
-                            ]
-                        ].drop_duplicates().apply(extract_core_txf_views, axis=1)
+                    if table_mapping_rows:
+                        for row in [SimpleNamespace(target_table_name=r.target_table_name, source=r.source
+                                , main_source=r.main_source, main_source_alias=r.main_source_alias
+                                , filter_criterion=r.filter_criterion, mapping_name=r.mapping_name, join=r.join
+                                , historization_algorithm=r.historization_algorithm, historization_columns=r.historization_columns) for r in table_mapping_rows]:
+                            extract_core_txf_views(row)
 
                     layer_table: LayerTable
                     for table_name in [layer_table.table.table_name for layer_table in LayerTable.get_all_instances()
@@ -1111,12 +1306,15 @@ def generate_scripts(smx: SMX):
         path = os.path.join(smx.current_scripts_path, main_folder, layer_folder_name)
         return path
 
-    layer_tables_df = pd.DataFrame(LayerTable.get_all_instances(), columns=['layer_table'])
-    layer_tables_df['out_path'] = layer_tables_df.apply(layer_table_out_path, axis=1)
-    layer_tables_df[['out_path']].drop_duplicates().apply(lambda row: create_folder(row.out_path), axis=1)
+    layer_table_rows = [SimpleNamespace(layer_table=lt) for lt in LayerTable.get_all_instances()]
+    for row in layer_table_rows:
+        row.out_path = layer_table_out_path(row)
 
-    if not layer_tables_df.empty:
-        layer_tables_df.apply(layer_table_scripts, axis=1)
+    for out_path in set([row.out_path for row in layer_table_rows]):
+        create_folder(out_path)
+
+    for row in layer_table_rows:
+        layer_table_scripts(row)
 
 @log_error_decorator()
 @time_elapsed_decorator

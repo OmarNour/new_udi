@@ -1,0 +1,1 @@
+drop user super_user;CREATE USER super_user    FROM EDW_PROD AS    PASSWORD  =  super_user,    PERMANENT = 60e6,    SPOOL = 20606183723616,    DEFAULT DATABASE = GPROD1_ETL;    

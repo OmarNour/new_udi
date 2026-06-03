@@ -32,6 +32,20 @@ class WriteFile:
     def close(self):
         self.f.close()
 
+def format_processing_row(row, row_index=None):
+    if hasattr(row, '_asdict'):
+        data = row._asdict()
+    elif hasattr(row, '__dict__'):
+        data = {k: v for k, v in vars(row).items() if not k.startswith('_')}
+    else:
+        return str(row)
+
+    index = row_index if row_index is not None else getattr(row, '_row_index', None)
+    series = pd.Series(data, name=index)
+    with pd.option_context('display.max_colwidth', 80):
+        return str(series)
+
+
 def get_dirs():
     if getattr(sys, 'frozen', False):
         bundle_dir = sys._MEIPASS
@@ -300,9 +314,9 @@ def parse_data_type(data_type_precision: str):
     precision = data_type_lst[1].split(sep=')')[0] if len(data_type_lst) > 1 else None
     return data_type, precision
 
-
 if __name__ == '__main__':
     _ = """ dasda's """
     x = single_quotes(_)
     print(x)
     print(generate_run_id())
+

@@ -1,5 +1,5 @@
 import logging
-from functions import log_error_decorator, time_elapsed_decorator, create_folder, WriteFile, single_quotes, merge_multiple_spaces, parse_data_type
+from functions import log_error_decorator, time_elapsed_decorator, create_folder, WriteFile, single_quotes, merge_multiple_spaces, parse_data_type, format_processing_row
 import os
 import datetime as dt
 from model import Server, Table, DataSource, DataBaseEngine, Ip, Credential, LayerType, Layer, LayerTable, Schema, DataSetType, Pipeline, DataType, Column, DataSet, Domain, DomainValue, ColumnMapping, Filter, GroupBy, JoinType, JoinWith, JoinOn
@@ -322,7 +322,7 @@ class SMX:
                         srci_vl = LayerTable(layer_id=self.srci_layer.id, table_id=srci_v.id)
                         Pipeline(src_lyr_table_id=stg_lt.id, tgt_lyr_table_id=srci_lt.id, lyr_view_id=srci_vl.id)
                     else:
-                        logging.error(f""" Invalid Source name, {row.schema}, processing row:\n{row}""")
+                        logging.error(f""" Invalid Source name, {row.schema}, processing row:\n{format_processing_row(row)}""")
 
             @log_error_decorator()
             def extract_core_tables(row):
@@ -343,7 +343,7 @@ class SMX:
                     _data_type = data_type_lst[0]
                     data_type = DataType.get_instance(_key=(self.db_engine.id, _data_type))
                     if not data_type:
-                        logging.error(f"Invalid data type, processing row:\n{row}")
+                        logging.error(f"Invalid data type, processing row:\n{format_processing_row(row)}")
                     else:
                         pk = 1 if row.pk.upper() == 'Y' else 0
                         mandatory = 1 if row.pk.upper() == 'Y' else 0
@@ -363,7 +363,7 @@ class SMX:
 
                                 data_set = DataSet.get_by_name(self.bkey_set_type.id, row.key_set_name)
                                 if not data_set:
-                                    logging.error(f"invalid key set name '{row.key_set_name}', processing row:\n{row}")
+                                    logging.error(f"invalid key set name '{row.key_set_name}', processing row:\n{format_processing_row(row)}")
                                 else:
                                     domain = Domain.get_by_name(data_set.id, row.key_domain_name)
                                     domain_error_msg = f"Bkey Domain not found for {row.table_name}.{row.column_name} column, " \
@@ -375,7 +375,7 @@ class SMX:
 
                                 data_set = DataSet.get_by_name(self.bmap_set_type.id, row.code_set_name)
                                 if not data_set:
-                                    logging.error(f"invalid code set name '{row.code_set_name}', processing row:\n{row}")
+                                    logging.error(f"invalid code set name '{row.code_set_name}', processing row:\n{format_processing_row(row)}")
                                 else:
                                     domain = Domain.get_by_name(data_set.id, row.code_domain_name)
                                     domain_error_msg = f"Bmap Domain not found for {row.table_name}.{row.column_name} column, " \
@@ -386,7 +386,7 @@ class SMX:
                             if domain:
                                 domain_id = domain.id
                             else:
-                                logging.error(f"{domain_error_msg}, processing row:\n{row}")
+                                logging.error(f"{domain_error_msg}, processing row:\n{format_processing_row(row)}")
 
                         if srci_table:
                             Column(table_id=srci_table.id, column_name=row.column_name, is_pk=pk, mandatory=mandatory
@@ -413,7 +413,7 @@ class SMX:
                                       , src_col_trx=row.column_transformation_rule
                                       )
                     else:
-                        logging.error(f"Invalid column '{row.column_name}', processing row:\n{row}")
+                        logging.error(f"Invalid column '{row.column_name}', processing row:\n{format_processing_row(row)}")
             
             @log_error_decorator()
             def extract_core_columns(row):
@@ -488,14 +488,14 @@ class SMX:
                     if ds:
                         if ds.set_code != row.key_set_id:
                             valid_ds = False
-                            logging.error(f"Duplicate dataset '{row.key_set_id}', processing row:\n{row}")
+                            logging.error(f"Duplicate dataset '{row.key_set_id}', processing row:\n{format_processing_row(row)}")
 
                     if valid_ds:
                         if set_table and surrogate_table:
                             DataSet(set_type_id=self.bkey_set_type.id, set_code=row.key_set_id, set_table_id=set_table.id, surrogate_table_id=surrogate_table.id)
                             surrogate_table.is_bkey = True
                         else:
-                            logging.error(f"Invalid set table {row.key_set_name} or surrogate table {row.physical_table}, processing row:\n {row}")
+                            logging.error(f"Invalid set table {row.key_set_name} or surrogate table {row.physical_table}, processing row:\n{format_processing_row(row)}")
 
             @log_error_decorator()
             def extract_bkey_domains(row):
@@ -503,7 +503,7 @@ class SMX:
                 if data_set and row.key_domain_id:
                     Domain(data_set_id=data_set.id, domain_code=row.key_domain_id, domain_name=row.key_domain_name)
                 else:
-                    logging.error(f"invalid data set {row.key_set_id} or domain ID, processing row:\n{row}")
+                    logging.error(f"invalid data set {row.key_set_id} or domain ID, processing row:\n{format_processing_row(row)}")
 
             @log_error_decorator()
             def extract_bmap_tables(row):
@@ -544,14 +544,14 @@ class SMX:
                     if ds:
                         if ds.set_code != row.code_set_id:
                             valid_ds = False
-                            logging.error(f"Duplicate dataset '{row.code_set_id}', processing row:\n{row}")
+                            logging.error(f"Duplicate dataset '{row.code_set_id}', processing row:\n{format_processing_row(row)}")
 
                     if valid_ds:
                         if set_table and row.code_set_id and surrogate_table:
                             DataSet(set_type_id=self.bmap_set_type.id, set_code=row.code_set_id, set_table_id=set_table.id, surrogate_table_id=surrogate_table.id)
                             surrogate_table.is_bmap = True
                         else:
-                            logging.error(f"Invalid set table '{row.code_set_name}' or surrogate table '{row.physical_table}', processing row:\n{row}")
+                            logging.error(f"Invalid set table '{row.code_set_name}' or surrogate table '{row.physical_table}', processing row:\n{format_processing_row(row)}")
 
             @log_error_decorator()
             def extract_bmap_domains(row):
@@ -559,7 +559,7 @@ class SMX:
                 if data_set and row.code_domain_id:
                     Domain(data_set_id=data_set.id, domain_code=row.code_domain_id, domain_name=row.code_domain_name)
                 else:
-                    logging.error(f"invalid data set or domain ID, processing row:\n{row}")
+                    logging.error(f"invalid data set or domain ID, processing row:\n{format_processing_row(row)}")
 
             @log_error_decorator()
             def extract_bmap_values(row):
@@ -581,15 +581,15 @@ class SMX:
                 if row.code_domain_name != '':
                     ds = DataSource.get_instance(_key=row.schema)
                     if not ds:
-                        logging.error(f"Invalid source name '{row.schema}', processing row:\n{row}")
+                        logging.error(f"Invalid source name '{row.schema}', processing row:\n{format_processing_row(row)}")
                     else:
                         data_set = DataSet.get_by_name(self.bmap_set_type.id, row.code_set_name)
                         if not data_set:
-                            logging.error(f"Invalid code set '{row.code_set_name}', processing row:\n{row}")
+                            logging.error(f"Invalid code set '{row.code_set_name}', processing row:\n{format_processing_row(row)}")
                         else:
                             domain = Domain.get_by_name(data_set_id=data_set.id, domain_name=row.code_domain_name)
                             if not domain:
-                                logging.error(f"Invalid code domain name '{row.code_domain_name}', processing row:\n{row}")
+                                logging.error(f"Invalid code domain name '{row.code_domain_name}', processing row:\n{format_processing_row(row)}")
                             else:
                                 stg_t = Table.get_instance(_key=(self.stg_t_schema.id, row.table_name))
                                 stg_lt = LayerTable.get_instance(_key=(self.stg_layer.id, stg_t.id))
@@ -618,7 +618,7 @@ class SMX:
                 if row.natural_key != '' and row.key_domain_name != '':
                     ds = DataSource.get_instance(_key=row.schema)
                     if not ds:
-                        logging.error(f"Invalid source name '{row.schema}', processing row:\n{row}")
+                        logging.error(f"Invalid source name '{row.schema}', processing row:\n{format_processing_row(row)}")
                     else:
                         domain: Domain
                         stg_col: Column
@@ -628,11 +628,11 @@ class SMX:
 
                         data_set = DataSet.get_by_name(self.bkey_set_type.id, row.key_set_name)
                         if not data_set:
-                            logging.error(f"Invalid key set '{row.key_set_name}', processing row:\n{row}")
+                            logging.error(f"Invalid key set '{row.key_set_name}', processing row:\n{format_processing_row(row)}")
                         else:
                             domain = Domain.get_by_name(data_set_id=data_set.id, domain_name=row.key_domain_name)
                             if not domain:
-                                logging.error(f"Invalid key domain name '{row.key_domain_name}', processing row:\n{row}")
+                                logging.error(f"Invalid key domain name '{row.key_domain_name}', processing row:\n{format_processing_row(row)}")
                             else:
                                 stg_t = Table.get_instance(_key=(self.stg_t_schema.id, row.table_name))
                                 stg_lt = LayerTable.get_instance(_key=(self.stg_layer.id, stg_t.id))
@@ -658,7 +658,7 @@ class SMX:
                                     if row.bkey_filter:
                                         Filter(pipeline_id=bkey_pipeline.id, filter_seq=1, complete_filter_expr=row.bkey_filter)
                                 else:
-                                    logging.error(f"Invalid key set '{row.key_set_name}', processing row:\n{row}")
+                                    logging.error(f"Invalid key set '{row.key_set_name}', processing row:\n{format_processing_row(row)}")
 
             @log_error_decorator()
             def extract_srci_view_columns(row):
@@ -674,11 +674,11 @@ class SMX:
                         if row.key_set_name != '':
                             data_set = DataSet.get_by_name(self.bkey_set_type.id, row.key_set_name)
                             if not data_set:
-                                logging.error(f"key set '{row.key_set_name}', is not defined, please check the 'BKEY' sheet!, processing row:\n{row}")
+                                logging.error(f"key set '{row.key_set_name}', is not defined, please check the 'BKEY' sheet!, processing row:\n{format_processing_row(row)}")
                             else:
                                 domain = Domain.get_by_name(data_set_id=data_set.id, domain_name=row.key_domain_name)
                                 if not domain:
-                                    logging.error(f"""{row.key_domain_name}, is not defined, please check the 'BKEY' sheet!, processing row:\n{row}""")
+                                    logging.error(f"""{row.key_domain_name}, is not defined, please check the 'BKEY' sheet!, processing row:\n{format_processing_row(row)}""")
                                 else:
                                     txf_process_name = BK_PROCESS_NAME_TEMPLATE.format(set_id=data_set.set_code
                                                                                        , src_table_name=stg_t.table_name
@@ -704,10 +704,10 @@ class SMX:
                     else:
                         stg_t_col = Column.get_instance(_key=(stg_t.id, row.column_name))
                         if not stg_t_col:
-                            logging.error(f"Invalid column {row.column_name}, processing row:\n{row}")
+                            logging.error(f"Invalid column {row.column_name}, processing row:\n{format_processing_row(row)}")
 
                     if not srci_t_col:
-                        logging.error(f"Invalid column {row.column_name}, processing row:\n{row}")
+                        logging.error(f"Invalid column {row.column_name}, processing row:\n{format_processing_row(row)}")
                     else:
                         srci_v = Table.get_instance(_key=(self.srci_v_schema.id, row.table_name))
                         srci_vl = LayerTable.get_instance(_key=(self.srci_layer.id, srci_v.id))
@@ -729,7 +729,7 @@ class SMX:
                     join_type = None
                     _join_txt = ' ' + merge_multiple_spaces(join_txt).lower() + ' '
                     if (' select ' or ' sel ' or '(sel ' or '(select ') in _join_txt:
-                        logging.error(f"Query cannot be found in join!, processing row:\n{row}")
+                        logging.error(f"Query cannot be found in join!, processing row:\n{format_processing_row(row)}")
                     _join_txt = _join_txt.replace(' inner ', ' ').replace(' outer ', ' ').strip()
 
                     new_input_join = 'join '
@@ -751,7 +751,7 @@ class SMX:
                             join_type = JoinType.get_instance(_key='fj')
 
                         if not join_type:
-                            logging.error(f"No join found!, processing row:\n{row}")
+                            logging.error(f"No join found!, processing row:\n{format_processing_row(row)}")
 
                         _split = _split[1].split(' on ', 1)
                         # print('on split: ', _split)
@@ -765,7 +765,7 @@ class SMX:
                             with_srci_t = Table.get_instance(_key=(self.srci_t_schema.id, table_name))
 
                             if not with_srci_t:
-                                logging.error(f"invalid join table '{table_name}', processing row:\n{row}")
+                                logging.error(f"invalid join table '{table_name}', processing row:\n{format_processing_row(row)}")
                             else:
                                 with_srci_lt = LayerTable.get_instance(_key=(self.srci_layer.id, with_srci_t.id))
                                 # print(f"table name {table_name}, alias {table_alias}")
@@ -800,11 +800,11 @@ class SMX:
                     tgt_col: Column
                     transformation_type = _row.transformation_type.upper()
                     if transformation_type not in ('COPY', 'SQL', 'CONST'):
-                        logging.error(f"Transformation Type, should be one of the following COPY, SQL or CONST, processing row:\n{_row}")
+                        logging.error(f"Transformation Type, should be one of the following COPY, SQL or CONST, processing row:\n{format_processing_row(_row)}")
                     else:
                         tgt_col = Column.get_instance(_key=(core_t.id, _row.column_name))
                         if not tgt_col:
-                            logging.error(f"Invalid Target Column Name, {_row.column_name}, processing row:\n{_row}")
+                            logging.error(f"Invalid Target Column Name, {_row.column_name}, processing row:\n{format_processing_row(_row)}")
                         else:
                             src_col = None
                             src_table_alias = None
@@ -817,7 +817,7 @@ class SMX:
                             elif row.historization_algorithm.upper() == 'HISTORY':
                                 scd_type = 2 if _row.column_name in row.historization_columns else 1
                             else:
-                                logging.error(f"Invalid historization algorithm, processing row:\n{row}")
+                                logging.error(f"Invalid historization algorithm, processing row:\n{format_processing_row(row)}")
 
                             scd_type = 0 if tgt_col.is_pk else scd_type
 
@@ -831,11 +831,11 @@ class SMX:
                                         if src_t:
                                             src_col = Column.get_instance(_key=(src_t.id, _row.mapped_to_column))
                                             if src_col is None:
-                                                logging.error(f"Invalid Source Column '{_row.mapped_to_column}', processing row:\n{_row}")
+                                                logging.error(f"Invalid Source Column '{_row.mapped_to_column}', processing row:\n{format_processing_row(_row)}")
                                         else:
-                                            logging.error(f"Invalid Table '{src_table.table_name}', processing row:\n{_row}")
+                                            logging.error(f"Invalid Table '{src_table.table_name}', processing row:\n{format_processing_row(_row)}")
                                     else:
-                                        logging.error(f"Invalid alias '{src_table_alias}' for mapping {row.mapping_name}, processing row:\n{_row}")
+                                        logging.error(f"Invalid alias '{src_table_alias}' for mapping {row.mapping_name}, processing row:\n{format_processing_row(_row)}")
                             elif transformation_type == 'CONST':
                                 if str(_row.transformation_rule).upper() == '':
                                     transformation_rule = None
@@ -860,7 +860,7 @@ class SMX:
                 core_t: Table
                 ds = DataSource.get_instance(_key=row.source)
                 if not ds:
-                    logging.error(f"Invalid source name {row.source}, processing row:\n{row}")
+                    logging.error(f"Invalid source name {row.source}, processing row:\n{format_processing_row(row)}")
                 else:
                     main_tables_name = row.main_source.split(',')
                     main_table_name = main_tables_name[0].strip()
@@ -868,7 +868,7 @@ class SMX:
 
                     srci_t = Table.get_instance(_key=(self.srci_t_schema.id, main_table_name))
                     if not srci_t:
-                        logging.error(f"invalid main table, {main_table_name}, processing row:\n{row}")
+                        logging.error(f"invalid main table, {main_table_name}, processing row:\n{format_processing_row(row)}")
                     else:
                         srci_lt = LayerTable.get_instance(_key=(self.srci_layer.id, srci_t.id))
 
@@ -876,10 +876,10 @@ class SMX:
                         core_lt = LayerTable.get_instance(_key=(self.core_layer.id, core_t.id))
 
                         if row.historization_algorithm.upper() == 'HISTORY' and not core_t.history_table:
-                            logging.error(f"History process should deal with history table only, processing row:\n{row}")
+                            logging.error(f"History process should deal with history table only, processing row:\n{format_processing_row(row)}")
 
                         if row.historization_algorithm.upper() != 'HISTORY' and core_t.history_table:
-                            logging.error(f"Non-history process should not deal with history table, processing row:\n{row}")
+                            logging.error(f"Non-history process should not deal with history table, processing row:\n{format_processing_row(row)}")
 
                         txf_process_name = CORE_PROCESS_NAME_TEMPLATE.format(mapping_name=row.mapping_name)
                         txf_view_name = CORE_VIEW_NAME_TEMPLATE.format(view_name=txf_process_name)
@@ -910,7 +910,7 @@ class SMX:
                                 for cm_row in column_mapping_rows:
                                     column_mapping(cm_row)
                             else:
-                                logging.error(f"No column mapping found for {row.mapping_name}, processing row:\n{row}")
+                                logging.error(f"No column mapping found for {row.mapping_name}, processing row:\n{format_processing_row(row)}")
 
             ####################################################  Begin DFs  ####################################################
             if ('system' or 'stg_tables') not in self.data.keys():
@@ -1149,10 +1149,12 @@ class SMX:
                             logging.error(f"These are invalid lookup tables, {invalid_lookup_tables}.\nCODE & DESC columns should follow the pattern <table_name>_CD & <table_name>_DESC")
 
                     if table_mapping_rows:
-                        for row in [SimpleNamespace(target_table_name=r.target_table_name, source=r.source
+                        for row_index, r in enumerate(table_mapping_rows):
+                            row = SimpleNamespace(target_table_name=r.target_table_name, source=r.source
                                 , main_source=r.main_source, main_source_alias=r.main_source_alias
                                 , filter_criterion=r.filter_criterion, mapping_name=r.mapping_name, join=r.join
-                                , historization_algorithm=r.historization_algorithm, historization_columns=r.historization_columns) for r in table_mapping_rows]:
+                                , historization_algorithm=r.historization_algorithm, historization_columns=r.historization_columns
+                                , _row_index=row_index)
                             extract_core_txf_views(row)
 
                     layer_table: LayerTable

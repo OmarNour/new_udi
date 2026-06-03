@@ -1,7 +1,7 @@
 # from .smx import *
 from model import *
 from functions import time_elapsed_decorator
-from smx import SMX, generate_scripts, generate_metadata_scripts
+from smx import SMX, generate_scripts, generate_metadata_scripts, deploy
 import logging
 from datetime import datetime
 
@@ -19,10 +19,8 @@ def start(run_id, source_layer0, db_prefix, smx_path: str, output_path: str, sou
             deploy()
 
     myid_summary = "\n\nSummary:\n######################\n\n"
-    for class_name in MyID.get_all_classes_instances().keys():
-        cls_instances_cout = eval(f"{class_name}.count_instances()")
-        class_count = f'{class_name} count: {cls_instances_cout}\n'
-        myid_summary += class_count
+    for class_name, instances in MyID.get_all_classes_instances().items():
+        myid_summary += f'{class_name} count: {len(instances)}\n'
 
     # reset class instances
     MyID.reset_class_variable()

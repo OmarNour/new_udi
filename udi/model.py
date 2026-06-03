@@ -1286,7 +1286,6 @@ class GroupBy(MyID):
     def column(self) -> Column:
         return Column.get_instance(_id=self._col_id)
 
-
 if __name__ == '__main__':
     x = DataSetType(name='xxxX')
     y = DataSet(set_type_id=x.id, set_code="ztztztz", set_table_id=11, surrogate_table_id=99)
@@ -1301,3 +1300,4 @@ if __name__ == '__main__':
 
     z = DataSet.get_instance(_key=(x.id, "ztztztz"))
     print(z.id, z._set_table_id)
+

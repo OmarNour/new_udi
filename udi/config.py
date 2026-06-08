@@ -166,7 +166,13 @@ VALUES
 """
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #3.5.2"
+ver_no = "| Build #3.5.4"
+# ################################################################################################
+# What is new : #3.5.4:
+# Faster Excel load, no output zip files, Excel sheet/row/cell in error logs
+# ################################################################################################
+# What is new : #3.5.3:
+# Improved error log row formatting, code cleanup, and exe packaging fixes
 # ################################################################################################
 # What is new : #3.5.2:
 # fixing issue in Tkinter when all sources are selected

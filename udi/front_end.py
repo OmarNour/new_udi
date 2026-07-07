@@ -7,6 +7,7 @@ import datetime as dt
 import traceback
 import threading
 import random
+import time
 
 from main import start
 from functions import generate_run_id, open_folder, get_dirs, get_config_file_path, get_config_file_values, get_server_info
@@ -233,36 +234,6 @@ class FrontEnd:
             self.source_names = ""
             self.db_prefix = ""
 
-    def get_scripts_to_generate_flag(self):
-        self.scripts_flag = "All"
-        testing_scripts_flag = self.Testing_scripts_generation_value.get()
-        UDI_scripts_flag = self.UDI_scripts_generation_value.get()
-        Source_smx_flag = self.Source_smx_generation_value.get()
-        if UDI_scripts_flag == 0 and testing_scripts_flag == 0 and Source_smx_flag == 0:
-            self.scripts_flag = 'Invalid'
-            self.enable_disable_fields(DISABLED)
-        elif UDI_scripts_flag == 0 and testing_scripts_flag == 0 and Source_smx_flag == 1:
-            self.scripts_flag = "Source smx"
-            self.enable_disable_fields(NORMAL)
-        elif UDI_scripts_flag == 0 and testing_scripts_flag == 1 and Source_smx_flag == 0:
-            self.scripts_flag = "Testing"
-            self.enable_disable_fields(NORMAL)
-        elif UDI_scripts_flag == 0 and testing_scripts_flag == 1 and Source_smx_flag == 1:
-            self.scripts_flag = "Source smx and Testing"
-            self.enable_disable_fields(NORMAL)
-        elif UDI_scripts_flag == 1 and testing_scripts_flag == 0 and Source_smx_flag == 0:
-            self.scripts_flag = "UDI"
-            self.enable_disable_fields(NORMAL)
-        elif UDI_scripts_flag == 1 and testing_scripts_flag == 0 and Source_smx_flag == 1:
-            self.scripts_flag = "UDI and Source smx"
-            self.enable_disable_fields(NORMAL)
-        elif UDI_scripts_flag == 1 and testing_scripts_flag == 1 and Source_smx_flag == 0:
-            self.scripts_flag = "UDI and Testing"
-            self.enable_disable_fields(NORMAL)
-        elif UDI_scripts_flag == 1 and testing_scripts_flag == 1 and Source_smx_flag == 1:
-            self.scripts_flag = "UDI and Testing and Source smx"
-            self.enable_disable_fields(NORMAL)
-
     def refresh_config_file_values(self, *args):
         self.get_config_file_values()
         self.populate_config_file_values()
@@ -346,11 +317,7 @@ class FrontEnd:
                 self.source_smx_generation.config(state=NORMAL)
 
             except Exception as error:
-                try:
-                    error_messager = "Error"
-                except Exception as e:
-                    error_messager = error
-
+                error_messager = str(error)
                 self.change_status_label(error_messager, self.color_error_messager)
                 self.generate_button.config(state=NORMAL)
                 self.config_file_entry.config(state=NORMAL)
@@ -394,6 +361,7 @@ class FrontEnd:
             msg = self.msg_generating + str(dt.datetime.now() - start_time)
             color = '#%02X%02X%02X' % (r(), r(), r())
             self.change_status_label(msg, color)
+            time.sleep(0.5)
 
         # TODO: change success and color messages based on state
         message = self.msg_done + str(dt.datetime.now() - start_time)
@@ -406,6 +374,7 @@ class FrontEnd:
             server_info = get_server_info()
             msg = "CPU " + str(server_info[0]) + "%" + " Memory " + str(server_info[1]) + "%"
             self.change_server_info_label(msg, color)
+            time.sleep(1.0)
 
 
 class GenerateScriptsThread(threading.Thread):

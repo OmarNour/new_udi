@@ -40,6 +40,7 @@ class SMX:
         self._source_systems = []
         self.data = {}
         self.duckdb_con = duckdb.connect(database=':memory:')
+        self._known_tables: set = set()
         self.init_model()
 
     def _normalize_value(self, value):
@@ -54,11 +55,15 @@ class SMX:
     def _register_rows(self, table_name, rows, columns):
         clean_columns = [col for col in columns if col]
         if not clean_columns:
-            self.duckdb_con.execute(f'CREATE OR REPLACE TABLE "{table_name}" AS SELECT * FROM (SELECT 1) WHERE 1 = 0')
+            self.duckdb_con.execute(
+                f'CREATE OR REPLACE TABLE "{table_name}" AS SELECT * FROM (SELECT 1) WHERE 1 = 0'
+            )
+            self._known_tables.add(table_name.lower())
             return
 
         cols_ddl = ', '.join([f'"{col}" VARCHAR' for col in clean_columns])
         self.duckdb_con.execute(f'CREATE OR REPLACE TABLE "{table_name}" ({cols_ddl})')
+        self._known_tables.add(table_name.lower())
 
         if not rows:
             return
@@ -66,20 +71,15 @@ class SMX:
         insert_cols_sql = ', '.join([f'"{col}"' for col in clean_columns])
         values_sql = ', '.join(['?'] * len(clean_columns))
         insert_sql = f'INSERT INTO "{table_name}" ({insert_cols_sql}) VALUES ({values_sql})'
-        all_rows_values = []
-        for row in rows:
-            row_values = []
-            for col in clean_columns:
-                val = row.get(col, '')
-                row_values.append(None if val is None else str(val))
-            all_rows_values.append(tuple(row_values))
+        all_rows_values = [
+            tuple(None if row.get(col) is None else str(row.get(col, ''))
+                  for col in clean_columns)
+            for row in rows
+        ]
         self.duckdb_con.executemany(insert_sql, all_rows_values)
 
     def _table_exists(self, table_name):
-        return self.duckdb_con.execute(
-            "SELECT COUNT(*) FROM information_schema.tables WHERE lower(table_name) = lower(?)",
-            [table_name]
-        ).fetchone()[0] > 0
+        return table_name.lower() in self._known_tables
 
     def _sql_list(self, table_name, column_name, where_clause='', params=None, distinct=False):
         params = params or []
@@ -92,15 +92,12 @@ class SMX:
         distinct_sql = 'DISTINCT ' if distinct else ''
         cols_sql = ', '.join([f'"{col}"' for col in columns])
         query = f'SELECT {distinct_sql}{cols_sql} FROM "{table_name}" {where_clause}'
-        rows = self.duckdb_con.execute(query, params).fetchall()
-        normalized_rows = []
-        for row in rows:
-            row_dict = {}
-            for idx, col in enumerate(columns):
-                value = row[idx]
-                row_dict[col] = '' if value is None else value
-            normalized_rows.append(SimpleNamespace(**row_dict))
-        return normalized_rows
+        cursor = self.duckdb_con.execute(query, params)
+        col_names = [desc[0] for desc in cursor.description]
+        return [
+            SimpleNamespace(**{k: ('' if v is None else v) for k, v in zip(col_names, row)})
+            for row in cursor.fetchall()
+        ]
 
     def _in_clause(self, values):
         if not values:
@@ -721,7 +718,7 @@ class SMX:
                                       )
 
             @log_error_decorator()
-            def extract_core_txf_views(row):
+            def extract_core_txf_views(row, cm_lookup):
                 def parse_join(join_txt: str):
                     join_type: JoinType
                     with_srci_lt: LayerTable
@@ -898,19 +895,12 @@ class SMX:
                         if row.filter_criterion:
                             Filter(pipeline_id=core_pipeline.id, filter_seq=1, complete_filter_expr=row.filter_criterion)
 
-                        if self._table_exists('column_mapping'):
-                            column_mapping_rows = self._sql_rows(
-                                table_name='column_mapping',
-                                columns=['column_name', 'mapped_to_table', 'mapped_to_column', 'transformation_rule', 'transformation_type'],
-                                where_clause='WHERE lower("mapping_name") = lower(?)',
-                                params=[row.mapping_name],
-                                distinct=True
-                            )
-                            if column_mapping_rows:
-                                for cm_row in column_mapping_rows:
-                                    column_mapping(cm_row)
-                            else:
-                                logging.error(f"No column mapping found for {row.mapping_name}, processing row:\n{format_processing_row(row)}")
+                        column_mapping_rows = cm_lookup.get(row.mapping_name.lower(), [])
+                        if column_mapping_rows:
+                            for cm_row in column_mapping_rows:
+                                column_mapping(cm_row)
+                        else:
+                            logging.error(f"No column mapping found for {row.mapping_name}, processing row:\n{format_processing_row(row)}")
 
             ####################################################  Begin DFs  ####################################################
             if ('system' or 'stg_tables') not in self.data.keys():
@@ -1015,7 +1005,8 @@ class SMX:
                     ####################################################  Begin   ####################################################
                     for row in system_rows:
                         extract_system(row)
-                    for row in self._sql_rows('stg_tables', ['data_type'], system_where, system_params, distinct=True):
+                    for row in [SimpleNamespace(data_type=v)
+                                for v in set(r.data_type for r in stg_rows_all if r.data_type)]:
                         extract_data_types(row)
                     if core_tables_rows:
                         for row in [SimpleNamespace(data_type=v) for v in list(set([r.data_type for r in core_tables_rows if r.data_type]))]:
@@ -1037,8 +1028,12 @@ class SMX:
                         for row in [SimpleNamespace(physical_table=v) for v in list(set([r.physical_table for r in bmap_rows if r.physical_table]))]:
                             extract_bmap_tables(row)
 
-                    for row in self._sql_rows('stg_tables', ['schema', 'table_name'], system_where, system_params, distinct=True):
-                        extract_stg_tables(row)
+                    seen_stg_tables = set()
+                    for r in stg_rows_all:
+                        key = (r.schema, r.table_name)
+                        if key not in seen_stg_tables:
+                            seen_stg_tables.add(key)
+                            extract_stg_tables(SimpleNamespace(schema=r.schema, table_name=r.table_name))
                     ##########################  Start bkey & bmaps   #####################
                     if bkey_rows:
                         first_by_key_set_id = {}
@@ -1100,26 +1095,60 @@ class SMX:
                             extract_bmap_values(row)
                     ##########################  End bkey & bmaps     #####################
 
-                    for row in self._sql_rows('stg_tables', ['table_name', 'column_name', 'data_type', 'mandatory', 'natural_key', 'pk',
-                                   'key_set_name', 'key_domain_name', 'code_set_name', 'code_domain_name'], system_where, system_params, distinct=True):
-                        extract_stg_srci_table_columns(row)
+                    seen_cols = set()
+                    for r in stg_rows_all:
+                        key = (r.table_name, r.column_name, r.data_type, r.mandatory,
+                               r.natural_key, r.pk, r.key_set_name, r.key_domain_name,
+                               r.code_set_name, r.code_domain_name)
+                        if key not in seen_cols:
+                            seen_cols.add(key)
+                            extract_stg_srci_table_columns(SimpleNamespace(
+                                table_name=r.table_name, column_name=r.column_name, data_type=r.data_type,
+                                mandatory=r.mandatory, natural_key=r.natural_key, pk=r.pk,
+                                key_set_name=r.key_set_name, key_domain_name=r.key_domain_name,
+                                code_set_name=r.code_set_name, code_domain_name=r.code_domain_name
+                            ))
 
-                    for row in self._sql_rows('stg_tables', ['schema', 'table_name', 'natural_key', 'column_name', 'column_transformation_rule'], system_where, system_params, distinct=True):
-                        extract_src_view_columns(row)
+                    seen_src_view = set()
+                    for r in stg_rows_all:
+                        key = (r.schema, r.table_name, r.natural_key, r.column_name, r.column_transformation_rule)
+                        if key not in seen_src_view:
+                            seen_src_view.add(key)
+                            extract_src_view_columns(SimpleNamespace(
+                                schema=r.schema, table_name=r.table_name, natural_key=r.natural_key,
+                                column_name=r.column_name, column_transformation_rule=r.column_transformation_rule
+                            ))
                     # stg_tables_df[['schema', 'table_name', 'natural_key', 'column_name']].drop_duplicates().apply(extract_stg_view_columns, axis=1)
 
                     ##########################  Start bkey & bmap TXF view  #####################
-                    for row in self._sql_rows('stg_tables', ['schema', 'table_name', 'natural_key', 'column_name'
-                        , 'key_set_name', 'key_domain_name', 'bkey_filter'], system_where, system_params, distinct=True):
-                        extract_bkey_views(row)
+                    seen_bkey = set()
+                    for r in stg_rows_all:
+                        key = (r.schema, r.table_name, r.natural_key, r.column_name,
+                               r.key_set_name, r.key_domain_name, r.bkey_filter)
+                        if key not in seen_bkey:
+                            seen_bkey.add(key)
+                            extract_bkey_views(SimpleNamespace(
+                                schema=r.schema, table_name=r.table_name, natural_key=r.natural_key,
+                                column_name=r.column_name, key_set_name=r.key_set_name,
+                                key_domain_name=r.key_domain_name, bkey_filter=r.bkey_filter
+                            ))
 
                     # stg_tables_df[['schema', 'column_name'
                     #     , 'code_set_name', 'code_domain_name']].drop_duplicates().apply(extract_bmap_views, axis=1)
 
                     ##########################  End bkey TXF view    #####################
-                    for row in self._sql_rows('stg_tables', ['schema', 'table_name', 'column_name', 'natural_key'
-                        , 'key_set_name', 'key_domain_name', 'code_set_name', 'code_domain_name'], system_where, system_params, distinct=True):
-                        extract_srci_view_columns(row)
+                    seen_srci = set()
+                    for r in stg_rows_all:
+                        key = (r.schema, r.table_name, r.column_name, r.natural_key,
+                               r.key_set_name, r.key_domain_name, r.code_set_name, r.code_domain_name)
+                        if key not in seen_srci:
+                            seen_srci.add(key)
+                            extract_srci_view_columns(SimpleNamespace(
+                                schema=r.schema, table_name=r.table_name, column_name=r.column_name,
+                                natural_key=r.natural_key, key_set_name=r.key_set_name,
+                                key_domain_name=r.key_domain_name, code_set_name=r.code_set_name,
+                                code_domain_name=r.code_domain_name
+                            ))
                     ##########################      Start Core TXF view     #####################
                     if core_tables_rows:
                         for row in [SimpleNamespace(table_name=r.table_name, column_name=r.column_name, data_type=r.data_type, pk=r.pk, mandatory=r.mandatory, historization_key=r.historization_key) for r in core_tables_rows]:
@@ -1148,6 +1177,17 @@ class SMX:
                         if invalid_lookup_tables:
                             logging.error(f"These are invalid lookup tables, {invalid_lookup_tables}.\nCODE & DESC columns should follow the pattern <table_name>_CD & <table_name>_DESC")
 
+                    cm_lookup: dict = {}
+                    if self._table_exists('column_mapping'):
+                        all_cm_rows = self._sql_rows(
+                            table_name='column_mapping',
+                            columns=['mapping_name', 'column_name', 'mapped_to_table',
+                                     'mapped_to_column', 'transformation_rule', 'transformation_type'],
+                            distinct=True
+                        )
+                        for cm in all_cm_rows:
+                            cm_lookup.setdefault(cm.mapping_name.lower(), []).append(cm)
+
                     if table_mapping_rows:
                         for row_index, r in enumerate(table_mapping_rows):
                             row = SimpleNamespace(target_table_name=r.target_table_name, source=r.source
@@ -1155,7 +1195,7 @@ class SMX:
                                 , filter_criterion=r.filter_criterion, mapping_name=r.mapping_name, join=r.join
                                 , historization_algorithm=r.historization_algorithm, historization_columns=r.historization_columns
                                 , _row_index=row_index)
-                            extract_core_txf_views(row)
+                            extract_core_txf_views(row, cm_lookup)
 
                     layer_table: LayerTable
                     for table_name in [layer_table.table.table_name for layer_table in LayerTable.get_all_instances()
@@ -1265,7 +1305,7 @@ def generate_schemas_ddl(smx: SMX):
             db_drop_file.write(delete_schema_ddl + "\n" + drop_schema_ddl + "\n\n")
             db_create_file.write(ddl + "\n")
 
-    db_drop_file.write(DROP_DATABASE_TEMPLATE.format(db_name=self.MAIN_DB_NAME) + "\n")
+    db_drop_file.write(DROP_DATABASE_TEMPLATE.format(db_name=smx.MAIN_DB_NAME) + "\n")
 
     db_create_file.close()
     db_drop_file.close()
@@ -1365,7 +1405,7 @@ def generate_metadata_scripts(smx: SMX):
                 source_system_tables_file.write(INSERT_INTO_SOURCE_SYSTEM_TABLES.format(meta_db=smx.meta_t_schema.schema_name,
                                                                                         SOURCE_NAME=single_quotes(source.source_name),
                                                                                         TABLE_NAME=single_quotes(table.table_name),
-                                                                                        IS_TARANSACTIOANL=1 if table.transactional_data else 0
+                                                                                        IS_TRANSACTIONAL=1 if table.transactional_data else 0
                                                                                         )
                                                 )
     for layer_table in LayerTable.get_all_instances():

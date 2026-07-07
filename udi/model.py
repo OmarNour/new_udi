@@ -213,7 +213,7 @@ class Server(MyID):
     def server_name(self):
         return self._server_name
 
-    @property
+    @functools.cached_property
     def ips(self) -> []:
         ip: Ip
         return [ip for ip in Ip.get_all_instances() if ip.server.id == self.id]
@@ -251,12 +251,12 @@ class DataBaseEngine(MyID):
     def reserved_words(self, rd_list: []):
         self._reserved_words = list(set(rd_list + ['null']))
 
-    @property
+    @functools.cached_property
     def schemas(self) -> []:
         schema: Schema
         return [schema for schema in Schema.get_all_instances() if self.id == schema.db_engine.id]
 
-    @property
+    @functools.cached_property
     def data_types(self) -> []:
         data_type: DataType
         return [data_type for data_type in DataType.get_all_instances() if self.id == data_type.db_engine.id]
@@ -265,7 +265,7 @@ class DataBaseEngine(MyID):
     def server(self) -> Server:
         return Server.get_instance(_id=self._server_id)
 
-    @property
+    @functools.cached_property
     def credentials(self) -> []:
         crd: Credential
         return [crd for crd in Credential.get_all_instances() if crd.db_engine.id == self.id]
@@ -375,17 +375,17 @@ class Schema(MyID):
     def db_engine(self) -> DataBaseEngine:
         return DataBaseEngine.get_instance(_id=self._db_id)
 
-    @property
+    @functools.cached_property
     def tables(self) -> []:
         table: Table
         return [table for table in Table.get_all_instances() if self.id == table.schema.id]
 
-    @property
+    @functools.cached_property
     def kind_T_tables(self) -> []:
         table: Table
         return [table for table in Table.get_all_instances() if self.id == table.schema.id and table.table_kind == 'T']
 
-    @property
+    @functools.cached_property
     def kind_V_tables(self) -> []:
         return [table for table in Table.get_all_instances() if self.id == table.schema.id and table.table_kind == 'V']
 
@@ -426,7 +426,7 @@ class DataSource(MyID):
     def source_name(self):
         return self._source_name.upper()
 
-    @property
+    @functools.cached_property
     def tables(self) -> []:
         return [table for table in Table.get_all_instances() if table.data_source if self.id == table.data_source.id]
 
@@ -467,7 +467,7 @@ class Table(MyID):
     def data_source(self) -> DataSource:
         return DataSource.get_instance(_id=self._source_id)
 
-    @property
+    @functools.cached_property
     def columns(self) -> []:
         col: Column
         return [col for col in Column.get_all_instances() if col.table.id == self.id]
@@ -563,12 +563,12 @@ class Table(MyID):
 
         return (self._ddl.strip() + ';\n') if self._ddl is not None else None
 
-    @property
+    @functools.cached_property
     def layers(self) -> []:
         lt: LayerTable
         return [lt.layer for lt in LayerTable.get_all_instances() if lt.table.id == self.id]
 
-    @property
+    @functools.cached_property
     def pipeline(self):
         pipe: Pipeline
         for pipe in Pipeline.get_all_instances():
@@ -582,7 +582,7 @@ class DataSetType(MyID):
         super().__init__(**kwargs)
         self.name = name
 
-    @property
+    @functools.cached_property
     def data_sets(self) -> []:
         return [ds for ds in DataSet.get_all_instances() if ds.data_set_type.id == self.id]
 
@@ -655,7 +655,7 @@ class Domain(MyID):
         except:
             return None
 
-    @property
+    @functools.cached_property
     def values(self) -> []:
         dv: DomainValue
         return [dv for dv in DomainValue.get_all_instances() if dv.domain.id == self.id]
@@ -776,7 +776,7 @@ class Layer(MyID):
     def layer_type(self) -> LayerType:
         return LayerType.get_instance(_id=self._type_id)
 
-    @property
+    @functools.cached_property
     def layer_tables(self) -> []:
         return [lt for lt in LayerTable.get_all_instances() if lt.layer.id == self.id]
 
@@ -796,11 +796,11 @@ class LayerTable(MyID):
     def table(self) -> Table:
         return Table.get_instance(_id=self._table_id)
 
-    @property
+    @functools.cached_property
     def src_pipelines(self) -> []:
         return [pipe for pipe in Pipeline.get_all_instances() if pipe.src_lyr_table.id == self.id]
 
-    @property
+    @functools.cached_property
     def tgt_pipelines(self) -> []:
         return [pipe for pipe in Pipeline.get_all_instances() if pipe.tgt_lyr_table.id == self.id]
 
@@ -904,7 +904,7 @@ class Pipeline(MyID):
     def src_table_alias(self):
         return self._src_table_alias if self._src_table_alias else ''
 
-    @property
+    @functools.cached_property
     def column_mapping(self) -> []:
         cm: ColumnMapping
         return [cm for cm in ColumnMapping.get_all_instances() if cm.pipeline.id == self.id]
@@ -927,11 +927,11 @@ class Pipeline(MyID):
         if self.column_mapping:
             return [cm for cm in self.column_mapping if cm.scd_type == 2]
 
-    @property
+    @functools.cached_property
     def group_by(self) -> []:
         return [gb for gb in GroupBy.get_all_instances() if gb.pipeline.id == self.id]
 
-    @property
+    @functools.cached_property
     def group_by_col_names(self) -> []:
         gb: GroupBy
         return [f"{gb.column.column_name}" for gb in GroupBy.get_all_instances() if gb.pipeline.id == self.id]
@@ -947,12 +947,12 @@ class Pipeline(MyID):
 
         return _dic
 
-    @property
+    @functools.cached_property
     def _filters(self) -> []:
         f: Filter
         return [f.filter_expr for f in Filter.get_all_instances() if f.pipeline.id == self.id]
 
-    @property
+    @functools.cached_property
     def join_with(self) -> []:
         j: JoinWith
         return [j for j in JoinWith.get_all_instances() if j.pipeline.id == self.id]
@@ -1106,7 +1106,7 @@ class JoinWith(MyID):
     def master_alias(self) -> str:
         return self._master_alias if self._master_alias else self.master_lyr_table.table.table_name
 
-    @property
+    @functools.cached_property
     def join_on(self):
         join_on: JoinOn
         for join_on in JoinOn.get_all_instances():

@@ -3,7 +3,6 @@ import os
 import datetime as dt
 import shutil
 import sys, subprocess
-import pandas as pd
 import traceback
 import functools
 from datetime import datetime
@@ -41,9 +40,14 @@ def format_processing_row(row, row_index=None):
         return str(row)
 
     index = row_index if row_index is not None else getattr(row, '_row_index', None)
-    series = pd.Series(data, name=index)
-    with pd.option_context('display.max_colwidth', 80):
-        return str(series)
+    header = f"Row {index}" if index is not None else "Row"
+    lines = [header]
+    for k, v in data.items():
+        val_str = str(v)
+        if len(val_str) > 80:
+            val_str = val_str[:77] + '...'
+        lines.append(f"    {k:<30} {val_str}")
+    return '\n'.join(lines)
 
 
 def get_dirs():
@@ -175,11 +179,7 @@ def open_folder(path):
 
 
 def create_folder(path):
-    try:
-        os.makedirs(path)
-    except FileExistsError:
-        remove_folder(path)
-        create_folder(path)
+    os.makedirs(path, exist_ok=True)
 
 
 def remove_folder(path):
@@ -285,27 +285,6 @@ def merge_multiple_spaces(txt: str):
 
 def split_text(text, sep, maxsplit=0):
     return re.split(sep, text, flags=re.IGNORECASE, maxsplit=maxsplit)
-
-
-def filter_dataframe(df: pd.DataFrame, col: str = None, filter_value=None) -> pd.DataFrame:
-    if filter_value is None:
-        return df
-    else:
-        if isinstance(filter_value, str):
-            mask = df[col].astype(str).str.lower() == filter_value.lower()
-        elif isinstance(filter_value, list):
-            _filter_value = []
-            for x in filter_value:
-                if isinstance(x, str):
-                    _filter_value.append(x.lower().strip())
-                else:
-                    _filter_value.append(str(x))
-
-            mask = df[col].astype(str).str.lower().isin(_filter_value)
-        else:
-            mask = df[col] == filter_value
-
-        return df[mask]
 
 
 def parse_data_type(data_type_precision: str):

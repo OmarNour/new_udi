@@ -280,7 +280,7 @@ def remove_all_from_list(lst: [], word: str):
 
 
 def merge_multiple_spaces(txt: str):
-    return re.sub('\s+', ' ', txt.strip())
+    return re.sub(r'\s+', ' ', txt.strip())
 
 
 def split_text(text, sep, maxsplit=0):

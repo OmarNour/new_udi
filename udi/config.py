@@ -166,7 +166,7 @@ VALUES
 """
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #3.5.4"
+ver_no = "| Build #3.5.5"
 # ################################################################################################
 # What is new : #3.5.4:
 # Faster Excel load, no output zip files, Excel sheet/row/cell in error logs
@@ -245,6 +245,11 @@ ver_no = "| Build #3.5.4"
 # Removing from statement from base tables selecting constant values only
 # Scripts : D000.py & D620.py
 # ################################################################################################
+# What is new : #3.5.5 :
+# Adding duckdb to the project
+# Splitting smx to 11 file
+# Imporving the performance of the program
+#############################################
 
 
 if __name__ == '__main__':

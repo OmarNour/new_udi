@@ -8,6 +8,10 @@ from .base import SmxComponent
 
 
 class SrciBuilder(SmxComponent):
+    def build_view_mappings(self, rows):
+        for row in rows:
+            self.extract_srci_view_columns(row)
+
     @log_error_decorator()
     def extract_srci_view_columns(self, row):
         if row.column_name != '':

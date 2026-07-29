@@ -19,6 +19,22 @@ from .base import SmxComponent
 
 
 class BKeyBuilder(SmxComponent):
+    def build_tables(self, rows):
+        for row in rows:
+            self.extract_bkey_tables(row)
+
+    def build_datasets(self, rows):
+        for row in rows:
+            self.extract_bkey_datasets(row)
+
+    def build_domains(self, rows):
+        for row in rows:
+            self.extract_bkey_domains(row)
+
+    def build_views(self, rows):
+        for row in rows:
+            self.extract_bkey_views(row)
+
     def configure_data_types(self, int_data_type, vchar_data_type, timestamp_data_type):
         self.int_data_type = int_data_type
         self.vchar_data_type = vchar_data_type

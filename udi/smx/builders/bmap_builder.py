@@ -17,12 +17,36 @@ from .base import SmxComponent
 
 
 class BMapBuilder(SmxComponent):
+    def build_tables(self, rows):
+        for row in rows:
+            self.extract_bmap_tables(row)
+
+    def build_datasets(self, rows):
+        for row in rows:
+            self.extract_bmap_datasets(row)
+
+    def build_domains(self, rows):
+        for row in rows:
+            self.extract_bmap_domains(row)
+
+    def build_values(self, rows):
+        for row in rows:
+            self.extract_bmap_values(row)
+
+    def build_views(self, rows):
+        for row in rows:
+            self.extract_bmap_views(row)
+
     def configure_data_types(self, int_data_type, vchar_data_type):
         self.int_data_type = int_data_type
         self.vchar_data_type = vchar_data_type
 
     def configure_data_sets(self, bmaps_data_sets):
-        self.bmaps_data_sets = bmaps_data_sets
+        self.bmaps_data_sets = tuple(bmaps_data_sets)
+        self.bmaps_data_sets_by_table = {
+            data_set.set_table.table_name: data_set
+            for data_set in self.bmaps_data_sets
+        }
 
     @log_error_decorator()
     def extract_bmap_tables(self, row):
@@ -38,7 +62,7 @@ class BMapBuilder(SmxComponent):
     @log_error_decorator()
     def extract_bmap_datasets(self, row):
         if row.physical_table != '':
-            surrogate_table = Table.get_instance(_key=(self.bkey_t_schema.id, row.physical_table))
+            surrogate_table = Table.get_instance(_key=(self.bmap_t_schema.id, row.physical_table))
             set_table = Table.get_instance(_key=(self.core_t_schema.id, row.code_set_name))
             ds = DataSet.get_by_name(self.bmap_set_type.id, row.code_set_name)
             valid_ds = True
@@ -63,12 +87,20 @@ class BMapBuilder(SmxComponent):
 
     @log_error_decorator()
     def extract_bmap_values(self, row):
-        data_set_lst = [ds for ds in self.bmaps_data_sets if ds.set_table.table_name == row.code_set_name.upper()]
-        if len(data_set_lst) > 0:
-            data_set = data_set_lst[0]
-            domain = Domain.get_instance(_key=(data_set.id, row.code_domain_id))
+        data_set = self.bmaps_data_sets_by_table.get(
+            str(row.code_set_name).upper()
+        )
+        if data_set:
+            domain = Domain.get_instance(
+                _key=(data_set.id, row.code_domain_id)
+            )
             if domain:
-                DomainValue(domain_id=domain.id, source_key=row.source_code, edw_key=row.edw_code, description=row.description)
+                DomainValue(
+                    domain_id=domain.id,
+                    source_key=row.source_code,
+                    edw_key=row.edw_code,
+                    description=row.description,
+                )
 
     @log_error_decorator()
     def extract_bmap_views(self, row):

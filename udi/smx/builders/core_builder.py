@@ -25,6 +25,22 @@ from .base import SmxComponent
 
 
 class CoreBuilder(SmxComponent):
+    def build_tables(self, rows):
+        for row in rows:
+            self.extract_core_tables(row)
+
+    def build_columns(self, rows):
+        for row in rows:
+            self.extract_core_columns(row)
+
+    def build_transformations(self, rows, column_mappings_by_name):
+        for row in rows:
+            mapping_name = str(row.mapping_name).lower()
+            self.extract_core_txf_views(
+                row,
+                column_mappings_by_name.get(mapping_name, ()),
+            )
+
     def configure_tables(self, history_tables, core_bmap_tables):
         self.history_tables_lst = history_tables
         self.core_tables_bmap = core_bmap_tables
@@ -63,8 +79,12 @@ class CoreBuilder(SmxComponent):
         def parse_join(join_txt: str):
             join_type = None
             _join_txt = ' ' + merge_multiple_spaces(join_txt).lower() + ' '
-            if (' select ' or ' sel ' or '(sel ' or '(select ') in _join_txt:
-                logging.error(f'Query cannot be found in join!, processing row:\n{format_processing_row(row)}')
+            forbidden_query_tokens = (' select ', ' sel ', '(sel ', '(select ')
+            if any(token in _join_txt for token in forbidden_query_tokens):
+                logging.error(
+                    'Query cannot be found in join!, processing row:\n'
+                    f'{format_processing_row(row)}'
+                )
             _join_txt = _join_txt.replace(' inner ', ' ').replace(' outer ', ' ').strip()
             new_input_join = 'join '
             _split = _join_txt.split(' ', 1)

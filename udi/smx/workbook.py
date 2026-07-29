@@ -1,6 +1,9 @@
-from types import SimpleNamespace
+from __future__ import annotations
+
+from collections import namedtuple
 
 import duckdb
+import pyarrow as pa
 from openpyxl import load_workbook
 
 from config import SHEETS
@@ -8,7 +11,9 @@ from functions import log_error_decorator
 
 
 class WorkbookStore:
-    """Owns Excel parsing and the temporary in-memory DuckDB tables."""
+    """Own Excel parsing and all temporary in-memory DuckDB relations."""
+
+    INTERNAL_ROW_NUMBER = "_udi_row_num"
 
     def __init__(self, path):
         self.path = path
@@ -16,6 +21,12 @@ class WorkbookStore:
         self.data = {}
         self.duckdb_con = duckdb.connect(database=":memory:")
         self._known_tables = set()
+        self._known_temp_tables = set()
+
+    @staticmethod
+    def _quote_identifier(identifier):
+        """Safely quote a DuckDB identifier."""
+        return f'"{str(identifier).replace(chr(34), chr(34) * 2)}"'
 
     @staticmethod
     def normalize_value(value):
@@ -28,41 +39,109 @@ class WorkbookStore:
         return value
 
     def register_rows(self, table_name, rows, columns):
-        clean_columns = [col for col in columns if col]
+        """Bulk-load one normalized sheet into DuckDB through Apache Arrow.
+
+        Every workbook column is stored as VARCHAR and ``_udi_row_num`` is a
+        one-based BIGINT assigned after Python deduplication.
+        """
+        clean_columns = [column for column in columns if column]
+        internal_column = self.INTERNAL_ROW_NUMBER
+
+        quoted_table_name = self._quote_identifier(table_name)
+        quoted_internal_column = self._quote_identifier(internal_column)
+
         if not clean_columns:
             self.duckdb_con.execute(
-                f'CREATE OR REPLACE TABLE "{table_name}" '
-                "AS SELECT * FROM (SELECT 1) WHERE 1 = 0"
+                f"CREATE OR REPLACE TABLE {quoted_table_name} "
+                f"({quoted_internal_column} BIGINT)"
             )
             self._known_tables.add(table_name.lower())
             return
 
-        cols_ddl = ", ".join(f'"{col}" VARCHAR' for col in clean_columns)
-        self.duckdb_con.execute(
-            f'CREATE OR REPLACE TABLE "{table_name}" ({cols_ddl})'
-        )
-        self._known_tables.add(table_name.lower())
-
         if not rows:
+            columns_ddl = ", ".join(
+                f"{self._quote_identifier(column)} VARCHAR"
+                for column in clean_columns
+            )
+            self.duckdb_con.execute(
+                f"CREATE OR REPLACE TABLE {quoted_table_name} "
+                f"({columns_ddl}, {quoted_internal_column} BIGINT)"
+            )
+            self._known_tables.add(table_name.lower())
             return
 
-        insert_cols_sql = ", ".join(f'"{col}"' for col in clean_columns)
-        values_sql = ", ".join(["?"] * len(clean_columns))
-        insert_sql = (
-            f'INSERT INTO "{table_name}" ({insert_cols_sql}) '
-            f"VALUES ({values_sql})"
+        arrow_values = {
+            column: [
+                None if row.get(column) is None else str(row.get(column, ""))
+                for row in rows
+            ]
+            for column in clean_columns
+        }
+
+        arrow_arrays = {
+            column: pa.array(values, type=pa.string())
+            for column, values in arrow_values.items()
+        }
+        arrow_arrays[internal_column] = pa.array(
+            range(1, len(rows) + 1),
+            type=pa.int64(),
         )
-        all_rows_values = [
-            tuple(
-                None if row.get(col) is None else str(row.get(col, ""))
-                for col in clean_columns
+        arrow_table = pa.table(arrow_arrays)
+
+        relation_name = f"__udi_arrow_{table_name}"
+        quoted_relation_name = self._quote_identifier(relation_name)
+        self.duckdb_con.register(relation_name, arrow_table)
+
+        try:
+            select_columns = [
+                (
+                    f"CAST({self._quote_identifier(column)} AS VARCHAR) "
+                    f"AS {self._quote_identifier(column)}"
+                )
+                for column in clean_columns
+            ]
+            select_columns.append(
+                f"CAST({quoted_internal_column} AS BIGINT) "
+                f"AS {quoted_internal_column}"
             )
-            for row in rows
-        ]
-        self.duckdb_con.executemany(insert_sql, all_rows_values)
+
+            self.duckdb_con.execute(
+                f"CREATE OR REPLACE TABLE {quoted_table_name} AS "
+                f"SELECT {', '.join(select_columns)} "
+                f"FROM {quoted_relation_name}"
+            )
+            self._known_tables.add(table_name.lower())
+        finally:
+            self.duckdb_con.unregister(relation_name)
 
     def table_exists(self, table_name):
         return table_name.lower() in self._known_tables
+
+    def temp_table_exists(self, table_name):
+        return table_name.lower() in self._known_temp_tables
+
+    def create_temp_table(self, table_name, select_sql, params=None):
+        params = params or []
+        self.duckdb_con.execute(
+            f'CREATE OR REPLACE TEMP TABLE "{table_name}" AS {select_sql}',
+            params,
+        )
+        self._known_temp_tables.add(table_name.lower())
+
+    def drop_temp_table(self, table_name):
+        self.duckdb_con.execute(f'DROP TABLE IF EXISTS "{table_name}"')
+        self._known_temp_tables.discard(table_name.lower())
+
+    def fetch_named_rows(self, query, params=None, row_type_name="DuckRow"):
+        """Fetch a final prepared result once as lightweight named tuples."""
+        params = params or []
+        cursor = self.duckdb_con.execute(query, params)
+        column_names = [description[0] for description in cursor.description]
+        row_type = namedtuple(row_type_name, column_names, rename=True)
+        return tuple(
+            row_type(*("" if value is None else value for value in row))
+            for row in cursor.fetchall()
+        )
 
     def sql_list(
         self,
@@ -91,24 +170,16 @@ class WorkbookStore:
         params=None,
         distinct=False,
     ):
+        """Backward-compatible helper retained for external callers."""
         params = params or []
         distinct_sql = "DISTINCT " if distinct else ""
-        cols_sql = ", ".join(f'"{col}"' for col in columns)
-        query = (
-            f'SELECT {distinct_sql}{cols_sql} '
-            f'FROM "{table_name}" {where_clause}'
+        columns_sql = ", ".join(f'"{column}"' for column in columns)
+        return self.fetch_named_rows(
+            f'SELECT {distinct_sql}{columns_sql} '
+            f'FROM "{table_name}" {where_clause}',
+            params,
+            row_type_name="SqlRow",
         )
-        cursor = self.duckdb_con.execute(query, params)
-        col_names = [desc[0] for desc in cursor.description]
-        return [
-            SimpleNamespace(
-                **{
-                    key: "" if value is None else value
-                    for key, value in zip(col_names, row)
-                }
-            )
-            for row in cursor.fetchall()
-        ]
 
     @staticmethod
     def in_clause(values):
@@ -127,9 +198,16 @@ class WorkbookStore:
         if sheet_name not in SHEETS:
             return
 
-        ws = self.xls[sheet]
-        raw_rows = list(ws.iter_rows(values_only=True))
-        if not raw_rows:
+        worksheet = self.xls[sheet]
+        header_iterator = worksheet.iter_rows(
+            min_row=1,
+            max_row=1,
+            values_only=True,
+        )
+
+        try:
+            first_row = next(header_iterator)
+        except StopIteration:
             return
 
         headers = [
@@ -140,29 +218,51 @@ class WorkbookStore:
             .strip()
             if cell is not None
             else ""
-            for cell in raw_rows[0]
+            for cell in first_row
         ]
+        active_columns = [
+            (index, header)
+            for index, header in enumerate(headers)
+            if header
+        ]
+        active_header_names = [header for _, header in active_columns]
+
+        if not active_columns:
+            self.data[sheet_name] = sheet_name
+            self.register_rows(sheet_name, [], [])
+            return
+
+        last_active_column = max(index for index, _ in active_columns) + 1
+        data_iterator = worksheet.iter_rows(
+            min_row=2,
+            max_col=last_active_column,
+            values_only=True,
+        )
 
         seen = set()
         rows = []
-        for data_row in raw_rows[1:]:
-            row_dict = {}
-            for index, column_name in enumerate(headers):
-                if not column_name:
-                    continue
-                value = data_row[index] if index < len(data_row) else ""
-                row_dict[column_name] = self.normalize_value(value)
 
+        for data_row in data_iterator:
+            row_dict = {
+                column_name: self.normalize_value(
+                    data_row[index] if index < len(data_row) else ""
+                )
+                for index, column_name in active_columns
+            }
+
+            # Preserve the original deduplication key shape and first-row order.
             row_key = tuple(
-                (key, row_dict.get(key, "")) for key in headers if key
+                (column_name, row_dict.get(column_name, ""))
+                for column_name in active_header_names
             )
             if row_key in seen:
                 continue
+
             seen.add(row_key)
             rows.append(row_dict)
 
         self.data[sheet_name] = sheet_name
-        self.register_rows(sheet_name, rows, headers)
+        self.register_rows(sheet_name, rows, active_header_names)
 
     @property
     def sheet_names(self):

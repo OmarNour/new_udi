@@ -5,6 +5,9 @@ import os
 from config import SHEETS
 from functions import create_folder, log_error_decorator, time_elapsed_decorator
 
+from model_cache import RelationCache
+
+from .model_accelerator import install_model_acceleration
 from .model_initializer import ModelInitializer, build_runtime_config
 from .population import ModelPopulator
 from .workbook import WorkbookStore
@@ -14,6 +17,8 @@ class SMX:
     """Backward-compatible facade for the structurally refactored backend."""
 
     def __init__(self, path, run_id, output_path, db_prefix, source_layer0):
+        install_model_acceleration()
+        RelationCache.clear()
         (
             self.LAYER_TYPES,
             self.LAYERS,
@@ -122,6 +127,7 @@ class SMX:
     @time_elapsed_decorator
     def parse_file(self):
         self.workbook.parse_file()
+
         if self._table_exists("supplements"):
             self.db_engine.reserved_words = self._sql_list(
                 table_name="supplements",

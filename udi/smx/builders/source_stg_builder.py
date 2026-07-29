@@ -17,6 +17,26 @@ from .base import SmxComponent
 
 
 class SourceStgBuilder(SmxComponent):
+    def build_systems(self, rows):
+        for row in rows:
+            self.extract_system(row)
+
+    def build_data_types(self, rows):
+        for row in rows:
+            self.extract_data_types(row)
+
+    def build_tables(self, rows):
+        for row in rows:
+            self.extract_stg_tables(row)
+
+    def build_columns(self, rows):
+        for row in rows:
+            self.extract_stg_srci_table_columns(row)
+
+    def build_source_view_mappings(self, rows):
+        for row in rows:
+            self.extract_src_view_columns(row)
+
     @log_error_decorator()
     def extract_system(self, row):
         ds = DataSource(source_name=row.schema, source_level=1, scheduled=1)

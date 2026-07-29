@@ -166,7 +166,7 @@ VALUES
 """
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #3.5.5"
+ver_no = "| Build #3.5.6"
 # ################################################################################################
 # What is new : #3.5.4:
 # Faster Excel load, no output zip files, Excel sheet/row/cell in error logs
@@ -249,8 +249,11 @@ ver_no = "| Build #3.5.5"
 # Adding duckdb to the project
 # Splitting smx to 11 file
 # Imporving the performance of the program
-#############################################
-
+#################################################################################################
+# What is new : #3.5.6 :
+# Reducing the size from 80 mega to 72 mega
+# Removing all pandas dependencies
+################################################################################################
 
 if __name__ == '__main__':
     pass

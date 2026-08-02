@@ -1,7 +1,5 @@
-import logging
-
 from config import BK_PROCESS_NAME_TEMPLATE, BK_VIEW_NAME_TEMPLATE
-from functions import format_processing_row, log_error_decorator
+from functions import log_error_decorator, log_validation_error
 from model import Column, ColumnMapping, DataSet, Domain, LayerTable, Pipeline, Table, GroupBy
 
 from .base import SmxComponent
@@ -23,11 +21,29 @@ class SrciBuilder(SmxComponent):
                 if row.key_set_name != '':
                     data_set = DataSet.get_by_name(self.bkey_set_type.id, row.key_set_name)
                     if not data_set:
-                        logging.error(f"key set '{row.key_set_name}', is not defined, please check the 'BKEY' sheet!, processing row:\n{format_processing_row(row)}")
+                        log_validation_error(
+                            "Invalid key set",
+                            row=row,
+                            problem=(
+                                f"Key set '{row.key_set_name}' is not defined in "
+                                "the BKEY sheet."
+                            ),
+                            action="The SRCI key transformation mapping was not created.",
+                            impact=f"Column '{row.table_name}.{row.column_name}' has no BKEY mapping.",
+                        )
                     else:
                         domain = Domain.get_by_name(data_set_id=data_set.id, domain_name=row.key_domain_name)
                         if not domain:
-                            logging.error(f"{row.key_domain_name}, is not defined, please check the 'BKEY' sheet!, processing row:\n{format_processing_row(row)}")
+                            log_validation_error(
+                                "Invalid key domain",
+                                row=row,
+                                problem=(
+                                    f"Key domain '{row.key_domain_name}' is not "
+                                    f"defined for set '{row.key_set_name}'."
+                                ),
+                                action="The SRCI key transformation mapping was not created.",
+                                impact=f"Column '{row.table_name}.{row.column_name}' has no BKEY mapping.",
+                            )
                         else:
                             txf_process_name = BK_PROCESS_NAME_TEMPLATE.format(set_id=data_set.set_code, src_table_name=stg_t.table_name, column_name=srci_t_col.column_name, domain_id=srci_t_col.domain.domain_code)
                             txf_view_name = BK_VIEW_NAME_TEMPLATE.format(view_name=txf_process_name)
@@ -40,9 +56,27 @@ class SrciBuilder(SmxComponent):
             else:
                 stg_t_col = Column.get_instance(_key=(stg_t.id, row.column_name))
                 if not stg_t_col:
-                    logging.error(f'Invalid column {row.column_name}, processing row:\n{format_processing_row(row)}')
+                    log_validation_error(
+                        "Invalid staging column",
+                        row=row,
+                        problem=(
+                            f"Column '{row.column_name}' was not found in staging "
+                            f"table '{row.table_name}'."
+                        ),
+                        action="The staging-to-SRCI mapping was not created for this column.",
+                        impact="The generated SRCI view may be incomplete.",
+                    )
             if not srci_t_col:
-                logging.error(f'Invalid column {row.column_name}, processing row:\n{format_processing_row(row)}')
+                log_validation_error(
+                        "Invalid staging column",
+                        row=row,
+                        problem=(
+                            f"Column '{row.column_name}' was not found in staging "
+                            f"table '{row.table_name}'."
+                        ),
+                        action="The staging-to-SRCI mapping was not created for this column.",
+                        impact="The generated SRCI view may be incomplete.",
+                    )
             else:
                 srci_v = Table.get_instance(_key=(self.srci_v_schema.id, row.table_name))
                 srci_vl = LayerTable.get_instance(_key=(self.srci_layer.id, srci_v.id))

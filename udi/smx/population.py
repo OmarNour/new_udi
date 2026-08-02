@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-import logging
-
 from config import DS_BMAP
-from functions import log_error_decorator
+from functions import (
+    log_error_decorator,
+    log_validation_error,
+    log_validation_warning,
+)
 from model import DataSetType, DataType, LayerTable, Table
 
 from .builders import (
@@ -39,9 +41,14 @@ class ModelPopulator(SmxComponent):
     def _extract_all(self, source_name):
         missing_sheets = {"system", "stg_tables"} - set(self.data.keys())
         if missing_sheets:
-            logging.error(
-                "Make sure 'System' and 'Stg Tables' sheets are both exists! "
-                f"Missing: {sorted(missing_sheets)}"
+            log_validation_error(
+                "Required workbook sheets are missing",
+                problem=(
+                    "The workbook does not contain all sheets required to build "
+                    f"the model. Missing: {sorted(missing_sheets)}"
+                ),
+                action="Model population was stopped.",
+                impact="No complete scripts can be generated from this workbook.",
             )
             return
 
@@ -53,9 +60,14 @@ class ModelPopulator(SmxComponent):
         core = prepared.core
 
         if not foundation.systems or not foundation.staging_tables:
-            logging.error(
-                "Please make sure there are data in both 'System' "
-                "and 'Stg Tables' sheets!"
+            log_validation_error(
+                "Required workbook data is missing",
+                problem=(
+                    "No usable source systems or staging-table definitions were "
+                    "found after workbook filtering."
+                ),
+                action="Model population was stopped.",
+                impact="No complete scripts can be generated for the selected source.",
             )
             return
 
@@ -154,20 +166,36 @@ class ModelPopulator(SmxComponent):
                     invalid_lookup_tables.append(table.table_name)
 
             if not table.key_col and table.table_kind == "T":
-                logging.error(
-                    "No Primary key defined for "
-                    f"'{table.schema.schema_name}.{table.table_name}' table!"
+                log_validation_error(
+                    "Primary key is not defined",
+                    problem=(
+                        f"Table '{table.schema.schema_name}.{table.table_name}' "
+                        "does not have a primary-key column."
+                    ),
+                    action="The table remains in the model and processing continued.",
+                    impact="Generated table and loading logic may not be valid without a key.",
                 )
 
         if invalid_history_tables:
-            logging.error(
-                f"These are invalid history tables, {invalid_history_tables}"
+            log_validation_error(
+                "Invalid history-table definitions",
+                problem=(
+                    "The following history tables do not contain the required key, "
+                    f"start-date, or end-date columns: {invalid_history_tables}"
+                ),
+                action="The tables remain in the model and processing continued.",
+                impact="Generated history processing for these tables may be invalid.",
             )
         if invalid_lookup_tables:
-            logging.error(
-                f"These are invalid lookup tables, {invalid_lookup_tables}.\n"
-                "CODE & DESC columns should follow the pattern "
-                "<table_name>_CD & <table_name>_DESC"
+            log_validation_error(
+                "Invalid lookup-table definitions",
+                problem=(
+                    f"The following lookup tables do not follow the required code "
+                    f"and description column pattern: {invalid_lookup_tables}. "
+                    "Expected columns: <table_name>_CD and <table_name>_DESC."
+                ),
+                action="The tables remain in the model and processing continued.",
+                impact="Generated lookup-table scripts may be incomplete or invalid.",
             )
 
         for layer_table in LayerTable.get_all_instances():
@@ -176,7 +204,12 @@ class ModelPopulator(SmxComponent):
                 and not layer_table.table.key_col
                 and layer_table.table.table_kind == "T"
             ):
-                logging.warning(
-                    "No Primary key defined for "
-                    f"'{layer_table.table.table_name}' staging table!"
+                log_validation_warning(
+                    "Staging table has no primary key",
+                    problem=(
+                        f"Staging table '{layer_table.table.table_name}' has no "
+                        "primary-key column."
+                    ),
+                    action="The table was generated without a primary key.",
+                    impact="Review deduplication and update behavior for this staging table.",
                 )

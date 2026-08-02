@@ -1,7 +1,7 @@
 ## UDI Configurations
 
 ## 1- smx_path: Absolute path of the SMX Excel sheet
-smx_path="C:/Yehia/UDI/SMX_CITIZEN.xlsx"
+smx_path="C:/Yehia/UDI/SMX_ECONOMICS.xlsx"
 
 ## 2- home_output_folder: Absolute path of the root folder for output data. The root folder is created if not exists
 ## Each run of the UDI generates a child output folder. Eg:
@@ -25,7 +25,7 @@ db_prefix="GPROD1"
 # 5- source_names: the name of the data source
 ## for all sources: source_names=""
 ## for certain sources: source_names="TAMWEEN,TAX,EDU,CUSTOMS"
-source_names="NEYABA"
+source_names="TAX_AUTHORITY"
 
 ## TODO: Full path of the unified Excel file to generate unified data
 unified_path = "C:/Yehia/UDI/Unified.xlsx"

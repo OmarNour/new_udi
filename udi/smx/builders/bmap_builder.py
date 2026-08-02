@@ -1,7 +1,5 @@
-import logging
-
 from config import BMAP_PROCESS_NAME_TEMPLATE, BMAP_VIEW_NAME_TEMPLATE
-from functions import format_processing_row, log_error_decorator
+from functions import log_error_decorator, log_validation_error
 from model import (
     Column,
     DataSet,
@@ -69,13 +67,31 @@ class BMapBuilder(SmxComponent):
             if ds:
                 if ds.set_code != row.code_set_id:
                     valid_ds = False
-                    logging.error(f"Duplicate dataset '{row.code_set_id}', processing row:\n{format_processing_row(row)}")
+                    log_validation_error(
+                        "Duplicate BMAP dataset ID",
+                        row=row,
+                        problem=(
+                            f"Dataset ID '{row.code_set_id}' is already assigned "
+                            "to a different code set."
+                        ),
+                        action="The duplicate dataset definition was not added.",
+                        impact="The affected BMAP code set will not be available to dependent mappings.",
+                    )
             if valid_ds:
                 if set_table and row.code_set_id and surrogate_table:
                     DataSet(set_type_id=self.bmap_set_type.id, set_code=row.code_set_id, set_table_id=set_table.id, surrogate_table_id=surrogate_table.id)
                     surrogate_table.is_bmap = True
                 else:
-                    logging.error(f"Invalid set table '{row.code_set_name}' or surrogate table '{row.physical_table}', processing row:\n{format_processing_row(row)}")
+                    log_validation_error(
+                    "Invalid BMAP table definition",
+                    row=row,
+                    problem=(
+                        f"Code set table '{row.code_set_name}' or surrogate table "
+                        f"'{row.physical_table}' could not be found."
+                    ),
+                    action="The BMAP dataset was not created.",
+                    impact="Mappings that use this code set may be skipped.",
+                )
 
     @log_error_decorator()
     def extract_bmap_domains(self, row):
@@ -83,7 +99,16 @@ class BMapBuilder(SmxComponent):
         if data_set and row.code_domain_id:
             Domain(data_set_id=data_set.id, domain_code=row.code_domain_id, domain_name=row.code_domain_name)
         else:
-            logging.error(f'invalid data set or domain ID, processing row:\n{format_processing_row(row)}')
+            log_validation_error(
+                "Invalid BMAP dataset or domain ID",
+                row=row,
+                problem=(
+                    f"Dataset ID '{row.code_set_id}' was not found or domain ID "
+                    f"'{row.code_domain_id}' is empty or invalid."
+                ),
+                action="The domain definition was not added.",
+                impact="Code mappings that depend on this domain may be unavailable.",
+            )
 
     @log_error_decorator()
     def extract_bmap_values(self, row):
@@ -107,15 +132,36 @@ class BMapBuilder(SmxComponent):
         if row.code_domain_name != '':
             ds = DataSource.get_instance(_key=row.schema)
             if not ds:
-                logging.error(f"Invalid source name '{row.schema}', processing row:\n{format_processing_row(row)}")
+                log_validation_error(
+                    "Invalid source name",
+                    row=row,
+                    problem=f"Source '{row.schema}' is not defined in the System sheet.",
+                    action="The BMAP transformation view was not created.",
+                    impact="The affected source mapping will be missing from the generated output.",
+                )
             else:
                 data_set = DataSet.get_by_name(self.bmap_set_type.id, row.code_set_name)
                 if not data_set:
-                    logging.error(f"Invalid code set '{row.code_set_name}', processing row:\n{format_processing_row(row)}")
+                    log_validation_error(
+                        "Invalid code set",
+                        row=row,
+                        problem=f"Code set '{row.code_set_name}' is not defined in the BMAP sheet.",
+                        action="The BMAP transformation view was not created.",
+                        impact="The affected code-domain mapping will be skipped.",
+                    )
                 else:
                     domain = Domain.get_by_name(data_set_id=data_set.id, domain_name=row.code_domain_name)
                     if not domain:
-                        logging.error(f"Invalid code domain name '{row.code_domain_name}', processing row:\n{format_processing_row(row)}")
+                        log_validation_error(
+                            "Invalid code domain",
+                            row=row,
+                            problem=(
+                                f"Domain '{row.code_domain_name}' is not defined for "
+                                f"code set '{row.code_set_name}'."
+                            ),
+                            action="The BMAP transformation view was not created.",
+                            impact="The affected column will not receive this domain mapping.",
+                        )
                     else:
                         stg_t = Table.get_instance(_key=(self.stg_t_schema.id, row.table_name))
                         stg_lt = LayerTable.get_instance(_key=(self.stg_layer.id, stg_t.id))

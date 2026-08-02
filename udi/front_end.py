@@ -1,16 +1,16 @@
 import os
 import sys
+import subprocess
 import multiprocessing
 from tkinter import *
 from tkinter import filedialog, ttk
 import datetime as dt
-import traceback
 import threading
 import random
 import time
 
 from main import start
-from functions import generate_run_id, open_folder, get_dirs, get_config_file_path, get_config_file_values, get_server_info
+from functions import generate_run_id, get_dirs, get_config_file_path, get_config_file_values, get_server_info
 from config import ver_no, default_config_file_name
 
 class FrontEnd:
@@ -201,7 +201,6 @@ class FrontEnd:
         elif UDI_scripts_flag == 1 and testing_scripts_flag == 1 and Source_smx_flag == 1:
             self.scripts_flag = "UDI and Testing and Source smx"
             self.enable_disable_fields(NORMAL)
-        print(self.scripts_flag)
 
     def change_status_label(self, msg, color):
         self.status_label_text.set(msg)
@@ -225,8 +224,7 @@ class FrontEnd:
             self.generate_button.config(state=NORMAL)
             self.change_status_label(self.msg_ready, self.color_msg_ready)
 
-        except Exception as e:
-            print(e)
+        except Exception:
             self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
             self.generate_button.config(state=DISABLED)
             self.smx_path = ""
@@ -297,20 +295,13 @@ class FrontEnd:
     def generate_scripts_thread(self):
         try:
             config_file_path = self.config_file_entry_txt.get()
-            print("config_file_path:", config_file_path)
             x = open(config_file_path)
             try:
                 self.enable_disable_fields(DISABLED)
-                print("source name:", self.source_names)
-                print("smx path:", r'{}'.format(self.smx_path))
-                print("output path:", r'{}'.format(self.output_path))
-                print("db_prefix:", r'{}'.format(self.db_prefix))
 
                 run_id = generate_run_id()
-                print("run id:", run_id)
                 start(run_id, self.source_layer0, self.db_prefix, self.smx_path, self.output_path, self.source_names, with_scripts=True,
                       with_deploy=False)
-                open_folder(self.output_path)
                 self.enable_disable_fields(NORMAL)
                 self.UDI_scripts_generation.config(state=NORMAL)
                 self.Testing_scripts_generation.config(state=NORMAL)
@@ -324,7 +315,6 @@ class FrontEnd:
                 self.UDI_scripts_generation.config(state=NORMAL)
                 self.Testing_scripts_generation.config(state=NORMAL)
                 self.source_smx_generation.config(state=NORMAL)
-                traceback.print_exc()
         except Exception as e:
             self.change_status_label(self.msg_no_config_file, self.color_msg_no_config_file)
 

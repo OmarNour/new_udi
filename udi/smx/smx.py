@@ -2,8 +2,12 @@ import datetime as dt
 import logging
 import os
 
-from config import SHEETS
-from functions import create_folder, log_error_decorator, time_elapsed_decorator
+from config import SHEETS, ver_no
+from functions import (
+    create_folder,
+    log_error_decorator,
+    reset_validation_log_stats,
+)
 
 from model_cache import RelationCache
 
@@ -49,17 +53,41 @@ class SMX:
 
     def _configure_logging(self):
         separator = "*" * 82
+        reset_validation_log_stats()
+
+        root_logger = logging.getLogger()
+        for handler in tuple(root_logger.handlers):
+            root_logger.removeHandler(handler)
+            try:
+                handler.close()
+            except Exception:
+                pass
+
         file_handler = logging.FileHandler(
-            os.path.join(self.log_error_path, self.log_file_name)
-        )
-        logging.basicConfig(
+            os.path.join(self.log_error_path, self.log_file_name),
             encoding="utf-8",
-            level=logging.DEBUG,
-            format=f"[%(levelname)s] %(message)s\n{separator}\n",
-            handlers=[file_handler],
         )
+        file_handler.setFormatter(
+            logging.Formatter(
+                f"[%(levelname)s] %(message)s\n{separator}\n"
+            )
+        )
+        root_logger.setLevel(logging.DEBUG)
+        root_logger.addHandler(file_handler)
+
         logging.info(
-            "Run ID %s, started at %s\n", self.run_id, dt.datetime.now()
+            "UDI Run Report\n"
+            "============================================================\n"
+            "Run ID: %s\n"
+            "Started: %s\n"
+            "Version: %s\n"
+            "Input file: %s\n"
+            "Output folder: %s",
+            self.run_id,
+            dt.datetime.now(),
+            ver_no.replace("| Build #", ""),
+            self.path,
+            self.current_scripts_path,
         )
 
     # Compatibility properties used by the existing population logic.
@@ -124,7 +152,6 @@ class SMX:
         return self.workbook.in_clause(values)
 
     @log_error_decorator()
-    @time_elapsed_decorator
     def parse_file(self):
         self.workbook.parse_file()
 
@@ -150,7 +177,6 @@ class SMX:
         return self._source_systems
 
     @log_error_decorator()
-    @time_elapsed_decorator
     def populate_model(self, source_name):
         return self.model_populator.populate(source_name)
 

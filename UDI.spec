@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['udi\\front_end.py'],
+    ['UDI\\front_end.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -10,7 +10,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['pandas'],
+    excludes=['pandas', 'pyarrow'],
     noarchive=False,
     optimize=0,
 )

@@ -1,6 +1,4 @@
-import logging
-
-from functions import format_processing_row, log_error_decorator
+from functions import log_error_decorator, log_validation_error
 from model import (
     Column,
     ColumnMapping,
@@ -68,7 +66,13 @@ class SourceStgBuilder(SmxComponent):
                 srci_vl = LayerTable(layer_id=self.srci_layer.id, table_id=srci_v.id)
                 Pipeline(src_lyr_table_id=stg_lt.id, tgt_lyr_table_id=srci_lt.id, lyr_view_id=srci_vl.id)
             else:
-                logging.error(f' Invalid Source name, {row.schema}, processing row:\n{format_processing_row(row)}')
+                log_validation_error(
+                    "Invalid source name",
+                    row=row,
+                    problem=f"Source '{row.schema}' is not defined in the System sheet.",
+                    action="The source, staging, and SRCI table shells were not created.",
+                    impact=f"Table '{row.table_name}' cannot be processed for this source.",
+                )
 
     @log_error_decorator()
     def extract_stg_srci_table_columns(self, row):
@@ -80,7 +84,16 @@ class SourceStgBuilder(SmxComponent):
             _data_type = data_type_lst[0]
             data_type = DataType.get_instance(_key=(self.db_engine.id, _data_type))
             if not data_type:
-                logging.error(f'Invalid data type, processing row:\n{format_processing_row(row)}')
+                log_validation_error(
+                    "Invalid data type",
+                    row=row,
+                    problem=(
+                        f"Data type '{row.data_type}' is not available for the "
+                        "configured database engine."
+                    ),
+                    action="The affected column definition was not added.",
+                    impact=f"Table '{row.table_name}' may be incomplete.",
+                )
             else:
                 pk = 1 if row.pk.upper() == 'Y' else 0
                 mandatory = 1 if row.pk.upper() == 'Y' else 0
@@ -97,21 +110,48 @@ class SourceStgBuilder(SmxComponent):
                     if row.key_set_name and row.key_domain_name:
                         data_set = DataSet.get_by_name(self.bkey_set_type.id, row.key_set_name)
                         if not data_set:
-                            logging.error(f"invalid key set name '{row.key_set_name}', processing row:\n{format_processing_row(row)}")
+                            log_validation_error(
+                                "Invalid key set",
+                                row=row,
+                                problem=(
+                                    f"Key set '{row.key_set_name}' is not defined "
+                                    "in the BKEY sheet."
+                                ),
+                                action="The column was created without the requested key domain.",
+                                impact="The column domain relationship is missing.",
+                            )
                         else:
                             domain = Domain.get_by_name(data_set.id, row.key_domain_name)
                             domain_error_msg = f"Bkey Domain not found for {row.table_name}.{row.column_name} column, \n key set name:'{row.key_set_name}'\n key domain name: '{row.key_domain_name}'\n please check 'Stg tables' sheet!"
                     elif row.code_set_name and row.code_domain_name:
                         data_set = DataSet.get_by_name(self.bmap_set_type.id, row.code_set_name)
                         if not data_set:
-                            logging.error(f"invalid code set name '{row.code_set_name}', processing row:\n{format_processing_row(row)}")
+                            log_validation_error(
+                                "Invalid code set",
+                                row=row,
+                                problem=(
+                                    f"Code set '{row.code_set_name}' is not defined "
+                                    "in the BMAP sheet."
+                                ),
+                                action="The column was created without the requested code domain.",
+                                impact="The column domain relationship is missing.",
+                            )
                         else:
                             domain = Domain.get_by_name(data_set.id, row.code_domain_name)
                             domain_error_msg = f"Bmap Domain not found for {row.table_name}.{row.column_name} column, \n code set name:'{row.code_set_name}'\n code domain name: '{row.code_domain_name}'\n please check 'Stg tables' sheet!"
                     if domain:
                         domain_id = domain.id
                     else:
-                        logging.error(f'{domain_error_msg}, processing row:\n{format_processing_row(row)}')
+                        log_validation_error(
+                            "Domain not found",
+                            row=row,
+                            problem=domain_error_msg,
+                            action="The column was created without a domain relationship.",
+                            impact=(
+                                f"Column '{row.table_name}.{row.column_name}' may "
+                                "not receive the expected key or code mapping."
+                            ),
+                        )
                 if srci_table:
                     Column(table_id=srci_table.id, column_name=row.column_name, is_pk=pk, mandatory=mandatory, data_type_id=data_type.id, dt_precision=precision, domain_id=domain_id)
 
@@ -128,4 +168,13 @@ class SourceStgBuilder(SmxComponent):
             if src_col and stg_col:
                 ColumnMapping(pipeline_id=pipeline.id, col_seq=0, src_col_id=src_col.id, tgt_col_id=stg_col.id, src_col_trx=row.column_transformation_rule)
             else:
-                logging.error(f"Invalid column '{row.column_name}', processing row:\n{format_processing_row(row)}")
+                log_validation_error(
+                    "Invalid source-view column",
+                    row=row,
+                    problem=(
+                        f"Column '{row.column_name}' was not found in both the "
+                        f"source and staging definitions for table '{row.table_name}'."
+                    ),
+                    action="The source-to-staging column mapping was not created.",
+                    impact="The generated source view will not include this mapping.",
+                )

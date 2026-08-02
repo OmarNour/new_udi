@@ -1,7 +1,5 @@
-import logging
-
 from config import BK_PROCESS_NAME_TEMPLATE, BK_VIEW_NAME_TEMPLATE
-from functions import format_processing_row, log_error_decorator
+from functions import log_error_decorator, log_validation_error
 from model import (
     Column,
     ColumnMapping,
@@ -62,13 +60,31 @@ class BKeyBuilder(SmxComponent):
             if ds:
                 if ds.set_code != row.key_set_id:
                     valid_ds = False
-                    logging.error(f"Duplicate dataset '{row.key_set_id}', processing row:\n{format_processing_row(row)}")
+                    log_validation_error(
+                        "Duplicate BKEY dataset ID",
+                        row=row,
+                        problem=(
+                            f"Dataset ID '{row.key_set_id}' is already assigned "
+                            "to a different key set."
+                        ),
+                        action="The duplicate dataset definition was not added.",
+                        impact="The affected BKEY set will not be available to dependent mappings.",
+                    )
             if valid_ds:
                 if set_table and surrogate_table:
                     DataSet(set_type_id=self.bkey_set_type.id, set_code=row.key_set_id, set_table_id=set_table.id, surrogate_table_id=surrogate_table.id)
                     surrogate_table.is_bkey = True
                 else:
-                    logging.error(f'Invalid set table {row.key_set_name} or surrogate table {row.physical_table}, processing row:\n{format_processing_row(row)}')
+                    log_validation_error(
+                    "Invalid BKEY table definition",
+                    row=row,
+                    problem=(
+                        f"Key set table '{row.key_set_name}' or surrogate table "
+                        f"'{row.physical_table}' could not be found."
+                    ),
+                    action="The BKEY dataset was not created.",
+                    impact="Mappings that use this key set may be skipped.",
+                )
 
     @log_error_decorator()
     def extract_bkey_domains(self, row):
@@ -76,22 +92,52 @@ class BKeyBuilder(SmxComponent):
         if data_set and row.key_domain_id:
             Domain(data_set_id=data_set.id, domain_code=row.key_domain_id, domain_name=row.key_domain_name)
         else:
-            logging.error(f'invalid data set {row.key_set_id} or domain ID, processing row:\n{format_processing_row(row)}')
+            log_validation_error(
+                "Invalid BKEY dataset or domain ID",
+                row=row,
+                problem=(
+                    f"Dataset ID '{row.key_set_id}' was not found or domain ID "
+                    f"'{row.key_domain_id}' is empty or invalid."
+                ),
+                action="The domain definition was not added.",
+                impact="Key mappings that depend on this domain may be unavailable.",
+            )
 
     @log_error_decorator()
     def extract_bkey_views(self, row):
         if row.natural_key != '' and row.key_domain_name != '':
             ds = DataSource.get_instance(_key=row.schema)
             if not ds:
-                logging.error(f"Invalid source name '{row.schema}', processing row:\n{format_processing_row(row)}")
+                log_validation_error(
+                    "Invalid source name",
+                    row=row,
+                    problem=f"Source '{row.schema}' is not defined in the System sheet.",
+                    action="The BKEY transformation view was not created.",
+                    impact="The affected source mapping will be missing from the generated output.",
+                )
             else:
                 data_set = DataSet.get_by_name(self.bkey_set_type.id, row.key_set_name)
                 if not data_set:
-                    logging.error(f"Invalid key set '{row.key_set_name}', processing row:\n{format_processing_row(row)}")
+                    log_validation_error(
+                        "Invalid key set",
+                        row=row,
+                        problem=f"Key set '{row.key_set_name}' is not defined in the BKEY sheet.",
+                        action="The BKEY transformation view was not created.",
+                        impact="The affected key mapping will be skipped.",
+                    )
                 else:
                     domain = Domain.get_by_name(data_set_id=data_set.id, domain_name=row.key_domain_name)
                     if not domain:
-                        logging.error(f"Invalid key domain name '{row.key_domain_name}', processing row:\n{format_processing_row(row)}")
+                        log_validation_error(
+                            "Invalid key domain",
+                            row=row,
+                            problem=(
+                                f"Domain '{row.key_domain_name}' is not defined for "
+                                f"key set '{row.key_set_name}'."
+                            ),
+                            action="The BKEY transformation view was not created.",
+                            impact="The affected column will not receive this key-domain mapping.",
+                        )
                     else:
                         stg_t = Table.get_instance(_key=(self.stg_t_schema.id, row.table_name))
                         stg_lt = LayerTable.get_instance(_key=(self.stg_layer.id, stg_t.id))
@@ -106,4 +152,10 @@ class BKeyBuilder(SmxComponent):
                             if row.bkey_filter:
                                 Filter(pipeline_id=bkey_pipeline.id, filter_seq=1, complete_filter_expr=row.bkey_filter)
                         else:
-                            logging.error(f"Invalid key set '{row.key_set_name}', processing row:\n{format_processing_row(row)}")
+                            log_validation_error(
+                        "Invalid key set",
+                        row=row,
+                        problem=f"Key set '{row.key_set_name}' is not defined in the BKEY sheet.",
+                        action="The BKEY transformation view was not created.",
+                        impact="The affected key mapping will be skipped.",
+                    )

@@ -2,7 +2,7 @@ import logging
 import os
 import datetime as dt
 import shutil
-import sys, subprocess
+import sys
 import traceback
 import functools
 from datetime import datetime
@@ -10,6 +10,10 @@ import configparser
 import concurrent.futures
 import multiprocessing
 import re
+import textwrap
+import threading
+from collections import Counter
+
 import psutil
 
 try:
@@ -31,23 +35,217 @@ class WriteFile:
     def close(self):
         self.f.close()
 
-def format_processing_row(row, row_index=None):
-    if hasattr(row, '_asdict'):
-        data = row._asdict()
-    elif hasattr(row, '__dict__'):
-        data = {k: v for k, v in vars(row).items() if not k.startswith('_')}
-    else:
+ROW_SHEET_NAMES = {
+    "SystemRow": "System",
+    "StagingTableRow": "Stg tables",
+    "StgSrciColumnRow": "Stg tables",
+    "SourceViewMappingRow": "Stg tables",
+    "SrciViewMappingRow": "Stg tables",
+    "BKeyViewRow": "Stg tables",
+    "BMapViewRow": "Stg tables",
+    "CoreTableRow": "Core tables",
+    "CoreColumnRow": "Core tables",
+    "BKeyTableRow": "BKEY",
+    "BKeyDataSetRow": "BKEY",
+    "BKeyDomainRow": "BKEY",
+    "BMapTableRow": "BMAP",
+    "BMapDataSetRow": "BMAP",
+    "BMapDomainRow": "BMAP",
+    "BMapValueRow": "BMAP values",
+    "TableMappingRow": "Table mapping",
+    "ColumnMappingRow": "Column mapping",
+}
+
+_LOG_STATS_LOCK = threading.Lock()
+_LOG_STATS = {
+    "ERROR": Counter(),
+    "WARNING": Counter(),
+    "CRITICAL": Counter(),
+}
+
+
+def reset_validation_log_stats():
+    with _LOG_STATS_LOCK:
+        for counter in _LOG_STATS.values():
+            counter.clear()
+
+
+def get_validation_log_stats():
+    with _LOG_STATS_LOCK:
+        return {
+            level: dict(counter)
+            for level, counter in _LOG_STATS.items()
+        }
+
+
+def _row_to_dict(row):
+    if row is None:
+        return {}
+    if hasattr(row, "_asdict"):
+        return dict(row._asdict())
+    if hasattr(row, "__dict__"):
+        return {
+            key: value
+            for key, value in vars(row).items()
+            if not key.startswith("_")
+        }
+    return {}
+
+
+def infer_sheet_name(row):
+    if row is None:
+        return None
+    return ROW_SHEET_NAMES.get(type(row).__name__)
+
+
+def _format_value(value, indent="    ", width=118):
+    if value is None:
+        return ""
+    text = str(value).replace("\r\n", "\n").replace("\r", "\n")
+    if not text:
+        return ""
+    lines = []
+    for original_line in text.split("\n"):
+        wrapped = textwrap.wrap(
+            original_line,
+            width=max(20, width - len(indent)),
+            replace_whitespace=False,
+            drop_whitespace=False,
+        ) or [""]
+        lines.extend(wrapped)
+    return ("\n" + indent).join(lines)
+
+
+def format_processing_row(row, row_index=None, include_empty=True):
+    data = _row_to_dict(row)
+    if not data:
         return str(row)
 
-    index = row_index if row_index is not None else getattr(row, '_row_index', None)
-    header = f"Row {index}" if index is not None else "Row"
+    index = (
+        row_index
+        if row_index is not None
+        else data.get("source_row_number")
+    )
+    header = f"Excel row {index}" if index not in (None, "") else "Row context"
     lines = [header]
-    for k, v in data.items():
-        val_str = str(v)
-        if len(val_str) > 80:
-            val_str = val_str[:77] + '...'
-        lines.append(f"    {k:<30} {val_str}")
-    return '\n'.join(lines)
+    for key, value in data.items():
+        if key == "source_row_number":
+            continue
+        if not include_empty and value in (None, ""):
+            continue
+        value_text = _format_value(value, indent=" " * 36)
+        lines.append(f"    {key:<30} {value_text}")
+    return "\n".join(lines)
+
+
+def _record_log_issue(level_name, title):
+    counter = _LOG_STATS.get(level_name)
+    if counter is None:
+        return
+    with _LOG_STATS_LOCK:
+        counter[title] += 1
+
+
+def format_log_issue(
+    title,
+    *,
+    row=None,
+    sheet=None,
+    problem=None,
+    action=None,
+    impact=None,
+    details=None,
+    original_error=None,
+):
+    row_data = _row_to_dict(row)
+    sheet = sheet or infer_sheet_name(row)
+    excel_row = row_data.get("source_row_number")
+
+    lines = [str(title).strip()]
+
+    if sheet or excel_row not in (None, ""):
+        lines.extend(["", "Location:"])
+        if sheet:
+            lines.append(f"  Sheet: {sheet}")
+        if excel_row not in (None, ""):
+            lines.append(f"  Excel row: {excel_row}")
+
+    if problem:
+        lines.extend(["", "Problem:", f"  {_format_value(problem, indent='  ')}"])
+
+    if original_error:
+        lines.extend([
+            "",
+            "Original error:",
+            f"  {_format_value(original_error, indent='  ')}",
+        ])
+
+    if action:
+        lines.extend([
+            "",
+            "Program action:",
+            f"  {_format_value(action, indent='  ')}",
+        ])
+
+    if impact:
+        lines.extend([
+            "",
+            "Impact:",
+            f"  {_format_value(impact, indent='  ')}",
+        ])
+
+    if details:
+        lines.extend([
+            "",
+            "Details:",
+            f"  {_format_value(details, indent='  ')}",
+        ])
+
+    if row_data:
+        lines.extend([
+            "",
+            "Workbook row context:",
+            format_processing_row(row, include_empty=True),
+        ])
+
+    return "\n".join(lines)
+
+
+def log_validation_issue(
+    title,
+    *,
+    row=None,
+    sheet=None,
+    problem=None,
+    action=None,
+    impact=None,
+    details=None,
+    original_error=None,
+    level=logging.ERROR,
+):
+    level_name = logging.getLevelName(level)
+    _record_log_issue(level_name, title)
+    logging.log(
+        level,
+        format_log_issue(
+            title,
+            row=row,
+            sheet=sheet,
+            problem=problem,
+            action=action,
+            impact=impact,
+            details=details,
+            original_error=original_error,
+        ),
+    )
+
+
+def log_validation_error(title, **kwargs):
+    log_validation_issue(title, level=logging.ERROR, **kwargs)
+
+
+def log_validation_warning(title, **kwargs):
+    log_validation_issue(title, level=logging.WARNING, **kwargs)
 
 
 def get_dirs():
@@ -240,15 +438,81 @@ class TemplateLogError(WriteFile):
         self.write(error_separator)
 
 
-def log_error_decorator():
+def _find_processing_row(args, kwargs):
+    for value in list(args[1:]) + list(kwargs.values()):
+        if hasattr(value, "_asdict") or hasattr(value, "source_row_number"):
+            return value
+    return None
+
+
+def _humanize_function_name(name):
+    return str(name).replace("_", " ").strip().capitalize()
+
+
+def log_error_decorator(sheet=None):
     def decorator(function):
         @functools.wraps(function)
         def wrapper(*args, **kwargs):
             try:
                 return function(*args, **kwargs)
-            except:
-                error_detailed = f"""\n\nFunction Name: {function.__name__}\n\nargs: {args}\n\nkwargs: {kwargs}\n\nError: {traceback.format_exc()}"""
-                logging.critical(error_detailed)
+            except Exception as exc:
+                row = _find_processing_row(args, kwargs)
+                column_name = getattr(row, "column_name", "") if row else ""
+                table_name = getattr(row, "table_name", "") if row else ""
+                error_text = str(exc)
+
+                if "Already Exists" in error_text:
+                    shown_value = column_name or "the same value"
+                    title = f"Duplicate definition '{shown_value}'"
+                    problem = (
+                        f"The value '{shown_value}' was received more than once "
+                        f"for table '{table_name or 'unknown'}'. "
+                        "The duplicate definition cannot be added to the model."
+                    )
+                    if str(shown_value).upper() == "#REF!":
+                        problem = (
+                            "Excel returned '#REF!' as the column name. The same "
+                            f"'#REF!' value already exists for table "
+                            f"'{table_name or 'unknown'}'."
+                        )
+                    log_validation_error(
+                        title,
+                        row=row,
+                        sheet=sheet,
+                        problem=problem,
+                        original_error=error_text,
+                        action=(
+                            "The duplicate definition was not added. Processing "
+                            "continued with the remaining workbook rows."
+                        ),
+                        impact=(
+                            "The affected table or mapping may be incomplete. "
+                            "The original workbook value is shown exactly as read."
+                        ),
+                        details=(
+                            f"Processing step: {_humanize_function_name(function.__name__)}"
+                        ),
+                    )
+                else:
+                    log_validation_issue(
+                        "Unexpected processing failure",
+                        row=row,
+                        sheet=sheet,
+                        problem=error_text or exc.__class__.__name__,
+                        action=(
+                            "The affected item was not added. Processing continued "
+                            "where it was safe to do so."
+                        ),
+                        impact=(
+                            "Review the workbook row context below. The generated "
+                            "output may not include this item."
+                        ),
+                        details=(
+                            f"Processing step: {_humanize_function_name(function.__name__)}"
+                        ),
+                        level=logging.CRITICAL,
+                    )
+                return None
 
         return wrapper
 

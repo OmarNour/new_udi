@@ -1,19 +1,32 @@
 from __future__ import annotations
 
+import csv
+import logging
+import os
+import tempfile
+import time
 from collections import namedtuple
+from pathlib import Path
 
 import duckdb
-import pyarrow as pa
 from openpyxl import load_workbook
 
 from config import SHEETS
-from functions import log_error_decorator
+from functions import log_error_decorator, log_validation_warning
 
 
 class WorkbookStore:
-    """Own Excel parsing and all temporary in-memory DuckDB relations."""
+    """Own Excel parsing and all temporary in-memory DuckDB relations.
+
+    Version 3.7 development replaces the PyArrow bridge with a temporary
+    UTF-8 CSV file loaded through DuckDB ``COPY``. This keeps bulk loading,
+    removes the PyArrow runtime dependency, and preserves the existing table
+    schema and row ordering.
+    """
 
     INTERNAL_ROW_NUMBER = "_udi_row_num"
+    CSV_NULL_SENTINEL = "__UDI_NULL_VALUE_7F2B1B4D__"
+    SOURCE_EXCEL_ROW_KEY = "__udi_excel_row__"
 
     def __init__(self, path):
         self.path = path
@@ -29,6 +42,11 @@ class WorkbookStore:
         return f'"{str(identifier).replace(chr(34), chr(34) * 2)}"'
 
     @staticmethod
+    def _quote_sql_string(value):
+        """Safely quote a SQL string literal."""
+        return "'" + str(value).replace("'", "''") + "'"
+
+    @staticmethod
     def normalize_value(value):
         if value is None:
             return ""
@@ -38,81 +56,147 @@ class WorkbookStore:
             return int(value)
         return value
 
-    def register_rows(self, table_name, rows, columns):
-        """Bulk-load one normalized sheet into DuckDB through Apache Arrow.
-
-        Every workbook column is stored as VARCHAR and ``_udi_row_num`` is a
-        one-based BIGINT assigned after Python deduplication.
-        """
-        clean_columns = [column for column in columns if column]
-        internal_column = self.INTERNAL_ROW_NUMBER
-
+    def _create_empty_table(self, table_name, clean_columns):
+        """Create the final DuckDB table with the legacy workbook schema."""
         quoted_table_name = self._quote_identifier(table_name)
-        quoted_internal_column = self._quote_identifier(internal_column)
+        quoted_internal_column = self._quote_identifier(
+            self.INTERNAL_ROW_NUMBER
+        )
 
         if not clean_columns:
             self.duckdb_con.execute(
                 f"CREATE OR REPLACE TABLE {quoted_table_name} "
                 f"({quoted_internal_column} BIGINT)"
             )
-            self._known_tables.add(table_name.lower())
             return
 
-        if not rows:
-            columns_ddl = ", ".join(
-                f"{self._quote_identifier(column)} VARCHAR"
-                for column in clean_columns
-            )
-            self.duckdb_con.execute(
-                f"CREATE OR REPLACE TABLE {quoted_table_name} "
-                f"({columns_ddl}, {quoted_internal_column} BIGINT)"
-            )
-            self._known_tables.add(table_name.lower())
-            return
-
-        arrow_values = {
-            column: [
-                None if row.get(column) is None else str(row.get(column, ""))
-                for row in rows
-            ]
+        columns_ddl = ", ".join(
+            f"{self._quote_identifier(column)} VARCHAR"
             for column in clean_columns
-        }
-
-        arrow_arrays = {
-            column: pa.array(values, type=pa.string())
-            for column, values in arrow_values.items()
-        }
-        arrow_arrays[internal_column] = pa.array(
-            range(1, len(rows) + 1),
-            type=pa.int64(),
         )
-        arrow_table = pa.table(arrow_arrays)
+        self.duckdb_con.execute(
+            f"CREATE OR REPLACE TABLE {quoted_table_name} "
+            f"({columns_ddl}, {quoted_internal_column} BIGINT)"
+        )
 
-        relation_name = f"__udi_arrow_{table_name}"
-        quoted_relation_name = self._quote_identifier(relation_name)
-        self.duckdb_con.register(relation_name, arrow_table)
+    def _write_csv_file(self, rows, clean_columns):
+        """Write normalized rows to a closed temporary UTF-8 CSV file.
+
+        ``delete=False`` is required on Windows because DuckDB must open the
+        file after Python closes the writer handle.
+        """
+        temporary_file = tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            newline="",
+            suffix=".csv",
+            prefix="udi_duckdb_",
+            delete=False,
+        )
+        temporary_path = temporary_file.name
 
         try:
-            select_columns = [
-                (
-                    f"CAST({self._quote_identifier(column)} AS VARCHAR) "
-                    f"AS {self._quote_identifier(column)}"
-                )
-                for column in clean_columns
-            ]
-            select_columns.append(
-                f"CAST({quoted_internal_column} AS BIGINT) "
-                f"AS {quoted_internal_column}"
+            writer = csv.writer(
+                temporary_file,
+                delimiter=",",
+                quotechar='"',
+                escapechar=None,
+                doublequote=True,
+                quoting=csv.QUOTE_MINIMAL,
+                lineterminator="\n",
             )
 
-            self.duckdb_con.execute(
-                f"CREATE OR REPLACE TABLE {quoted_table_name} AS "
-                f"SELECT {', '.join(select_columns)} "
-                f"FROM {quoted_relation_name}"
-            )
+            for row_number, row in enumerate(rows, start=1):
+                values = []
+                for column in clean_columns:
+                    value = row.get(column, "")
+                    if value is None:
+                        value = self.CSV_NULL_SENTINEL
+                    else:
+                        value = str(value)
+                    values.append(value)
+
+                values.append(row.get(self.SOURCE_EXCEL_ROW_KEY, row_number))
+                writer.writerow(values)
+        except Exception:
+            temporary_file.close()
+            self._remove_temporary_file(temporary_path)
+            raise
+        else:
+            temporary_file.close()
+
+        return temporary_path
+
+    @staticmethod
+    def _remove_temporary_file(path, attempts=5, delay_seconds=0.1):
+        """Remove a temporary file, retrying brief Windows file locks."""
+        if not path:
+            return
+
+        for attempt in range(attempts):
+            try:
+                os.remove(path)
+                return
+            except FileNotFoundError:
+                return
+            except OSError:
+                if attempt == attempts - 1:
+                    log_validation_warning(
+                        "Temporary file could not be removed",
+                        problem=(
+                            "Windows kept the temporary CSV file locked after "
+                            "the workbook sheet was loaded."
+                        ),
+                        action="The program continued without deleting this file.",
+                        impact=(
+                            "Generated scripts are not affected, but the temporary "
+                            f"file may remain on disk: {path}"
+                        ),
+                    )
+                    return
+                time.sleep(delay_seconds)
+
+    def _copy_csv_into_table(self, table_name, temporary_path):
+        """Load a CSV file into the already-created DuckDB table."""
+        quoted_table_name = self._quote_identifier(table_name)
+        csv_path = Path(temporary_path).resolve().as_posix()
+        quoted_csv_path = self._quote_sql_string(csv_path)
+        quoted_null = self._quote_sql_string(self.CSV_NULL_SENTINEL)
+
+        self.duckdb_con.execute(
+            f"COPY {quoted_table_name} FROM {quoted_csv_path} ("
+            "FORMAT CSV, "
+            "HEADER FALSE, "
+            "DELIMITER ',', "
+            "QUOTE '\"', "
+            "ESCAPE '\"', "
+            f"NULLSTR {quoted_null}, "
+            "AUTO_DETECT FALSE"
+            ")"
+        )
+
+    def register_rows(self, table_name, rows, columns):
+        """Bulk-load one normalized sheet using CSV + DuckDB ``COPY``.
+
+        Every workbook column is stored as ``VARCHAR`` and
+        ``_udi_row_num`` is a one-based ``BIGINT`` assigned after Python
+        deduplication. Temporary files are removed in all success and failure
+        paths.
+        """
+        clean_columns = [column for column in columns if column]
+        self._create_empty_table(table_name, clean_columns)
+
+        if not rows:
+            self._known_tables.add(table_name.lower())
+            return
+
+        temporary_path = None
+        try:
+            temporary_path = self._write_csv_file(rows, clean_columns)
+            self._copy_csv_into_table(table_name, temporary_path)
             self._known_tables.add(table_name.lower())
         finally:
-            self.duckdb_con.unregister(relation_name)
+            self._remove_temporary_file(temporary_path)
 
     def table_exists(self, table_name):
         return table_name.lower() in self._known_tables
@@ -242,7 +326,7 @@ class WorkbookStore:
         seen = set()
         rows = []
 
-        for data_row in data_iterator:
+        for excel_row_number, data_row in enumerate(data_iterator, start=2):
             row_dict = {
                 column_name: self.normalize_value(
                     data_row[index] if index < len(data_row) else ""
@@ -259,6 +343,7 @@ class WorkbookStore:
                 continue
 
             seen.add(row_key)
+            row_dict[self.SOURCE_EXCEL_ROW_KEY] = excel_row_number
             rows.append(row_dict)
 
         self.data[sheet_name] = sheet_name

@@ -221,7 +221,7 @@ class DuckDbStagePreparer(SmxComponent):
     def _load_foundation_stage(self) -> FoundationStage:
         systems = self.workbook.fetch_named_rows(
             """
-            SELECT "schema"
+            SELECT "schema", min("_udi_row_num") AS source_row_number
             FROM udi_run_system
             GROUP BY "schema"
             ORDER BY min("_udi_row_num")
@@ -231,7 +231,7 @@ class DuckDbStagePreparer(SmxComponent):
 
         staging_tables = self.workbook.fetch_named_rows(
             """
-            SELECT "schema", "table_name"
+            SELECT "schema", "table_name", min("_udi_row_num") AS source_row_number
             FROM udi_run_stg
             WHERE coalesce("table_name", '') <> ''
             GROUP BY "schema", "table_name"
@@ -243,7 +243,7 @@ class DuckDbStagePreparer(SmxComponent):
         if self.workbook.temp_table_exists("udi_run_core"):
             core_tables = self.workbook.fetch_named_rows(
                 """
-                SELECT "table_name"
+                SELECT "table_name", min("_udi_row_num") AS source_row_number
                 FROM udi_run_core
                 WHERE coalesce("table_name", '') <> ''
                 GROUP BY "table_name"
@@ -255,7 +255,8 @@ class DuckDbStagePreparer(SmxComponent):
                 """
                 SELECT
                     "table_name", "column_name", "data_type", "pk",
-                    "mandatory", "historization_key"
+                    "mandatory", "historization_key",
+                    min("_udi_row_num") AS source_row_number
                 FROM udi_run_core
                 GROUP BY
                     "table_name", "column_name", "data_type", "pk",
@@ -355,7 +356,7 @@ class DuckDbStagePreparer(SmxComponent):
         if self.workbook.temp_table_exists("udi_run_bkey"):
             bkey_tables = self.workbook.fetch_named_rows(
                 """
-                SELECT "physical_table"
+                SELECT "physical_table", min("_udi_row_num") AS source_row_number
                 FROM udi_run_bkey
                 WHERE coalesce("physical_table", '') <> ''
                 GROUP BY "physical_table"
@@ -365,7 +366,8 @@ class DuckDbStagePreparer(SmxComponent):
             )
             bkey_datasets = self.workbook.fetch_named_rows(
                 """
-                SELECT "key_set_name", "key_set_id", "physical_table"
+                SELECT "key_set_name", "key_set_id", "physical_table",
+                    "_udi_row_num" AS source_row_number
                 FROM udi_run_bkey
                 WHERE coalesce("key_set_id", '') <> ''
                 QUALIFY row_number() OVER (
@@ -378,7 +380,8 @@ class DuckDbStagePreparer(SmxComponent):
             )
             bkey_domains = self.workbook.fetch_named_rows(
                 """
-                SELECT "key_set_id", "key_domain_id", "key_domain_name"
+                SELECT "key_set_id", "key_domain_id", "key_domain_name",
+                    "_udi_row_num" AS source_row_number
                 FROM udi_run_bkey
                 WHERE coalesce("key_set_id", '') <> ''
                   AND coalesce("key_domain_id", '') <> ''
@@ -397,7 +400,8 @@ class DuckDbStagePreparer(SmxComponent):
             """
             SELECT
                 "schema", "table_name", "natural_key", "column_name",
-                "key_set_name", "key_domain_name", "bkey_filter"
+                "key_set_name", "key_domain_name", "bkey_filter",
+                min("_udi_row_num") AS source_row_number
             FROM udi_run_stg
             WHERE coalesce("natural_key", '') <> ''
               AND coalesce("key_domain_name", '') <> ''
@@ -412,7 +416,7 @@ class DuckDbStagePreparer(SmxComponent):
         if self.workbook.temp_table_exists("udi_run_bmap"):
             bmap_tables = self.workbook.fetch_named_rows(
                 """
-                SELECT "physical_table"
+                SELECT "physical_table", min("_udi_row_num") AS source_row_number
                 FROM udi_run_bmap
                 WHERE coalesce("physical_table", '') <> ''
                 GROUP BY "physical_table"
@@ -422,7 +426,8 @@ class DuckDbStagePreparer(SmxComponent):
             )
             bmap_datasets = self.workbook.fetch_named_rows(
                 """
-                SELECT "code_set_name", "code_set_id", "physical_table"
+                SELECT "code_set_name", "code_set_id", "physical_table",
+                    "_udi_row_num" AS source_row_number
                 FROM udi_run_bmap
                 WHERE coalesce("code_set_id", '') <> ''
                 QUALIFY row_number() OVER (
@@ -435,7 +440,8 @@ class DuckDbStagePreparer(SmxComponent):
             )
             bmap_domains = self.workbook.fetch_named_rows(
                 """
-                SELECT "code_set_id", "code_domain_id", "code_domain_name"
+                SELECT "code_set_id", "code_domain_id", "code_domain_name",
+                    "_udi_row_num" AS source_row_number
                 FROM udi_run_bmap
                 WHERE coalesce("code_set_id", '') <> ''
                   AND coalesce("code_domain_id", '') <> ''
@@ -455,7 +461,8 @@ class DuckDbStagePreparer(SmxComponent):
                 """
                 SELECT
                     "code_set_name", "code_domain_id", "edw_code",
-                    "source_code", "description"
+                    "source_code", "description",
+                    "_udi_row_num" AS source_row_number
                 FROM udi_run_bmap_values
                 ORDER BY "_udi_row_num"
                 """,
@@ -470,7 +477,7 @@ class DuckDbStagePreparer(SmxComponent):
             """
             SELECT
                 "schema", "table_name", "column_name", "code_set_name",
-                "code_domain_name"
+                "code_domain_name", min("_udi_row_num") AS source_row_number
             FROM udi_run_stg
             WHERE coalesce("code_domain_name", '') <> ''
             GROUP BY
@@ -499,7 +506,7 @@ class DuckDbStagePreparer(SmxComponent):
             SELECT
                 "table_name", "column_name", "data_type", "mandatory",
                 "natural_key", "pk", "key_set_name", "key_domain_name",
-                "code_set_name", "code_domain_name"
+                "code_set_name", "code_domain_name", min("_udi_row_num") AS source_row_number
             FROM udi_run_stg
             GROUP BY
                 "table_name", "column_name", "data_type", "mandatory",
@@ -514,7 +521,8 @@ class DuckDbStagePreparer(SmxComponent):
             """
             SELECT
                 "schema", "table_name", "natural_key", "column_name",
-                "column_transformation_rule"
+                "column_transformation_rule",
+                min("_udi_row_num") AS source_row_number
             FROM udi_run_stg
             WHERE coalesce("natural_key", '') = ''
               AND coalesce("column_name", '') <> ''
@@ -531,7 +539,7 @@ class DuckDbStagePreparer(SmxComponent):
             SELECT
                 "schema", "table_name", "column_name", "natural_key",
                 "key_set_name", "key_domain_name", "code_set_name",
-                "code_domain_name"
+                "code_domain_name", min("_udi_row_num") AS source_row_number
             FROM udi_run_stg
             WHERE coalesce("column_name", '') <> ''
             GROUP BY
@@ -581,7 +589,8 @@ class DuckDbStagePreparer(SmxComponent):
                 SELECT
                     "mapping_name", "column_name", "mapped_to_table",
                     "mapped_to_column", "transformation_rule",
-                    "transformation_type"
+                    "transformation_type",
+                    "_udi_row_num" AS source_row_number
                 FROM udi_run_column_mapping
                 QUALIFY row_number() OVER (
                     PARTITION BY

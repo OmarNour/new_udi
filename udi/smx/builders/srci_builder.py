@@ -1,6 +1,6 @@
 from config import BK_PROCESS_NAME_TEMPLATE, BK_VIEW_NAME_TEMPLATE
 from functions import log_error_decorator, log_validation_error
-from model import Column, ColumnMapping, DataSet, Domain, LayerTable, Pipeline, Table, GroupBy
+from model import Column, ColumnMapping, DataSet, Domain, GroupBy, LayerTable, Pipeline, Table
 
 from .base import SmxComponent
 

@@ -1,4 +1,8 @@
-from functions import log_error_decorator, log_validation_error
+from functions import (
+    get_issue_reference,
+    log_error_decorator,
+    log_validation_error,
+)
 from model import (
     Column,
     ColumnMapping,
@@ -106,13 +110,16 @@ class SourceStgBuilder(SmxComponent):
                         Column(table_id=stg_table.id, column_name=row.column_name, is_pk=pk, mandatory=mandatory, data_type_id=data_type.id, dt_precision=precision)
                 else:
                     domain = None
+                    related_domain_issue_id = None
+                    related_domain_cause = None
                     domain_error_msg = f"Domain not found for {row.table_name}.{row.column_name} column, please check 'Stg tables' sheet!"
                     if row.key_set_name and row.key_domain_name:
                         data_set = DataSet.get_by_name(self.bkey_set_type.id, row.key_set_name)
                         if not data_set:
-                            log_validation_error(
+                            related_domain_issue_id = log_validation_error(
                                 "Invalid key set",
                                 row=row,
+                                affected_object=row.key_set_name,
                                 problem=(
                                     f"Key set '{row.key_set_name}' is not defined "
                                     "in the BKEY sheet."
@@ -120,21 +127,36 @@ class SourceStgBuilder(SmxComponent):
                                 action="The column was created without the requested key domain.",
                                 impact="The column domain relationship is missing.",
                             )
+                            related_domain_cause = (
+                                f"Key set '{row.key_set_name}' was not available."
+                            )
                         else:
                             domain = Domain.get_by_name(data_set.id, row.key_domain_name)
                             domain_error_msg = f"Bkey Domain not found for {row.table_name}.{row.column_name} column, \n key set name:'{row.key_set_name}'\n key domain name: '{row.key_domain_name}'\n please check 'Stg tables' sheet!"
                     elif row.code_set_name and row.code_domain_name:
                         data_set = DataSet.get_by_name(self.bmap_set_type.id, row.code_set_name)
                         if not data_set:
-                            log_validation_error(
+                            root_issue_id = get_issue_reference(
+                                "bmap_code_set", row.code_set_name
+                            )
+                            related_domain_issue_id = log_validation_error(
                                 "Invalid code set",
                                 row=row,
+                                affected_object=row.code_set_name,
                                 problem=(
                                     f"Code set '{row.code_set_name}' is not defined "
-                                    "in the BMAP sheet."
+                                    "in the loaded BMAP model."
                                 ),
+                                related_issue_id=root_issue_id,
+                                related_cause=(
+                                    f"The parent BMAP code set '{row.code_set_name}' "
+                                    "was not created."
+                                ) if root_issue_id else None,
                                 action="The column was created without the requested code domain.",
                                 impact="The column domain relationship is missing.",
+                            )
+                            related_domain_cause = (
+                                f"Code set '{row.code_set_name}' was not available."
                             )
                         else:
                             domain = Domain.get_by_name(data_set.id, row.code_domain_name)
@@ -145,7 +167,10 @@ class SourceStgBuilder(SmxComponent):
                         log_validation_error(
                             "Domain not found",
                             row=row,
+                            affected_object=f"{row.table_name}.{row.column_name}",
                             problem=domain_error_msg,
+                            related_issue_id=related_domain_issue_id,
+                            related_cause=related_domain_cause,
                             action="The column was created without a domain relationship.",
                             impact=(
                                 f"Column '{row.table_name}.{row.column_name}' may "

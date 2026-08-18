@@ -12,7 +12,11 @@ import duckdb
 from openpyxl import load_workbook
 
 from config import SHEETS
-from functions import log_error_decorator, log_validation_warning
+from functions import (
+    log_error_decorator,
+    log_validation_warning,
+    record_input_normalization,
+)
 
 
 class WorkbookStore:
@@ -46,15 +50,19 @@ class WorkbookStore:
         """Safely quote a SQL string literal."""
         return "'" + str(value).replace("'", "''") + "'"
 
-    @staticmethod
-    def normalize_value(value):
+    def normalize_value(self, value, field_name=None):
         if value is None:
-            return ""
-        if isinstance(value, str):
-            return value.replace("\ufeff", "").replace("`", "").strip()
-        if isinstance(value, float) and value.is_integer():
-            return int(value)
-        return value
+            normalized = ""
+        elif isinstance(value, str):
+            normalized = value.replace("\ufeff", "").replace("`", "").strip()
+        elif isinstance(value, float) and value.is_integer():
+            normalized = int(value)
+        else:
+            normalized = value
+
+        if value is not None:
+            record_input_normalization(field_name, value, normalized)
+        return normalized
 
     def _create_empty_table(self, table_name, clean_columns):
         """Create the final DuckDB table with the legacy workbook schema."""
@@ -143,6 +151,8 @@ class WorkbookStore:
                 if attempt == attempts - 1:
                     log_validation_warning(
                         "Temporary file could not be removed",
+                        validation_stage="Temporary-file cleanup",
+                        affected_object=path,
                         problem=(
                             "Windows kept the temporary CSV file locked after "
                             "the workbook sheet was loaded."
@@ -329,7 +339,8 @@ class WorkbookStore:
         for excel_row_number, data_row in enumerate(data_iterator, start=2):
             row_dict = {
                 column_name: self.normalize_value(
-                    data_row[index] if index < len(data_row) else ""
+                    data_row[index] if index < len(data_row) else "",
+                    field_name=column_name,
                 )
                 for index, column_name in active_columns
             }

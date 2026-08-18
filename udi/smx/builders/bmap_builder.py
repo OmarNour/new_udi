@@ -1,5 +1,10 @@
 from config import BMAP_PROCESS_NAME_TEMPLATE, BMAP_VIEW_NAME_TEMPLATE
-from functions import log_error_decorator, log_validation_error
+from functions import (
+    get_issue_reference,
+    log_error_decorator,
+    log_validation_error,
+    register_issue_reference,
+)
 from model import (
     Column,
     DataSet,
@@ -59,56 +64,125 @@ class BMapBuilder(SmxComponent):
 
     @log_error_decorator()
     def extract_bmap_datasets(self, row):
-        if row.physical_table != '':
-            surrogate_table = Table.get_instance(_key=(self.bmap_t_schema.id, row.physical_table))
-            set_table = Table.get_instance(_key=(self.core_t_schema.id, row.code_set_name))
-            ds = DataSet.get_by_name(self.bmap_set_type.id, row.code_set_name)
-            valid_ds = True
-            if ds:
-                if ds.set_code != row.code_set_id:
-                    valid_ds = False
-                    log_validation_error(
-                        "Duplicate BMAP dataset ID",
-                        row=row,
-                        problem=(
-                            f"Dataset ID '{row.code_set_id}' is already assigned "
-                            "to a different code set."
-                        ),
-                        action="The duplicate dataset definition was not added.",
-                        impact="The affected BMAP code set will not be available to dependent mappings.",
-                    )
-            if valid_ds:
-                if set_table and row.code_set_id and surrogate_table:
-                    DataSet(set_type_id=self.bmap_set_type.id, set_code=row.code_set_id, set_table_id=set_table.id, surrogate_table_id=surrogate_table.id)
-                    surrogate_table.is_bmap = True
-                else:
-                    log_validation_error(
-                    "Invalid BMAP table definition",
-                    row=row,
-                    problem=(
-                        f"Code set table '{row.code_set_name}' or surrogate table "
-                        f"'{row.physical_table}' could not be found."
-                    ),
-                    action="The BMAP dataset was not created.",
-                    impact="Mappings that use this code set may be skipped.",
-                )
+        if row.physical_table == '':
+            return
+
+        surrogate_table = Table.get_instance(
+            _key=(self.bmap_t_schema.id, row.physical_table)
+        )
+        set_table = Table.get_instance(
+            _key=(self.core_t_schema.id, row.code_set_name)
+        )
+        existing_data_set = DataSet.get_by_name(
+            self.bmap_set_type.id, row.code_set_name
+        )
+
+        if existing_data_set and existing_data_set.set_code != row.code_set_id:
+            issue_id = log_validation_error(
+                "Duplicate BMAP dataset ID",
+                row=row,
+                affected_object=row.code_set_name,
+                problem=(
+                    f"Dataset ID '{row.code_set_id}' is already assigned "
+                    "to a different code set."
+                ),
+                action="The duplicate dataset definition was not added.",
+                impact=(
+                    "The affected BMAP code set will not be available to "
+                    "dependent mappings."
+                ),
+            )
+            register_issue_reference(
+                "bmap_code_set", row.code_set_name, issue_id
+            )
+            register_issue_reference(
+                "bmap_dataset_id", row.code_set_id, issue_id
+            )
+            return
+
+        if set_table and row.code_set_id and surrogate_table:
+            DataSet(
+                set_type_id=self.bmap_set_type.id,
+                set_code=row.code_set_id,
+                set_table_id=set_table.id,
+                surrogate_table_id=surrogate_table.id,
+            )
+            surrogate_table.is_bmap = True
+            return
+
+        missing_objects = []
+        if not set_table:
+            missing_objects.append(f"code set table '{row.code_set_name}'")
+        if not surrogate_table:
+            missing_objects.append(f"surrogate table '{row.physical_table}'")
+        if not row.code_set_id:
+            missing_objects.append("dataset ID")
+
+        issue_id = log_validation_error(
+            "Invalid BMAP table definition",
+            row=row,
+            affected_object=row.code_set_name,
+            problem=(
+                "The following required BMAP object(s) could not be resolved: "
+                + ", ".join(missing_objects)
+                + "."
+            ),
+            action="The BMAP dataset was not created.",
+            impact="Mappings that use this code set may be skipped.",
+        )
+        register_issue_reference(
+            "bmap_code_set", row.code_set_name, issue_id
+        )
+        register_issue_reference(
+            "bmap_dataset_id", row.code_set_id, issue_id
+        )
 
     @log_error_decorator()
     def extract_bmap_domains(self, row):
-        data_set = DataSet.get_instance(_key=(self.bmap_set_type.id, row.code_set_id))
-        if data_set and row.code_domain_id:
-            Domain(data_set_id=data_set.id, domain_code=row.code_domain_id, domain_name=row.code_domain_name)
-        else:
+        data_set = DataSet.get_instance(
+            _key=(self.bmap_set_type.id, row.code_set_id)
+        )
+
+        if not data_set:
+            related_issue_id = get_issue_reference(
+                "bmap_dataset_id", row.code_set_id
+            )
             log_validation_error(
-                "Invalid BMAP dataset or domain ID",
+                "BMAP domain could not be created",
                 row=row,
+                affected_object=row.code_domain_name or row.code_domain_id,
                 problem=(
-                    f"Dataset ID '{row.code_set_id}' was not found or domain ID "
-                    f"'{row.code_domain_id}' is empty or invalid."
+                    f"Parent dataset ID '{row.code_set_id}' was not found, so "
+                    f"domain ID '{row.code_domain_id}' could not be created."
+                ),
+                related_issue_id=related_issue_id,
+                related_cause=(
+                    f"The parent BMAP dataset '{row.code_set_id}' was not created."
+                ) if related_issue_id else None,
+                action="The domain definition was not added.",
+                impact="Code mappings that depend on this domain may be unavailable.",
+            )
+            return
+
+        if row.code_domain_id in (None, ''):
+            log_validation_error(
+                "Invalid BMAP domain ID",
+                row=row,
+                affected_object=row.code_domain_name or "<blank>",
+                problem=(
+                    f"Domain ID is empty for BMAP dataset ID "
+                    f"'{row.code_set_id}'."
                 ),
                 action="The domain definition was not added.",
                 impact="Code mappings that depend on this domain may be unavailable.",
             )
+            return
+
+        Domain(
+            data_set_id=data_set.id,
+            domain_code=row.code_domain_id,
+            domain_name=row.code_domain_name,
+        )
 
     @log_error_decorator()
     def extract_bmap_values(self, row):

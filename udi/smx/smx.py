@@ -7,6 +7,7 @@ from functions import (
     create_folder,
     log_error_decorator,
     reset_validation_log_stats,
+    ValidationSummaryFilter,
 )
 
 from model_cache import RelationCache
@@ -67,6 +68,7 @@ class SMX:
             os.path.join(self.log_error_path, self.log_file_name),
             encoding="utf-8",
         )
+        file_handler.addFilter(ValidationSummaryFilter())
         file_handler.setFormatter(
             logging.Formatter(
                 f"[%(levelname)s] %(message)s\n{separator}\n"

@@ -62,20 +62,71 @@ _LOG_STATS = {
     "WARNING": Counter(),
     "CRITICAL": Counter(),
 }
+_LOG_SHEET_STATS = Counter()
+_LOG_AFFECTED_OBJECTS = {}
+_LOG_ISSUE_SEQUENCE = Counter()
+_LOG_ISSUE_REFERENCES = {}
+_NORMALIZATION_STATS = Counter()
+_NORMALIZATION_EXAMPLES = []
 
 
 def reset_validation_log_stats():
     with _LOG_STATS_LOCK:
         for counter in _LOG_STATS.values():
             counter.clear()
+        _LOG_SHEET_STATS.clear()
+        _LOG_AFFECTED_OBJECTS.clear()
+        _LOG_ISSUE_SEQUENCE.clear()
+        _LOG_ISSUE_REFERENCES.clear()
+        _NORMALIZATION_STATS.clear()
+        _NORMALIZATION_EXAMPLES.clear()
 
 
 def get_validation_log_stats():
     with _LOG_STATS_LOCK:
         return {
-            level: dict(counter)
-            for level, counter in _LOG_STATS.items()
+            "levels": {
+                level: dict(counter)
+                for level, counter in _LOG_STATS.items()
+            },
+            "sheets": dict(_LOG_SHEET_STATS),
+            "affected_objects": {
+                category: dict(counter)
+                for category, counter in _LOG_AFFECTED_OBJECTS.items()
+            },
+            "normalization": {
+                "counts": dict(_NORMALIZATION_STATS),
+                "examples": list(_NORMALIZATION_EXAMPLES),
+            },
         }
+
+
+def register_issue_reference(reference_type, reference_key, issue_id):
+    if not issue_id or reference_key in (None, ""):
+        return
+    key = (str(reference_type).lower(), str(reference_key).strip().lower())
+    with _LOG_STATS_LOCK:
+        _LOG_ISSUE_REFERENCES[key] = issue_id
+
+
+def get_issue_reference(reference_type, reference_key):
+    if reference_key in (None, ""):
+        return None
+    key = (str(reference_type).lower(), str(reference_key).strip().lower())
+    with _LOG_STATS_LOCK:
+        return _LOG_ISSUE_REFERENCES.get(key)
+
+
+def record_input_normalization(field_name, original_value, normalized_value):
+    if original_value == normalized_value:
+        return
+
+    field = str(field_name or "value")
+    example = (field, str(original_value), str(normalized_value))
+    with _LOG_STATS_LOCK:
+        _NORMALIZATION_STATS[field] += 1
+        if example not in _NORMALIZATION_EXAMPLES and len(_NORMALIZATION_EXAMPLES) < 8:
+            _NORMALIZATION_EXAMPLES.append(example)
 
 
 def _row_to_dict(row):
@@ -138,75 +189,129 @@ def format_processing_row(row, row_index=None, include_empty=True):
     return "\n".join(lines)
 
 
-def _record_log_issue(level_name, title):
+def _next_issue_id(level_name):
+    prefix = {
+        "ERROR": "E",
+        "WARNING": "W",
+        "CRITICAL": "C",
+    }.get(level_name, "I")
+    with _LOG_STATS_LOCK:
+        _LOG_ISSUE_SEQUENCE[prefix] += 1
+        return f"{prefix}{_LOG_ISSUE_SEQUENCE[prefix]:04d}"
+
+
+def _extract_quoted_value(problem, label):
+    match = re.search(rf"{re.escape(label)}\s+'([^']*)'", str(problem or ""), re.IGNORECASE)
+    return match.group(1) if match else None
+
+
+def _infer_affected_object(title, row, problem):
+    data = _row_to_dict(row)
+    title_lower = str(title).lower()
+
+    if "main source table" in title_lower:
+        return str(data.get("main_source", "") or "<blank>")
+    if "join table" in title_lower:
+        return _extract_quoted_value(problem, "JOIN table") or "<unknown>"
+    if "source-table alias" in title_lower:
+        return str(data.get("mapped_to_table", "") or "<unknown>")
+    if "source column" in title_lower:
+        table_name = data.get("mapped_to_table") or data.get("table_name") or "<unknown>"
+        column_name = data.get("mapped_to_column") or data.get("column_name") or "<unknown>"
+        return f"{table_name}.{column_name}"
+    if "transformation type" in title_lower:
+        return str(data.get("mapping_name", "") or data.get("column_name", "") or "<unknown>")
+    if "history table" in title_lower:
+        return str(data.get("target_table_name", "") or "<unknown>")
+    if "#ref!" in title_lower:
+        return str(data.get("table_name", "") or "<unknown>")
+    if "bmap" in title_lower or "code set" in title_lower:
+        return str(data.get("code_set_name", "") or data.get("physical_table", "") or "<unknown>")
+    if "domain" in title_lower:
+        table_name = data.get("table_name")
+        column_name = data.get("column_name")
+        if table_name or column_name:
+            return f"{table_name or '<unknown>'}.{column_name or '<unknown>'}"
+        return str(data.get("code_domain_name", "") or data.get("code_domain_id", "") or "<unknown>")
+    if "primary key" in title_lower:
+        return str(data.get("table_name", "") or "<unknown>")
+    return None
+
+
+def _record_log_issue(level_name, title, sheet_label, affected_object):
     counter = _LOG_STATS.get(level_name)
     if counter is None:
         return
     with _LOG_STATS_LOCK:
         counter[title] += 1
+        if level_name in {"ERROR", "CRITICAL"}:
+            _LOG_SHEET_STATS[sheet_label or "General validation"] += 1
+        if affected_object:
+            category_counter = _LOG_AFFECTED_OBJECTS.setdefault(title, Counter())
+            category_counter[str(affected_object)] += 1
 
 
 def format_log_issue(
     title,
     *,
+    issue_id=None,
     row=None,
     sheet=None,
+    validation_stage=None,
+    affected_object=None,
     problem=None,
     action=None,
     impact=None,
     details=None,
+    related_issue_id=None,
+    related_cause=None,
     original_error=None,
 ):
     row_data = _row_to_dict(row)
     sheet = sheet or infer_sheet_name(row)
     excel_row = row_data.get("source_row_number")
 
-    lines = [str(title).strip()]
+    heading = f"[{issue_id}] {str(title).strip()}" if issue_id else str(title).strip()
+    lines = [heading, "", "Location:"]
 
-    if sheet or excel_row not in (None, ""):
-        lines.extend(["", "Location:"])
-        if sheet:
-            lines.append(f"  Sheet: {sheet}")
-        if excel_row not in (None, ""):
-            lines.append(f"  Excel row: {excel_row}")
+    if sheet:
+        lines.append(f"  Sheet: {sheet}")
+    elif validation_stage:
+        lines.append(f"  Validation stage: {validation_stage}")
+    else:
+        lines.append("  Validation stage: General validation")
+
+    if excel_row not in (None, ""):
+        lines.append(f"  Excel row: {excel_row}")
+    if affected_object:
+        lines.append(f"  Affected object: {affected_object}")
 
     if problem:
         lines.extend(["", "Problem:", f"  {_format_value(problem, indent='  ')}"])
 
-    if original_error:
-        lines.extend([
-            "",
-            "Original error:",
-            f"  {_format_value(original_error, indent='  ')}",
-        ])
+    if related_issue_id or related_cause:
+        lines.extend(["", "Related cause:"])
+        if related_issue_id and related_cause:
+            lines.append(f"  {related_issue_id} — {_format_value(related_cause, indent='  ')}")
+        elif related_issue_id:
+            lines.append(f"  {related_issue_id}")
+        else:
+            lines.append(f"  {_format_value(related_cause, indent='  ')}")
+
+    # original_error remains accepted for backward compatibility, but ordinary
+    # validation reports intentionally do not expose internal Python/model text.
 
     if action:
-        lines.extend([
-            "",
-            "Program action:",
-            f"  {_format_value(action, indent='  ')}",
-        ])
+        lines.extend(["", "Program action:", f"  {_format_value(action, indent='  ')}"])
 
     if impact:
-        lines.extend([
-            "",
-            "Impact:",
-            f"  {_format_value(impact, indent='  ')}",
-        ])
+        lines.extend(["", "Impact:", f"  {_format_value(impact, indent='  ')}"])
 
     if details:
-        lines.extend([
-            "",
-            "Details:",
-            f"  {_format_value(details, indent='  ')}",
-        ])
+        lines.extend(["", "Details:", f"  {_format_value(details, indent='  ')}"])
 
     if row_data:
-        lines.extend([
-            "",
-            "Workbook row context:",
-            format_processing_row(row, include_empty=True),
-        ])
+        lines.extend(["", "Workbook row context:", format_processing_row(row, include_empty=True)])
 
     return "\n".join(lines)
 
@@ -216,37 +321,213 @@ def log_validation_issue(
     *,
     row=None,
     sheet=None,
+    validation_stage=None,
+    affected_object=None,
     problem=None,
     action=None,
     impact=None,
     details=None,
+    related_issue_id=None,
+    related_cause=None,
     original_error=None,
     level=logging.ERROR,
 ):
     level_name = logging.getLevelName(level)
-    _record_log_issue(level_name, title)
+    issue_id = _next_issue_id(level_name)
+    resolved_sheet = sheet or infer_sheet_name(row) or validation_stage or "General validation"
+    affected_object = affected_object or _infer_affected_object(title, row, problem)
+    _record_log_issue(level_name, title, resolved_sheet, affected_object)
     logging.log(
         level,
         format_log_issue(
             title,
+            issue_id=issue_id,
             row=row,
             sheet=sheet,
+            validation_stage=validation_stage,
+            affected_object=affected_object,
             problem=problem,
             action=action,
             impact=impact,
             details=details,
+            related_issue_id=related_issue_id,
+            related_cause=related_cause,
             original_error=original_error,
         ),
     )
+    return issue_id
 
 
 def log_validation_error(title, **kwargs):
-    log_validation_issue(title, level=logging.ERROR, **kwargs)
+    return log_validation_issue(title, level=logging.ERROR, **kwargs)
 
 
 def log_validation_warning(title, **kwargs):
-    log_validation_issue(title, level=logging.WARNING, **kwargs)
+    return log_validation_issue(title, level=logging.WARNING, **kwargs)
 
+
+def _count_level(level_name):
+    return sum(_LOG_STATS[level_name].values())
+
+
+def _build_category_lines():
+    combined = Counter(_LOG_STATS["ERROR"])
+    combined.update(_LOG_STATS["CRITICAL"])
+    if not combined:
+        return ["  None"]
+    width = max(len(name) for name in combined)
+    return [
+        f"  {name:<{width}}  {count:>5}"
+        for name, count in combined.most_common()
+    ]
+
+
+def _build_sheet_lines():
+    if not _LOG_SHEET_STATS:
+        return ["  None"]
+    width = max(len(name) for name in _LOG_SHEET_STATS)
+    return [
+        f"  {name:<{width}}  {count:>5}"
+        for name, count in _LOG_SHEET_STATS.most_common()
+    ]
+
+
+def _build_affected_object_lines():
+    groups = []
+    for category, counter in _LOG_AFFECTED_OBJECTS.items():
+        repeated = [(name, count) for name, count in counter.most_common(5) if count > 1]
+        if repeated:
+            groups.append((sum(counter.values()), category, repeated))
+
+    if not groups:
+        return ["  No repeated affected objects."]
+
+    lines = []
+    for _, category, repeated in sorted(groups, reverse=True)[:8]:
+        lines.append(f"  {category}:")
+        for name, count in repeated:
+            lines.append(f"    {name}: {count}")
+    return lines
+
+
+def _build_normalization_lines():
+    total = sum(_NORMALIZATION_STATS.values())
+    lines = [f"  Values normalized: {total}"]
+
+    if not total:
+        return lines
+
+    top_field_limit = 10
+    example_limit = 6
+
+    top_fields = _NORMALIZATION_STATS.most_common(top_field_limit)
+    other_fields_count = max(
+        len(_NORMALIZATION_STATS) - len(top_fields),
+        0,
+    )
+
+    lines.append("")
+    lines.append("  Most frequently normalized fields:")
+
+    for field, count in top_fields:
+        lines.append(f"    {field}: {count}")
+
+    if other_fields_count:
+        lines.append("")
+        lines.append(f"  Other normalized fields: {other_fields_count}")
+
+    examples = _NORMALIZATION_EXAMPLES[:example_limit]
+
+    if examples:
+        lines.append("")
+        lines.append("  Examples:")
+
+        for field, original, normalized in examples:
+            lines.append(
+                f"    {field}: {original!r} -> {normalized!r}"
+            )
+
+    return lines
+
+
+def build_validation_summary_report():
+    with _LOG_STATS_LOCK:
+        error_count = _count_level("ERROR")
+        warning_count = _count_level("WARNING")
+        critical_count = _count_level("CRITICAL")
+
+        if critical_count:
+            status = "COMPLETED WITH CRITICAL ERRORS"
+            output_condition = "Generated output may be incomplete or unreliable"
+        elif error_count:
+            status = "COMPLETED WITH ERRORS"
+            output_condition = "Generated with omissions"
+        elif warning_count:
+            status = "SUCCESS WITH WARNINGS"
+            output_condition = "Generated successfully; review warnings"
+        else:
+            status = "SUCCESS"
+            output_condition = "Generated successfully"
+
+        lines = [
+            "Run Result:",
+            "######################",
+            "",
+            f"Status: {status}",
+            "",
+            f"Errors:   {error_count}",
+            f"Warnings: {warning_count}",
+            f"Critical: {critical_count}",
+            "",
+            "Scripts generated: Yes",
+            f"Output condition: {output_condition}",
+            "",
+            "",
+            "Errors by category:",
+            "######################",
+            "",
+            *_build_category_lines(),
+            "",
+            "",
+            "Errors by sheet:",
+            "######################",
+            "",
+            *_build_sheet_lines(),
+            "",
+            "",
+            "Most affected objects:",
+            "######################",
+            "",
+            *_build_affected_object_lines(),
+            "",
+            "",
+            "Input normalization:",
+            "######################",
+            "",
+            *_build_normalization_lines(),
+        ]
+        return "\n".join(lines)
+
+
+class ValidationSummaryFilter(logging.Filter):
+    """Prepend the enhanced report immediately before the legacy Summary."""
+
+    def filter(self, record):
+        try:
+            message = record.getMessage()
+            if (
+                record.levelno == logging.INFO
+                and "Summary:" in message
+                and "######################" in message
+                and not getattr(record, "_udi_summary_augmented", False)
+            ):
+                record.msg = f"{build_validation_summary_report()}\n\n{message}"
+                record.args = ()
+                record._udi_summary_augmented = True
+        except Exception:
+            # Logging must never break script generation.
+            pass
+        return True
 
 def get_dirs():
     if getattr(sys, 'frozen', False):
@@ -368,14 +649,6 @@ def generate_run_id():
     return str(dt.datetime.now().strftime("%Y%m%d%H%M%S"))
 
 
-def open_folder(path):
-    if sys.platform == "win32":
-        os.startfile(path)
-    else:
-        opener = "open" if sys.platform == "darwin" else "xdg-open"
-        subprocess.call([opener, path])
-
-
 def create_folder(path):
     os.makedirs(path, exist_ok=True)
 
@@ -457,47 +730,72 @@ def log_error_decorator(sheet=None):
                 return function(*args, **kwargs)
             except Exception as exc:
                 row = _find_processing_row(args, kwargs)
+                row_type = type(row).__name__ if row is not None else ""
                 column_name = getattr(row, "column_name", "") if row else ""
                 table_name = getattr(row, "table_name", "") if row else ""
                 error_text = str(exc)
+                processing_step = _humanize_function_name(function.__name__)
 
                 if "Already Exists" in error_text:
-                    shown_value = column_name or "the same value"
-                    title = f"Duplicate definition '{shown_value}'"
-                    problem = (
-                        f"The value '{shown_value}' was received more than once "
-                        f"for table '{table_name or 'unknown'}'. "
-                        "The duplicate definition cannot be added to the model."
-                    )
-                    if str(shown_value).upper() == "#REF!":
-                        problem = (
-                            "Excel returned '#REF!' as the column name. The same "
-                            f"'#REF!' value already exists for table "
-                            f"'{table_name or 'unknown'}'."
+                    if row_type == "BMapValueRow":
+                        code_set_name = getattr(row, "code_set_name", "")
+                        code_domain_id = getattr(row, "code_domain_id", "")
+                        source_code = getattr(row, "source_code", "")
+                        log_validation_error(
+                            "Duplicate domain value",
+                            row=row,
+                            sheet=sheet,
+                            affected_object=code_set_name or "<unknown>",
+                            problem=(
+                                f"Source code '{source_code}' is already defined in "
+                                f"domain ID '{code_domain_id}' for code set "
+                                f"'{code_set_name}'."
+                            ),
+                            action=(
+                                "This duplicate domain value was not added. The "
+                                "previously defined value remains unchanged."
+                            ),
+                            impact=(
+                                f"No additional value was created for source code "
+                                f"'{source_code}'."
+                            ),
+                            details=f"Processing step: {processing_step}",
                         )
-                    log_validation_error(
-                        title,
-                        row=row,
-                        sheet=sheet,
-                        problem=problem,
-                        original_error=error_text,
-                        action=(
-                            "The duplicate definition was not added. Processing "
-                            "continued with the remaining workbook rows."
-                        ),
-                        impact=(
-                            "The affected table or mapping may be incomplete. "
-                            "The original workbook value is shown exactly as read."
-                        ),
-                        details=(
-                            f"Processing step: {_humanize_function_name(function.__name__)}"
-                        ),
-                    )
+                    else:
+                        shown_value = column_name or "the same value"
+                        title = f"Duplicate definition '{shown_value}'"
+                        problem = (
+                            f"The value '{shown_value}' was received more than once "
+                            f"for table '{table_name or 'unknown'}'. The duplicate "
+                            "definition cannot be added to the model."
+                        )
+                        if str(shown_value).upper() == "#REF!":
+                            problem = (
+                                "Excel returned '#REF!' as the column name. The same "
+                                f"'#REF!' value already exists for table "
+                                f"'{table_name or 'unknown'}'."
+                            )
+                        log_validation_error(
+                            title,
+                            row=row,
+                            sheet=sheet,
+                            problem=problem,
+                            action=(
+                                "The duplicate definition was not added. Processing "
+                                "continued with the remaining workbook rows."
+                            ),
+                            impact=(
+                                "The affected table or mapping may be incomplete. "
+                                "The original workbook value is shown exactly as read."
+                            ),
+                            details=f"Processing step: {processing_step}",
+                        )
                 else:
                     log_validation_issue(
                         "Unexpected processing failure",
                         row=row,
                         sheet=sheet,
+                        validation_stage=processing_step,
                         problem=error_text or exc.__class__.__name__,
                         action=(
                             "The affected item was not added. Processing continued "
@@ -507,9 +805,7 @@ def log_error_decorator(sheet=None):
                             "Review the workbook row context below. The generated "
                             "output may not include this item."
                         ),
-                        details=(
-                            f"Processing step: {_humanize_function_name(function.__name__)}"
-                        ),
+                        details=f"Processing step: {processing_step}",
                         level=logging.CRITICAL,
                     )
                 return None
@@ -517,7 +813,6 @@ def log_error_decorator(sheet=None):
         return wrapper
 
     return decorator
-
 
 def get_file_name(file):
     return os.path.splitext(os.path.basename(file))[0]
@@ -556,10 +851,3 @@ def parse_data_type(data_type_precision: str):
     data_type = data_type_lst[0]
     precision = data_type_lst[1].split(sep=')')[0] if len(data_type_lst) > 1 else None
     return data_type, precision
-
-if __name__ == '__main__':
-    _ = """ dasda's """
-    x = single_quotes(_)
-    print(x)
-    print(generate_run_id())
-

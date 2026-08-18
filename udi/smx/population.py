@@ -43,6 +43,8 @@ class ModelPopulator(SmxComponent):
         if missing_sheets:
             log_validation_error(
                 "Required workbook sheets are missing",
+                validation_stage="Workbook validation",
+                affected_object=", ".join(sorted(missing_sheets)),
                 problem=(
                     "The workbook does not contain all sheets required to build "
                     f"the model. Missing: {sorted(missing_sheets)}"
@@ -62,6 +64,8 @@ class ModelPopulator(SmxComponent):
         if not foundation.systems or not foundation.staging_tables:
             log_validation_error(
                 "Required workbook data is missing",
+                validation_stage="Model preparation",
+                affected_object="Selected source data",
                 problem=(
                     "No usable source systems or staging-table definitions were "
                     "found after workbook filtering."
@@ -168,6 +172,8 @@ class ModelPopulator(SmxComponent):
             if not table.key_col and table.table_kind == "T":
                 log_validation_error(
                     "Primary key is not defined",
+                    validation_stage="Core-table validation",
+                    affected_object=f"{table.schema.schema_name}.{table.table_name}",
                     problem=(
                         f"Table '{table.schema.schema_name}.{table.table_name}' "
                         "does not have a primary-key column."
@@ -179,6 +185,8 @@ class ModelPopulator(SmxComponent):
         if invalid_history_tables:
             log_validation_error(
                 "Invalid history-table definitions",
+                validation_stage="Core-table validation",
+                affected_object=", ".join(invalid_history_tables),
                 problem=(
                     "The following history tables do not contain the required key, "
                     f"start-date, or end-date columns: {invalid_history_tables}"
@@ -189,6 +197,8 @@ class ModelPopulator(SmxComponent):
         if invalid_lookup_tables:
             log_validation_error(
                 "Invalid lookup-table definitions",
+                validation_stage="Lookup-table validation",
+                affected_object=", ".join(invalid_lookup_tables),
                 problem=(
                     f"The following lookup tables do not follow the required code "
                     f"and description column pattern: {invalid_lookup_tables}. "
@@ -206,6 +216,8 @@ class ModelPopulator(SmxComponent):
             ):
                 log_validation_warning(
                     "Staging table has no primary key",
+                    validation_stage="Staging-table validation",
+                    affected_object=layer_table.table.table_name,
                     problem=(
                         f"Staging table '{layer_table.table.table_name}' has no "
                         "primary-key column."

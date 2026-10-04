@@ -185,7 +185,16 @@ class CoreBuilder(SmxComponent):
                     elif row.historization_algorithm.upper() in ('UPSERT', 'UPSERTDELETE'):
                         scd_type = 1
                     elif row.historization_algorithm.upper() == 'HISTORY':
-                        scd_type = 2 if _row.column_name in row.historization_columns else 1
+                        history_columns = {
+                            col.strip().upper()
+                            for col in str(row.historization_columns).split(',')
+                            if col.strip()
+                        }
+
+                        if _row.column_name.strip().upper() in history_columns:
+                            scd_type = 2
+                        else:
+                            scd_type = 0 if tgt_col.is_pk else 1
                     else:
                         log_validation_error(
                             "Invalid historization algorithm",
@@ -197,7 +206,7 @@ class CoreBuilder(SmxComponent):
                             action="The mapping continued with the default SCD handling.",
                             impact="Historization behavior for this mapping may be incorrect.",
                         )
-                    scd_type = 0 if tgt_col.is_pk else scd_type
+                    # scd_type = 0 if tgt_col.is_pk else scd_type
                     if transformation_type == 'COPY':
                         transformation_rule = None
                         if _row.mapped_to_column:

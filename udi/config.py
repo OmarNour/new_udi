@@ -166,7 +166,7 @@ VALUES
 """
 
 # AppName_<Major>.<Minor>.<BuildNo>
-ver_no = "| Build #3.6.1"
+ver_no = "| Build #3.6.2"
 # ###############################################################################################
 # What is new : #3.5.5 :
 # Adding duckdb to the project
